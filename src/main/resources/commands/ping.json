@@ -1,4 +1,4 @@
 {
     "name": "ping",
-    "description": "Ping pong!"
+    "description": "Display's the bot's hearbeat."
 }
