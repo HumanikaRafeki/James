@@ -9,7 +9,7 @@ import discord4j.gateway.ShardInfo;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.gateway.GatewayClient;
 
-import humanika.rafeki.JamesData;
+import humanika.rafeki.james.James;
 
 public class PingCommand implements SlashCommand {
     @Override
@@ -38,6 +38,8 @@ public class PingCommand implements SlashCommand {
         String babble = James.getState().jamesPhrase("JAMES::ping");
         if(babble != null)
             ping += '\n' + babble;
+        else
+            ping += "\n(no JAMES::ping)";
         return event.reply()
             .withEphemeral(true)
             .withContent(ping);

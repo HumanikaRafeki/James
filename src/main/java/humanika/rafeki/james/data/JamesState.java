@@ -1,8 +1,11 @@
 package humanika.rafeki.james.data;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Stream;
 
 import me.mcofficer.esparser.DataFile;
 
@@ -18,11 +21,11 @@ public class JamesState {
     // Objects that may be replaced at any time:
     private PhraseDatabase jamesPhrases;
 
-    public JamesState(PhraseLimits limits) {
+    public JamesState(PhraseLimits phraseLimits) {
         modifying = new ReentrantReadWriteLock();
-        this.limits = limits;
+        this.phraseLimits = phraseLimits;
 
-        jamesTxt = null;
+        jamesPhrases = null;
     }
 
     public String jamesPhrase(String name) {
@@ -31,14 +34,14 @@ public class JamesState {
     }
 
     public Reading use() throws InterruptedException {
-        return new Reading();
+        return new Reading(modifying.readLock());
     }
 
-    public void update() throws IOException {
-        String jamesData = Utils.readResourceString("james.txt");
+    public void update() throws IOException, InterruptedException {
+        List<String> jamesData = Utils.readResourceLines("james.txt");
         PhraseDatabase jamesPhrases = new PhraseDatabase();
         if(jamesData != null)
-            jamesPhrases.load(new DataFile(jamesData));
+            jamesPhrases.addPhrases(new DataFile(jamesData).getNodes());
 
         // FIXME: Read other things here.
 
@@ -52,7 +55,7 @@ public class JamesState {
         }
     }
 
-    public class Reading implements AutoClosable {
+    public class Reading implements AutoCloseable {
         ReentrantReadWriteLock.ReadLock lock;
         Reading(ReentrantReadWriteLock.ReadLock lock) throws InterruptedException {
             this.lock = lock;

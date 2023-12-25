@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import org.reactivestreams.Publisher;
 
+import java.io.IOException;
 import java.util.List;
 
 public class James {
@@ -22,7 +23,7 @@ public class James {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(James.class);
 
-    public JamesState getState() {
+    public static JamesState getState() {
         return jamesState;
     }
 
@@ -30,6 +31,13 @@ public class James {
         //Creates the gateway client and connects to the gateway
         DiscordClient bot = DiscordClient.create(System.getenv("BOT_TOKEN"));
         jamesState = new JamesState(new PhraseLimits(10000, 10));
+        try {
+            jamesState.update();
+        } catch(IOException ioe) {
+            LOGGER.error("Unable to load initial data", ioe);
+        } catch(InterruptedException ie) {
+            LOGGER.error("Unable to load initial data", ie);
+        }
         bot.gateway().setSharding(ShardingStrategy.recommended())
             .withGateway(client -> client.on(ReadyEvent.class)
                          .doOnNext(ready -> withGatewayClient(bot, client) ))

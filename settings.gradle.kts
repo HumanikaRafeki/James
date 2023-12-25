@@ -1,2 +1,2 @@
-rootProject.name = "simplebot"
+rootProject.name = "james"
 

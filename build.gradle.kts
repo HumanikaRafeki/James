@@ -14,7 +14,7 @@ repositories {
 }
 
 application {
-    mainClass.set("humanika.rafeki.james.SimpleBot")
+    mainClass.set("humanika.rafeki.james.James")
 }
 
 sourceSets {
@@ -24,6 +24,7 @@ sourceSets {
     }
     all {
         dependencies {
+            implementation("com.google.code.findbugs:jsr305:3.0.2")
             implementation("com.discord4j:discord4j-core:3.2.0")
             implementation("ch.qos.logback:logback-classic:1.2.3")
         }
@@ -36,7 +37,7 @@ This boilerplate is completely removed when using Springboot
  */
 tasks.jar {
     manifest {
-        attributes("Main-Class" to "humanika.rafeki.james.SimpleBot")
+        attributes("Main-Class" to "humanika.rafeki.james.James")
     }
 
     finalizedBy("shadowJar")
