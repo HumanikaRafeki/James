@@ -1,4 +1,4 @@
-package com.github.HumanikaRafeki.james;
+package humanika.rafeki.james;
 
 import discord4j.common.JacksonResources;
 import discord4j.discordjson.json.ApplicationCommandRequest;

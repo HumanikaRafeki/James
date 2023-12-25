@@ -1,8 +1,8 @@
-package com.github.HumanikaRafeki.james.listeners;
+package humanika.rafeki.james.listeners;
 
-import com.github.HumanikaRafeki.james.commands.GreetCommand;
-import com.github.HumanikaRafeki.james.commands.PingCommand;
-import com.github.HumanikaRafeki.james.commands.SlashCommand;
+import humanika.rafeki.james.commands.GreetCommand;
+import humanika.rafeki.james.commands.PingCommand;
+import humanika.rafeki.james.commands.SlashCommand;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

@@ -1,4 +1,4 @@
-package com.github.HumanikaRafeki.james.commands;
+package humanika.rafeki.james.commands;
 
 import java.util.Optional;
 import java.time.Duration;

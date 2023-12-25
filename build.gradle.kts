@@ -6,7 +6,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version ("7.0.0")
 }
 
-group = "com.github.HumanikaRafeki.james"
+group = "humanika.rafeki.james"
 version = "2023.12.24"
 
 repositories {
@@ -14,7 +14,7 @@ repositories {
 }
 
 application {
-    mainClass.set("com.github.HumanikaRafeki.james.SimpleBot")
+    mainClass.set("humanika.rafeki.james.SimpleBot")
 }
 
 sourceSets {
@@ -32,7 +32,7 @@ This boilerplate is completely removed when using Springboot
  */
 tasks.jar {
     manifest {
-        attributes("Main-Class" to "com.github.HumanikaRafeki.james.SimpleBot")
+        attributes("Main-Class" to "humanika.rafeki.james.SimpleBot")
     }
 
     finalizedBy("shadowJar")

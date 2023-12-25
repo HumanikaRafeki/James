@@ -1,6 +1,6 @@
-package com.github.HumanikaRafeki.james;
+package humanika.rafeki.james;
 
-import com.github.HumanikaRafeki.james.listeners.SlashCommandListener;
+import humanika.rafeki.james.listeners.SlashCommandListener;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
