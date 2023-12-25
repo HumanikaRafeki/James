@@ -17,10 +17,10 @@ import org.reactivestreams.Publisher;
 
 import java.util.List;
 
-public class SimpleBot {
+public class James {
     private static JamesState jamesState;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleBot.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(James.class);
 
     public JamesState getState() {
         return jamesState;

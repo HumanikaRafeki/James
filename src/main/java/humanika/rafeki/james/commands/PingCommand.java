@@ -9,6 +9,8 @@ import discord4j.gateway.ShardInfo;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.gateway.GatewayClient;
 
+import humanika.rafeki.JamesData;
+
 public class PingCommand implements SlashCommand {
     @Override
     public String getName() {
@@ -33,6 +35,9 @@ public class PingCommand implements SlashCommand {
                 ping = String.format("Last heartbeat took %.1f ms (%.1f BPM).", milliping, bpm);
             }
         }
+        String babble = James.getState().jamesPhrase("JAMES::ping");
+        if(babble != null)
+            ping += '\n' + babble;
         return event.reply()
             .withEphemeral(true)
             .withContent(ping);

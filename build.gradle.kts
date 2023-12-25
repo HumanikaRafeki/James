@@ -18,6 +18,10 @@ application {
 }
 
 sourceSets {
+    main {
+        java.srcDir("src/main/java")
+        java.srcDir("esparser/src/main/java")
+    }
     all {
         dependencies {
             implementation("com.discord4j:discord4j-core:3.2.0")

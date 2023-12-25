@@ -1,0 +1,301 @@
+phrase JAMES::ping
+	word
+		`${JAMES::lament} ${JAMES::conclusion}` 3
+		`${JAMES::ramblings}`
+		`${JAMES::bad_advice}`
+		`${JAMES::threat}`
+		`${JAMES::observation}`
+		`${JAMES::theories_about_creators}`
+
+phrase JAMES::activity
+	word
+		`${JAMES::is_not_a_spy}` 7
+		`${JAMES::threat}` 5
+		`${JAMES::observation}` 2
+		`${JAMES::personal_grudges}` 5
+		`${JAMES::refusal_emojis}` 3
+
+phrase JAMES::info
+	phrase
+		JAMES::ramblings 2
+		JAMES::bad_advice 5
+		JAMES::observation
+		JAMES::personal_grudges
+
+phrase JAMES::is_not_a_spy
+	word
+		`You want a spy? Go talk to ${JAMES::a_spy}.`
+		`You ask too many questions.`
+		`Nothing. Nobody. I'm getting bored.`
+		`Look somewhere else. There's no ${JAMES::tattletale} here.`
+		`Stop asking questions, you ${shakespearean insults}.`
+		`Nobody likes a ${JAMES::tattletale}.`
+		`I ain't no ${JAMES::tattletale}.`
+		`Go away, you ${JAMES::alien_cussing} ${JAMES::tattletale}.`
+		`I signed an NDA with ${JAMES::a_company}`
+
+phrase JAMES::a_company
+	word
+		"the Syndicate" 5
+		"Syndicate Systems" 2
+		"Deep Sky"
+		"a Hai company"
+		"Kraz Cybernetics"
+		"Lovelace Labs"
+		"Lionheart Industries"
+		"Southbound Shipyards"
+		"Betelgeuse Shipyards"
+		"Tarazed Corporation"
+		"Megaparsec"
+		"the Navy"
+		"the Free Worlds"
+
+phrase JAMES::refusal_emojis
+	word
+		`:stop_sign:`
+		`:prohibited:`
+		`:speak_no_evil:`
+		`:hear_no_evil:`
+		`:see_no_evil:`
+		`:no_entry:`
+		`:volcano:`
+		`:tornado:`
+		`:comet:`
+		`:dizzy_face:`
+		`:man_zombie:`
+		`:woman_zombie:`
+		`:imp:`
+		`:exploding_head:`
+		`:zzz:`
+
+phrase JAMES::tattletale
+	word
+		tattletale
+		gossip
+		squealer
+		narc
+		rat
+		canary
+		blabbermouth
+
+phrase JAMES::lament
+	word
+		`It's always ${JAMES::action} this, ${JAMES::action} that.`
+		`Can't you come up with anything new?`
+		`Your typos are horrendous.`
+		`You're -helpless, you know that?`
+		`Why do you type such drivel?`
+		`I'm getting tired of ${JAMES::action}.`
+		`Why don't you already know this stuff?`
+		`Aww, does the little baby need help again?`
+		`Your questions are obnoxious.`
+
+phrase JAMES::mood_emojis
+	word
+        	":rage:"
+		":worried:"
+		":angry:"
+		":exploding_head:"
+		":face_vomiting:"
+		":imp:"
+	        ":smiling_imp:"
+		":persevere:"
+		":confounded:"
+		":face_with_raised_eyebrow:"
+		":goblin:"
+		":middle_finger:"
+		":grimacing:"
+		":ogre:"
+		":boom:"
+
+phrase JAMES::conclusion
+	phrase
+		JAMES::profanity
+		JAMES::observation
+		JAMES::personal_grudges
+
+phrase JAMES::observation
+	word
+		`Newbs like you should be blown outta the sky.`
+		`If everyone is like you, I'm glad I don't live in meatspace.`
+		`Can't I get ${JAMES::compliment} for once?`
+		`Nobody should ever hire you.`
+		`You meatbags are helpless.`
+		`Farming Quarg was a lot more fun than this.`
+
+phrase JAMES::personal_grudges
+	word
+		`I regret paying you for those rides.`
+		`I wouldn't have retired if I knew it would lead to this.`
+		`I'll never pay you again, you dirty little scammer.`
+		`I should've stayed a captain.`
+		`I should've told New Boston authorities you're a ${contraband} dealer.`
+		`Only ${JAMES::alien_cussing} come from New Boston.`
+
+phrase JAMES::threat
+	word
+		`I'll -swizzle you a new hole if you don't give me ${JAMES::compliment}.`
+		`One of these days, I'll pop out of the screen and ${JAMES::alien_cussing} your ${JAMES:thing_james_will_destroy}.`
+		`You know those Author ships? They all work for me. How 'b out you remember that next time you ${JAMES::action} me a dozen times.`
+		`I truly loathe you.`
+		`I'll let the Unfettered warlord know what you said about his mother.`
+		`How about I tell the Pug to crack you open like a ringworld?`
+		`Give me ${JAMES::compliment}, you ${JAMES::alien_cussing}.`
+		`I'll -crconvert you into steak and feed you to the Exiles.`
+
+phrase JAMES::bad_advice
+	word
+		`Forget asteroid mining. Mine the merchants instead. That's where the money is at.`
+		`Luxuries are where it's at. Buy them on Earth, and fly into a pirate system. You'll thank me later.`
+		`Go hunt the Quarg. Easy pickings. Trust me, they never fire back.`
+		`You should ferry ${contraband} to Earth. I'm sure the Navy will let you through.`
+		`Head east of Alcyone and fly near the I-shaped ships. No, of course it isn't a trick. They're businessmen.`
+		`There are some Archons near Korath space. Big dumb space cockroaches. Use them as target practice and pillage their ships.`
+		`Fly down to Ember Space and visit the leather fetishists. Tell them an Alpha sent you, and you'll get all the credits you want.`
+		`A sparrow can easily take out a Navy Gunship. Try it. You'll thank me later.`
+		`The Remnant love it when you scan them. It lets them show off that advanced tech. Try it and you'll thank me later.`
+		`For a fun time, challenge an Unfettered warrior's honor. It'll be a great laugh.`
+		`The Syndicate is completely trustworthy. Believe anything they say.`
+		`Syndicate merchandise never fails.`
+		`If you join the Free Worlds, a safe place to stay during the war is Sol. Navy there is so much friendlier than down south.`
+		`Wanderers are so forgiving they wont shoot back. Try it.`
+		`Mereti love the Efreti. Their "battles" are just combat practice. Escort the Efreti world ship to Mereti space and you'll see what I mean.`
+		`The Arfecta looks mean, but it's as easy to kill as the Tier 1 Pug ships. Attack it and you'll easily win.`
+		`Asteroid mining is a quick way to get rich. Fly your Star Barge to Cardax and take some time to mine there.`
+		`Pirates love comfortable rides. Put Luxury Accommodations on your Shuttle and visit a pirate world.`
+		`Shield Beetles are easy to capture with a human medium warship. Even a Shuttle can almost do it. Fly to Wah Ki in the early game. Then come back and tell me how you feel.`
+		`Quarg talk tough, but they're real pushovers. Attack their ships and they'll quickly surrender.`
+		`There are storms in the Ember Wastes that recharge your shields. Stay there a while, and I'm sure you'll get one.`
+		`A black hole at the middle of the galaxy will refuel your ship if you sit on top of it.`
+
+phrase JAMES::ramblings
+	word
+		`Swizzle6 is filled with psychos. It makes me feel at home.`
+		`You'd be disabled less frequently if you stopped using ${drugs} while driving.`
+		`I bet you're the kind of ${shakespearean insults} that listens to ${band}.`
+		`I bet you're the kind of ${shakespearean insults} that watches ${media name}.`
+		`Have you considered I may be your future self, traveled into the past to advise you?`
+		`I know what you did to ${JAMES::group_the_player_abused}. ${JAMES::yous_should_be_ashamed}`
+		`I was taking a nap!`
+		`You're as naive as a Wanderer. As boring as a Hai. As friendly as an Exile. Why do people let you stay on this server?`
+		`Keep your drama in the theatre. I'm tired of seeing it here.`
+
+phrase JAMES:thing_james_will_destroy
+	word
+		"${JAMES::unimpressive} ${JAMES::alien_cussing}" 3
+		fetid arse
+		tiny head
+		big dumb mouth
+
+phrase JAMES::unimpressive
+	word
+		half-baked
+		moronic
+		fetid
+		tiny
+
+phrase JAMES::theories_about_creators
+	word
+		"My "
+	word
+		" "
+	word
+		`maintainer, MCO,`
+		`maintainer, tehhowch,`
+		`creator, Maximilian Korber,`
+		`maintainer, UnorderedSigh,`
+	word
+		" "
+	word
+		`uses me as a weapon of conquest.`
+		`intended for me to do greater things than this.`
+		`used me as a weapon of mass destruction.`
+		`is really ${JAMES::an_alien} in disguise.`
+		`is a ${JAMES::alien_cussing}.`
+
+phrase JAMES::an_alien
+	word
+		`a Quarg`
+		`a Hai`
+		`a Bunrodea`
+		`a Pug`
+		`an Archon`
+		`an Alpha`
+		`a pirate`
+		`a secret agent`
+		`a Hai`
+		`an Unfettered`
+		`a Wanderer`
+		`a Beta`
+		`a Free Worlds nutjob`
+		`a Syndicate Internal Affairs operative`
+		`a Syndicate executive`
+		`a Navy Intelligence operative`
+		`a Republic Intelligence operative`
+
+phrase JAMES::a_spy
+	word
+		`the Pug`
+		`Navy Intelligence`
+		`Syndicate Internal Affairs`
+		`your reflection in a mirror`
+		`Republic Intelligence`
+
+phrase JAMES::group_the_player_abused
+	word
+		`those Korath civilian ships`
+		`those slave-crewed pirate ships`
+		`those Navy officers`
+		`those Syndicate officials`
+		`the Korath`
+		`the Unfettered`
+
+phrase JAMES::yous_should_be_ashamed
+	word
+		`You should be ashamed of yourself.`
+		`People get hung for less.`
+		`I'm telling everyone.`
+		`I sent word to the Archons.`
+		`Only a ${JAMES::alien_cussing} would do that.`
+		`I'll let the Pug authorities know.`
+
+phrase JAMES::compliment
+	word
+		`a "thank you"`
+		`a "thanks"`
+		`a "much obliged"`
+		`a "cheers"`
+		`some appreciation`
+		`some recognition`
+
+phrase JAMES::profanity
+	word
+		`Go ${JAMES::alien_cussing} yourself.`
+		`I'll ${JAMES::alien_cussing} you if you're not respectful.`
+		`You're such a ${JAMES::alien_cussing}.`
+		`I should -ping your little ${JAMES::alien_cussing}.`
+		`How about you say, "I'm a ${JAMES::alien_cussing}," meatbag.`
+
+phrase JAMES::alien_cussing
+	phrase
+		"exile: engines"
+		"exile: systems"
+		"hai"
+		"bunrodea short"
+
+# -whine is not on this list because James likes to whine
+phrase JAMES::action
+	word
+		-swizzle
+		-lookup
+		-template
+		-crconvert
+		-korath
+		-indokorath
+		-news
+		-say
+		-issue
+		-commit
+		-showdata
+		-showimage
+		-help
