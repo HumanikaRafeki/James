@@ -7,6 +7,12 @@
             "description": "Your name",
             "type": 3,
             "required": true
+        },
+        {
+            "name": "reason",
+            "description": "Reason for request",
+            "type": 3,
+            "required": false
         }
     ]
 }

@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.time.Duration;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.command.ApplicationCommandInteractionOption;
+import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import reactor.core.publisher.Mono;
 import discord4j.gateway.ShardInfo;
 import discord4j.core.GatewayDiscordClient;
@@ -19,11 +21,29 @@ public class PingCommand implements SlashCommand {
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
+        return event.reply()
+            .withEphemeral(isEphemeral(event))
+            .withContent(getPing(event) + '\n' + getCommentary(event));
+    }
+
+    private boolean isEphemeral(ChatInputInteractionEvent event) {
+        Optional<String> maybeHide = event.getOption("hidden")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString); //This is warning us that we didn't check if its present, we can ignore this on required options
+        return maybeHide.isPresent() && maybeHide.get().equals("hide");
+    }
+
+    private String getCommentary(ChatInputInteractionEvent event) {
+        String babble = James.getState().jamesPhrase("JAMES::ping");
+        return babble!=null ? babble : "*no commentary*";
+    }
+
+    private String getPing(ChatInputInteractionEvent event) {
         ShardInfo shard = event.getShardInfo();
         int shardId = shard.getIndex();
         GatewayDiscordClient discord = event.getClient();
-        String ping = "*cannot find gateway*";
         Optional<GatewayClient> optionalGateway = discord.getGatewayClient(shardId);
+        String ping = "*cannot find gateway*";
         if(optionalGateway.isPresent()) {
             GatewayClient gateway = optionalGateway.get();
             Duration responseTime = gateway.getResponseTime();
@@ -35,13 +55,6 @@ public class PingCommand implements SlashCommand {
                 ping = String.format("Last heartbeat took %.1f ms (%.1f BPM).", milliping, bpm);
             }
         }
-        String babble = James.getState().jamesPhrase("JAMES::ping");
-        if(babble != null)
-            ping += '\n' + babble;
-        else
-            ping += "\n(no JAMES::ping)";
-        return event.reply()
-            .withEphemeral(true)
-            .withContent(ping);
+        return ping;
     }
 }

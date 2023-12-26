@@ -1,4 +1,22 @@
 {
     "name": "ping",
-    "description": "Display's the bot's hearbeat."
+    "description": "Display's the bot's hearbeat.",
+    "options": [
+        {
+            "name": "hidden",
+            "description": "Hide response from other users.",
+            "type": 3,
+            "required": false,
+            "choices": [
+                {
+                    "name": "hide",
+                    "value": "hide"
+                },
+                {
+                    "name": "show",
+                    "value": "show"
+                }
+            ]
+        }
+    ]
 }
