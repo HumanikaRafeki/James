@@ -1,0 +1,23 @@
+{
+    // Bot repository for /ping and /info
+    "bot_repo": "https://github.com/HumanikaRafeki/James",
+
+    // URL of Endless Sky repository
+    "endless_sky_repo": "https://github.com/endless-sky/endless-sky",
+
+    // Raw data files come from endless_sky_data + file_path + endless_sky_data_query
+    "endless_sky_data": "https://api.github.com/repos/endless-sky/endless-sky/contents/",
+    "endless_sky_data_query": "?ref=master",
+
+    // Maximum length of text after expanding all phrases recursively
+    "max_expanded_phrase_length": 10000,
+
+    // Maximum number of recursion levels of phrases
+    "max_phrase_recursion_depth": 10,
+
+    // Maximum number of phrases to process in one expansion
+    "max_phrase_expansions": 1000,
+
+    // Area for bot to store repo clones
+    "work_area": "/home/newbot/work/commit"
+}

@@ -4,6 +4,7 @@ import okhttp3.OkHttpClient;
 
 import humanika.rafeki.james.listeners.SlashCommandListener;
 import humanika.rafeki.james.data.JamesState;
+import humanika.rafeki.james.data.JamesConfig;
 import humanika.rafeki.james.phrases.PhraseLimits;
 
 import discord4j.core.DiscordClientBuilder;
@@ -24,9 +25,15 @@ import java.util.List;
 
 public class James {
     private static JamesState jamesState;
-    private static String BOT_URI = "https://github.com/HumanikaRafeki/James";
+    private static JamesConfig jamesConfig;
+    private static final String JAMES_CONFIG_PATH = "james-config.json";
+    //private static String BOT_URI = "https://github.com/HumanikaRafeki/James";
     private static final Logger LOGGER = LoggerFactory.getLogger(James.class);
     private static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
+
+    public static JamesConfig getConfig() {
+        return jamesConfig;
+    }
 
     public static JamesState getState() {
         return jamesState;
@@ -39,19 +46,18 @@ public class James {
     public static void main(String[] args) {
         //Creates the gateway client and connects to the gateway
         DiscordClient bot = DiscordClient.create(System.getenv("BOT_TOKEN"));
-        URI botUri = null;
+
         try {
-            botUri = new URI(BOT_URI);
-        } catch(URISyntaxException se) {
-            LOGGER.error("Syntax error in both uri \"" + BOT_URI + '"', se);
+            jamesConfig = new JamesConfig(JAMES_CONFIG_PATH, LOGGER);
+        } catch(Exception pe) {
+            LOGGER.error("Unable to read settings from ", pe);
         }
-        jamesState = new JamesState(new PhraseLimits(10000, 10), botUri);
+
+        jamesState = new JamesState(jamesConfig);
         try {
             jamesState.update();
-        } catch(IOException ioe) {
-            LOGGER.error("Unable to load initial data", ioe);
-        } catch(InterruptedException ie) {
-            LOGGER.error("Unable to load initial data", ie);
+        } catch(Exception se) {
+            LOGGER.error("Unable to load initial data", se);
         }
         bot.gateway().setSharding(ShardingStrategy.recommended())
             .withGateway(client -> client.on(ReadyEvent.class)

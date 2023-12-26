@@ -29,14 +29,10 @@ public class PingCommand extends SlashCommand {
             .withDescription(getPing(event))
             .withFooter(EmbedCreateFields.Footer.of(getCommentary(event), null));
 
-        Optional<URI> uri = James.getState().getBotUri();
-        if(uri.isPresent()) {
-            String uriString = uri.get().toString();
-            String last = uriString.replaceAll("/*$", "").replaceAll(".*/", "");
-            creator = creator.withUrl(uriString).withTitle(last);
-        } else {
-            creator = creator.withTitle("James");
-        }
+        String uriString = James.getConfig().botRepo.toString();
+        String last = uriString.replaceAll("/*$", "").replaceAll(".*/", "");
+        creator = creator.withUrl(uriString).withTitle(last);
+
         return event.reply().withEmbeds(creator).withEphemeral(isEphemeral(event));
     }
 

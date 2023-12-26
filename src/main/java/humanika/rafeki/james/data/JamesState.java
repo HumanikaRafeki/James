@@ -19,19 +19,18 @@ import humanika.rafeki.james.phrases.PhraseLimits;
 public class JamesState {
     private final ReentrantReadWriteLock modifying;
     private final PhraseLimits phraseLimits;
-    private final Optional<URI> botUri;
+    private final URI botUri;
     // Objects that may be replaced at any time:
     private PhraseDatabase jamesPhrases;
 
-    public JamesState(PhraseLimits phraseLimits, URI botUri) {
+    public JamesState(JamesConfig config) {
         modifying = new ReentrantReadWriteLock();
-        this.botUri = Optional.of(botUri);
-        this.phraseLimits = phraseLimits;
-
+        this.botUri = config.botRepo;
+        this.phraseLimits = new PhraseLimits(config.maxExpandedPhraseLength, config.maxPhraseRecursionDepth);
         jamesPhrases = null;
     }
 
-    public Optional<URI> getBotUri() {
+    public URI getBotUri() {
         return botUri;
     }
 

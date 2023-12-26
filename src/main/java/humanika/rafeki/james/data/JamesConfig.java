@@ -1,0 +1,47 @@
+package humanika.rafeki.james.data;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import org.slf4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class JamesConfig {
+    public final URI botRepo;
+    public final URI endlessSkyRepo;
+    public final String endlessSkyData;
+    public final String endlessSkyDataQuery;
+    public final int maxExpandedPhraseLength;
+    public final int maxPhraseRecursionDepth;
+    public final int maxPhraseExpansions;
+
+    public JamesConfig(String file, Logger logger) throws IOException, JSONException, URISyntaxException {
+        // Read file and strip comments
+        List<String> lines = Files.readAllLines(Paths.get(file));
+        List<String> cleaned = new ArrayList<>();
+        for(String line : lines) {
+            if(line.trim().startsWith("//"))
+                cleaned.add("");
+            else
+                cleaned.add(line);
+        }
+        String text = String.join("\n", cleaned);
+
+        // Read the file and parse out settings from JSON
+        JSONObject contents = new JSONObject(text);
+        botRepo = new URI(contents.getString("bot_repo"));
+        endlessSkyRepo = new URI(contents.getString("endless_sky_repo"));
+        endlessSkyData = contents.getString("endless_sky_data");
+        endlessSkyDataQuery = contents.getString("endless_sky_data_query");
+        maxExpandedPhraseLength = contents.getInt("max_expanded_phrase_length");
+        maxPhraseRecursionDepth = contents.getInt("max_phrase_recursion_depth");
+        maxPhraseExpansions = contents.getInt("max_phrase_expansions");
+    }
+}
