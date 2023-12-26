@@ -11,7 +11,17 @@ import java.util.stream.Stream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 
+import humanika.rafeki.james.utils.KorathCipher;
+
 public class Utils {
+    /** Reads the entire contents of a stream of known size
+     * @param size the length of the stream in bytes
+     * @param stream the stream to read
+     * @param timeout total number of nanoseconds to read before giving up
+     * @returns a byte array containing all characters that were read,
+     * or null if nothing was read. The array may be shorter than size
+     * if the entire file could not be written before the timeout or
+     * end-of-file. */
     public static byte[] readWholeStream(int size, InputStream stream, long timeout) throws IOException {
         long startTime = System.nanoTime();
         byte[] b = new byte[size];
@@ -27,6 +37,13 @@ public class Utils {
         if(offset < b.length)
             b = Arrays.copyOf(b, offset);
         return b;
+    }
+
+    /** Applies the Korath cipher to the Indonesian text.
+     * @param indonesian a string containing text that should be in the Indonesian language
+     * @returns a KorathCipher object where the indonesian, exile, and efreti fields are valid */
+    public static KorathCipher applyKorathCipher(String indonesian) {
+        return new KorathCipher(null, indonesian).indokorath();
     }
 
     /**

@@ -27,7 +27,7 @@ public class GlobalCommandRegistrar {
     }
 
     //Since this will only run once on startup, blocking is okay.
-    protected void registerCommands(List<String> fileNames) throws IOException {
+    public void registerCommands(List<String> fileNames) throws IOException {
         //Create an ObjectMapper that supports Discord4J classes
         final JacksonResources d4jMapper = JacksonResources.create();
 

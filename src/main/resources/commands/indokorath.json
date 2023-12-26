@@ -1,0 +1,28 @@
+{
+    "name": "indokorath",
+    "description": "Pass text through the Korath cipher. The text should be in the Indonesian language.",
+    "options": [
+        {
+            "name": "text",
+            "description": "Text to cipher (should be Indonesian)",
+            "type": 3,
+            "required": true
+        },
+        {
+            "name": "hidden",
+            "description": "Hide response from other users.",
+            "type": 3,
+            "required": false,
+            "choices": [
+                {
+                    "name": "hide",
+                    "value": "hide"
+                },
+                {
+                    "name": "show",
+                    "value": "show"
+                }
+            ]
+        }
+    ]
+}

@@ -2,22 +2,35 @@ package humanika.rafeki.james.listeners;
 
 import humanika.rafeki.james.commands.GreetCommand;
 import humanika.rafeki.james.commands.PingCommand;
+import humanika.rafeki.james.commands.IndokorathCommand;
 import humanika.rafeki.james.commands.SlashCommand;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.GatewayDiscordClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import humanika.rafeki.james.GlobalCommandRegistrar;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SlashCommandListener {
     //An array list of classes that implement the SlashCommand interface
     private final static List<SlashCommand> commands = new ArrayList<>();
+    private final static List<String> commandJson = new ArrayList<>();
 
     static {
         //We register our commands here when the class is initialized
         commands.add(new PingCommand());
+        commands.add(new IndokorathCommand());
         commands.add(new GreetCommand());
+        for(SlashCommand command : commands)
+            commandJson.add(command.getJson());
+    }
+
+    public static void registerCommands(GatewayDiscordClient gateway) throws IOException {
+        new GlobalCommandRegistrar(gateway.getRestClient()).registerCommands(commandJson);
     }
 
     public static Mono<Void> handle(ChatInputInteractionEvent event) {

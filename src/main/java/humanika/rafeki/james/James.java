@@ -53,9 +53,8 @@ public class James {
 
          Using SpringBoot we can avoid all of this and use their resource pattern matcher to do this for us.
          */
-        List<String> commands = List.of("greet.json", "ping.json");
         try {
-            new GlobalCommandRegistrar(gateway.getRestClient()).registerCommands(commands);
+            SlashCommandListener.registerCommands(gateway);
         } catch (Exception e) {
             LOGGER.error("Error trying to register global slash commands", e);
         }

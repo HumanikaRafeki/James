@@ -4,8 +4,6 @@ import java.util.Optional;
 import java.time.Duration;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.object.command.ApplicationCommandInteractionOption;
-import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import reactor.core.publisher.Mono;
 import discord4j.gateway.ShardInfo;
 import discord4j.core.GatewayDiscordClient;
@@ -13,7 +11,7 @@ import discord4j.gateway.GatewayClient;
 
 import humanika.rafeki.james.James;
 
-public class PingCommand implements SlashCommand {
+public class PingCommand extends SlashCommand {
     @Override
     public String getName() {
         return "ping";
@@ -24,13 +22,6 @@ public class PingCommand implements SlashCommand {
         return event.reply()
             .withEphemeral(isEphemeral(event))
             .withContent(getPing(event) + '\n' + getCommentary(event));
-    }
-
-    private boolean isEphemeral(ChatInputInteractionEvent event) {
-        Optional<String> maybeHide = event.getOption("hidden")
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asString); //This is warning us that we didn't check if its present, we can ignore this on required options
-        return maybeHide.isPresent() && maybeHide.get().equals("hide");
     }
 
     private String getCommentary(ChatInputInteractionEvent event) {
