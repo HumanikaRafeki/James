@@ -23,6 +23,8 @@ public class PingCommand extends SlashCommand {
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
+        if(!event.getInteraction().getGuildId().isPresent())
+            return handleDirectMessage(event);
         EmbedCreateSpec creator = EmbedCreateSpec.create()
             .withDescription(getPing(event))
             .withFooter(EmbedCreateFields.Footer.of(getCommentary(event), null));

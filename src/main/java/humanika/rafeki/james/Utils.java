@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 
 import humanika.rafeki.james.utils.KorathCipher;
+import humanika.rafeki.james.utils.Translator;
+import humanika.rafeki.james.James;
 
 public class Utils {
     /** Reads the entire contents of a stream of known size
@@ -44,6 +46,14 @@ public class Utils {
      * @returns a KorathCipher object where the indonesian, exile, and efreti fields are valid */
     public static KorathCipher applyKorathCipher(String indonesian) {
         return new KorathCipher(null, indonesian).indokorath();
+    }
+
+    /** Translates English text to Indonesian and applies the Korath cipher to the Indonesian text.
+     * @param english a string containing text that should be in the English language
+     * @returns a KorathCipher object where the english, indonesian, exile, and efreti fields are valid */
+    public static KorathCipher translateToKorath(String english) throws IOException {
+        String indonesian = Translator.translate("en", "id", english, James.getHttpClient());
+        return new KorathCipher(english, indonesian).indokorath();
     }
 
     /**

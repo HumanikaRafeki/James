@@ -1,5 +1,7 @@
 package humanika.rafeki.james;
 
+import okhttp3.OkHttpClient;
+
 import humanika.rafeki.james.listeners.SlashCommandListener;
 import humanika.rafeki.james.data.JamesState;
 import humanika.rafeki.james.phrases.PhraseLimits;
@@ -24,9 +26,14 @@ public class James {
     private static JamesState jamesState;
     private static String BOT_URI = "https://github.com/HumanikaRafeki/James";
     private static final Logger LOGGER = LoggerFactory.getLogger(James.class);
+    private static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
 
     public static JamesState getState() {
         return jamesState;
+    }
+
+    public static OkHttpClient getHttpClient() {
+        return HTTP_CLIENT;
     }
 
     public static void main(String[] args) {

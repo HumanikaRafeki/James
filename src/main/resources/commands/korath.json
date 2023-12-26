@@ -1,11 +1,11 @@
 {
-    "name": "indokorath",
-    "description": "Pass text through the Korath cipher. The text should be in the Indonesian language.",
+    "name": "korath",
+    "description": "\"Translates\" from English to Indonesian to Korath.",
     "dm_permission": false,
     "options": [
         {
             "name": "text",
-            "description": "Text to cipher (should be Indonesian)",
+            "description": "text to cipher (should be Indonesian)",
             "type": 3,
             "required": true
         },

@@ -4,6 +4,7 @@ import humanika.rafeki.james.commands.GreetCommand;
 import humanika.rafeki.james.commands.PingCommand;
 import humanika.rafeki.james.commands.IndokorathCommand;
 import humanika.rafeki.james.commands.SlashCommand;
+import humanika.rafeki.james.commands.KorathCommand;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.GatewayDiscordClient;
 import reactor.core.publisher.Flux;
@@ -25,6 +26,7 @@ public class SlashCommandListener {
         commands.add(new PingCommand());
         commands.add(new IndokorathCommand());
         commands.add(new GreetCommand());
+        commands.add(new KorathCommand());
         for(SlashCommand command : commands)
             commandJson.add(command.getJson());
     }

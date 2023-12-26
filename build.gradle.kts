@@ -29,6 +29,7 @@ sourceSets {
             implementation("ch.qos.logback:logback-classic:1.2.3")
 	    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
             implementation("com.squareup.okhttp3:okhttp")
+            implementation("org.json:json:20231013")
         }
     }
 }

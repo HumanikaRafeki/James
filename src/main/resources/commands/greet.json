@@ -1,7 +1,6 @@
 {
     "name": "greet",
     "description": "Greets you",
-    "dmPermission": false,
     "dm_permission": false,
     "options": [
         {

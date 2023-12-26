@@ -1,5 +1,6 @@
 package humanika.rafeki.james.commands;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -14,14 +15,14 @@ import humanika.rafeki.james.James;
 import humanika.rafeki.james.Utils;
 import humanika.rafeki.james.utils.KorathCipher;
 
-public class IndokorathCommand extends SlashCommand {
+public class KorathCommand extends SlashCommand {
     private static final int MAX_RESPONSE_LENGTH = 4000;
     private static String FOOTER_MESSAGE = "This tool only aids translation. You must massage the words for readability. Sometimes the cipher will produce obscene or offensive terms. Words with standard translations, like human/Humani, won't be correct.";
-    private static String TITLE = "Korath Cipher";
+    private static String TITLE = "Korath Encoding";
 
     @Override
     public String getName() {
-        return "indokorath";
+        return "korath";
     }
 
     @Override
@@ -38,12 +39,18 @@ public class IndokorathCommand extends SlashCommand {
         if(mention != null && mention.length() > 0)
             creator = creator.withDescription(mention + " said:\n");
 
-        KorathCipher results = Utils.applyKorathCipher(text);
-
-        creator = creator.withFields(
+        try {
+            KorathCipher results = Utils.translateToKorath(text);
+            creator = creator.withFields(
+                     EmbedCreateFields.Field.of("English", results.getEnglish(), true),
                      EmbedCreateFields.Field.of("Indonesian", results.getIndonesian(), true),
                      EmbedCreateFields.Field.of("Exile", results.getExile(), true),
                      EmbedCreateFields.Field.of("Efreti", results.getEfreti(), true));
+        } catch(IOException ioe) {
+            creator = creator.withFields(
+                     EmbedCreateFields.Field.of("English", text, false),
+                     EmbedCreateFields.Field.of("Error", "Network error contacting translation server.", false));
+        }
 
         return event.reply().withEmbeds(creator).withEphemeral(ephemeral);
     }
