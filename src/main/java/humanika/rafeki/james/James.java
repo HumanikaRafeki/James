@@ -16,11 +16,13 @@ import org.slf4j.LoggerFactory;
 import org.reactivestreams.Publisher;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 public class James {
     private static JamesState jamesState;
-
+    private static String BOT_URI = "https://github.com/HumanikaRafeki/James";
     private static final Logger LOGGER = LoggerFactory.getLogger(James.class);
 
     public static JamesState getState() {
@@ -30,7 +32,13 @@ public class James {
     public static void main(String[] args) {
         //Creates the gateway client and connects to the gateway
         DiscordClient bot = DiscordClient.create(System.getenv("BOT_TOKEN"));
-        jamesState = new JamesState(new PhraseLimits(10000, 10));
+        URI botUri = null;
+        try {
+            botUri = new URI(BOT_URI);
+        } catch(URISyntaxException se) {
+            LOGGER.error("Syntax error in both uri \"" + BOT_URI + '"', se);
+        }
+        jamesState = new JamesState(new PhraseLimits(10000, 10), botUri);
         try {
             jamesState.update();
         } catch(IOException ioe) {

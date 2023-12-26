@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
+import java.util.Optional;
+import java.net.URI;
 
 import me.mcofficer.esparser.DataFile;
 
@@ -17,15 +19,20 @@ import humanika.rafeki.james.phrases.PhraseLimits;
 public class JamesState {
     private final ReentrantReadWriteLock modifying;
     private final PhraseLimits phraseLimits;
-
+    private final Optional<URI> botUri;
     // Objects that may be replaced at any time:
     private PhraseDatabase jamesPhrases;
 
-    public JamesState(PhraseLimits phraseLimits) {
+    public JamesState(PhraseLimits phraseLimits, URI botUri) {
         modifying = new ReentrantReadWriteLock();
+        this.botUri = Optional.of(botUri);
         this.phraseLimits = phraseLimits;
 
         jamesPhrases = null;
+    }
+
+    public Optional<URI> getBotUri() {
+        return botUri;
     }
 
     public String jamesPhrase(String name) {

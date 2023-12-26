@@ -1,6 +1,8 @@
 {
     "name": "ping",
     "description": "Display's the bot's hearbeat.",
+    "dmPermission": false,
+    "dm_permission": false,
     "options": [
         {
             "name": "hidden",

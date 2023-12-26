@@ -1,6 +1,8 @@
 {
     "name": "indokorath",
     "description": "Pass text through the Korath cipher. The text should be in the Indonesian language.",
+    "dmPermission": false,
+    "dm_permission": false,
     "options": [
         {
             "name": "text",

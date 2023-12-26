@@ -2,11 +2,15 @@ package humanika.rafeki.james.commands;
 
 import java.util.Optional;
 import java.time.Duration;
+import java.net.URI;
 
+// import discord4j.core.event.domain.interaction.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import reactor.core.publisher.Mono;
 import discord4j.gateway.ShardInfo;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.EmbedCreateFields;
 import discord4j.gateway.GatewayClient;
 
 import humanika.rafeki.james.James;
@@ -19,9 +23,19 @@ public class PingCommand extends SlashCommand {
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
-        return event.reply()
-            .withEphemeral(isEphemeral(event))
-            .withContent(getPing(event) + '\n' + getCommentary(event));
+        EmbedCreateSpec creator = EmbedCreateSpec.create()
+            .withDescription(getPing(event))
+            .withFooter(EmbedCreateFields.Footer.of(getCommentary(event), null));
+
+        Optional<URI> uri = James.getState().getBotUri();
+        if(uri.isPresent()) {
+            String uriString = uri.get().toString();
+            String last = uriString.replaceAll("/*$", "").replaceAll(".*/", "");
+            creator = creator.withUrl(uriString).withTitle(last);
+        } else {
+            creator = creator.withTitle("James");
+        }
+        return event.reply().withEmbeds(creator).withEphemeral(isEphemeral(event));
     }
 
     private String getCommentary(ChatInputInteractionEvent event) {
