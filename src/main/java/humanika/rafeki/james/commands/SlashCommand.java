@@ -27,10 +27,6 @@ public abstract class SlashCommand {
 
     public abstract Mono<Void> handle(ChatInputInteractionEvent event);
 
-    protected boolean isEphemeral(ChatInputInteractionEvent event) {
-        Optional<String> maybeHide = getString(event, "hidden");
-        return maybeHide.isPresent() && maybeHide.get().equals("hide");
-    }
 
     protected Optional<List<ApplicationCommandInteractionOption>> getSubcommand(ChatInputInteractionEvent event, String name) {
         Optional<ApplicationCommandInteractionOption> subcommand = event.getOption(name);
@@ -40,6 +36,12 @@ public abstract class SlashCommand {
         else
             result = Optional.of(subcommand.get().getOptions());
         return result;
+    }
+
+
+    protected boolean isEphemeral(ChatInputInteractionEvent event) {
+        Optional<String> maybeHide = getString(event, "hidden");
+        return maybeHide.isPresent() && maybeHide.get().equals("hide");
     }
 
     protected String getStringOrDefault(ChatInputInteractionEvent event, String name, String def) {
@@ -70,6 +72,11 @@ public abstract class SlashCommand {
             .map(ApplicationCommandInteractionOptionValue::asAttachment);
     }
 
+
+
+    protected boolean isEphemeral(List<ApplicationCommandInteractionOption> options) {
+        return getStringOrDefault(options, "hidden", "show").equals("hide");
+    }
 
     protected String getStringOrDefault(List<ApplicationCommandInteractionOption> options, String name, String def) {
         Optional<String> result = getString(options, name);

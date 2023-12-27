@@ -42,14 +42,14 @@ public class CRConvertCommand extends SlashCommand {
         long value = getLongOrDefault(options, "value", 0);
         return event.reply(String.format("Combat points %s gives a rating of %s.",
                                          value, getRatingFromPoints(value)))
-            .withEphemeral(isEphemeral(event));
+            .withEphemeral(isEphemeral(options));
     }
 
     private Mono<Void> handlePoints(ChatInputInteractionEvent event, List<ApplicationCommandInteractionOption> options) {
         long value = getLong(options, "value").get();
         return event.reply(String.format("Combat rating %s requires %s combat points.",
                                          value, getPointsFromRating(value)))
-            .withEphemeral(isEphemeral(event));
+            .withEphemeral(isEphemeral(options));
     }
 
     private long getRatingFromPoints(long points) {
