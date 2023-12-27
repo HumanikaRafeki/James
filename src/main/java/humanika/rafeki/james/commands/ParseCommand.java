@@ -69,10 +69,10 @@ abstract class ParseCommand extends SlashCommand {
                     count = linesRemaining;
                 entry = entry.substring(matcher.end());
             }
-            if(count < 1)
-                continue;
             String[] result = processInput(count, phrases, news, entry, limits);
             fields.add(EmbedCreateFields.Field.of(result[0], result[1], false));
+            if(count < 1)
+                break;
             linesRemaining -= count;
         }
 

@@ -12,20 +12,20 @@ import humanika.rafeki.james.data.JamesState;
 import humanika.rafeki.james.phrases.PhraseDatabase;
 import humanika.rafeki.james.phrases.PhraseLimits;
 import humanika.rafeki.james.phrases.NewsDatabase;
-import humanika.rafeki.james.phrases.Phrase;
+import humanika.rafeki.james.phrases.NewsStory;
 
-public class PhrasesCommand extends ParseCommand {
-    private static final String[] VAR_ARRAY = {"phrase1", "phrase2", "phrase3", "phrase4"};
+public class NewsCommand extends ParseCommand {
+    private static final String[] VAR_ARRAY = {"news1", "news2", "news3", "news4"};
     private static final List<String> VAR_LIST = Arrays.asList(VAR_ARRAY);
 
     @Override
     public String getName() {
-        return "phrases";
+        return "news";
     }
 
     @Override
     protected String invalidInputDescription() {
-        return "*No phrases provided!*";
+        return "*No news provided!*";
     }
 
     @Override
@@ -36,15 +36,15 @@ public class PhrasesCommand extends ParseCommand {
     @Override
     protected String[] processInput(int count, PhraseDatabase phrases, NewsDatabase news, String entry, PhraseLimits limits) {
         if(count < 1) {
-            String[] result = { "Phrase \"" + entry + '"', "*Too many inputs! Use fewer phrases or repetitions.*" };
+            String[] result = { "News \"" + entry + '"', "*Too many inputs! Use fewer news or repetitions.*" };
             return result;
         }
-        String expanded = expandPhrases(count, phrases, entry, limits);
+        String expanded = expandNews(count, phrases, news, entry, limits);
         if(expanded == null) {
-            String[] result = { "Phrase \"" + entry + '"', "*Phrase not found!*" };
+            String[] result = { "News \"" + entry + '"', "*Phrase not found!*" };
             return result;
         } else {
-            String title = "Phrase \"" + entry + '"';
+            String title = "News \"" + entry + '"';
             if(count > 1)
                 title += " Repeated " + count + " Times";
             String[] result = { title, "`" + expanded.replace("`","'") + "`" };
@@ -52,15 +52,15 @@ public class PhrasesCommand extends ParseCommand {
         }
     }
 
-    private String expandPhrases(int count, PhraseDatabase phrases, String phrase, PhraseLimits limits) {
+    private String expandNews(int count, PhraseDatabase phrases, NewsDatabase news, String name, PhraseLimits limits) {
         StringBuilder builder = new StringBuilder();
 
-        Phrase gotten = phrases.get(phrase);
+        NewsStory gotten = news.getNews(name);
         if(gotten == null)
             return null;
 
         for(int repeat = 0; repeat < count && builder.length() < MAX_STRING_LENGTH; repeat++)
-            builder.append(gotten.expand(phrases, limits)).append('\n');
+            builder.append(gotten.toString(phrases, limits)).append('\n');
 
         // "very long string" becomes "very long s..."
         if(builder.length() > MAX_STRING_LENGTH) {

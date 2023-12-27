@@ -1,0 +1,29 @@
+{
+    "name": "say",
+    "description": "Expands ${phrases} in text.",
+    "dm_permission": false,
+    "options": [
+        {
+            "name": "text",
+            "description": "text ('a ${band}') with optional count ('10 a ${band}')",
+            "type": 3,
+            "required": true
+        },
+        {
+            "name": "hidden",
+            "description": "Hide response from other users.",
+            "type": 3,
+            "required": false,
+            "choices": [
+                {
+                    "name": "hide",
+                    "value": "hide"
+                },
+                {
+                    "name": "show",
+                    "value": "show"
+                }
+            ]
+        }
+    ]
+}

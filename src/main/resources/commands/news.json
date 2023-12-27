@@ -1,29 +1,29 @@
 {
-    "name": "phrases",
-    "description": "Looks up phrases in the Endless Sky data files.",
+    "name": "news",
+    "description": "Looks up news in the Endless Sky data files.",
     "dm_permission": false,
     "options": [
         {
-            "name": "phrase1",
-            "description": "phrase to find (ie. band) with optional count (ie. 10 band)",
+            "name": "news1",
+            "description": "news to find (ie. sailor) with optional count (ie. 10 sailor)",
             "type": 3,
             "required": true
         },
         {
-            "name": "phrase2",
-            "description": "second phrase to find (ie. drugs) with optional count (ie. 10 drugs)",
+            "name": "news2",
+            "description": "second news to find (ie. miner) with optional count (ie. 10 miner)",
             "type": 3,
             "required": false
         },
         {
-            "name": "phrase3",
-            "description": "third phrase to find (ie. hai) with optional count (ie. 10 hai)",
+            "name": "news3",
+            "description": "third news to find (ie. parent) with optional count (ie. 10 parent)",
             "type": 3,
             "required": false
         },
         {
-            "name": "phrase4",
-            "description": "fourth phrase to find (ie. bunrodea) with optional count (ie. 10 bunrodea)",
+            "name": "news4",
+            "description": "fourth news to find (ie. grifter) with optional count (ie. 10 grifter)",
             "type": 3,
             "required": false
         },
