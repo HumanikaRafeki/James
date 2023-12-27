@@ -14,8 +14,8 @@
             "description": "Combat points ('combat rating' data variable).",
             "type": 4,
             "required": false,
-            "min_value": 1
-            "max_value": 26
+            "min_value": 1,
+            "max_value": 28
         },
         {
             "name": "image2",
