@@ -42,7 +42,9 @@ public class ImageSwizzler {
             "rrg",
             "gbg",
             "rbr",
-            "rgr"
+            "rgr",
+            "r00",
+            "000"
     };
 
     /**
@@ -89,7 +91,8 @@ public class ImageSwizzler {
         int channelTwo = getChannelIndexByChar(swizzle.charAt(1));
         int channelThree = getChannelIndexByChar(swizzle.charAt(2));
 
-        int[] channels = new int[4];
+        int[] channels = new int[5];
+        channels[4] = 0;
 
         int points = width * height;
         for(int i = 0; i < points; i++) {
@@ -113,6 +116,7 @@ public class ImageSwizzler {
         if(c == 'r') return 1;
         else if(c == 'g') return 2;
         else if(c == 'b') return 3;
+        else if(c == '0') return 4;
         else return 0;
     }
 
