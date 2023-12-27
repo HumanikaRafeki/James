@@ -5,11 +5,13 @@ import okhttp3.OkHttpClient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.Locale;
 import java.io.IOException;
 
 public class KorathCipher {
-    private static Map<Character, Character> toExile = createExileMap();
-    private static Map<Character, Character> toEfreti = createEfretiMap();
+    private static final Map<Character, Character> toExile = createExileMap();
+    private static final Map<Character, Character> toEfreti = createEfretiMap();
+    private static final Locale locale = new Locale("id");
 
     private String english;
     private String indonesian;
@@ -54,7 +56,7 @@ public class KorathCipher {
     /** Applies cipher steps to indonesian, creating exile and efreti fields. Assumes that indonesian is non-null.
      * @returns this */
     private void cipherSteps() {
-        char[][] reversedChars = reverseStrings(indonesian);
+        char[][] reversedChars = reverseStrings(indonesian.toLowerCase(locale));
         char[][] korath = new char[reversedChars.length][];
         applyCipher(reversedChars, korath, toExile);
         exile = join(korath);

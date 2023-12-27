@@ -19,5 +19,8 @@
     "max_phrase_expansions": 1000,
 
     // Area for bot to store repo clones
-    "work_area": "/home/newbot/work/commit"
+    "work_area": "/home/newbot/work/commit",
+
+    // Maximum number of phrase expansions to return in /phrases
+    "max_phrase_command_repetitions": 20
 }

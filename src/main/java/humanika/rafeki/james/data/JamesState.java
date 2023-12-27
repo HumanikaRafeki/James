@@ -1,4 +1,5 @@
 package humanika.rafeki.james.data;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.stream.Stream;
 import java.util.Optional;
 import java.net.URI;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
+
 import me.mcofficer.esparser.DataFile;
 
 import humanika.rafeki.james.Utils;
@@ -16,22 +19,40 @@ import humanika.rafeki.james.phrases.PhraseDatabase;
 import humanika.rafeki.james.phrases.Phrase;
 import humanika.rafeki.james.phrases.PhraseLimits;
 
-public class JamesState {
+public class JamesState implements AutoCloseable {
     private final ReentrantReadWriteLock modifying;
     private final PhraseLimits phraseLimits;
     private final URI botUri;
+
     // Objects that may be replaced at any time:
     private PhraseDatabase jamesPhrases;
+    private EndlessSky endlessSky;
+    private final Logger logger;
 
-    public JamesState(JamesConfig config) {
+    public JamesState(JamesConfig config, Logger logger) {
         modifying = new ReentrantReadWriteLock();
         this.botUri = config.botRepo;
         this.phraseLimits = new PhraseLimits(config.maxExpandedPhraseLength, config.maxPhraseRecursionDepth);
+        this.logger = logger;
         jamesPhrases = null;
+        endlessSky = new EndlessSky(config);
+    }
+
+    public void close() {
+        endlessSky.close();
+        jamesPhrases.clear();
     }
 
     public URI getBotUri() {
         return botUri;
+    }
+
+    public PhraseLimits getPhraseLimits() {
+        return phraseLimits;
+    }
+
+    public EndlessSky getEndlessSky() {
+        return endlessSky;
     }
 
     public String jamesPhrase(String name) {
@@ -39,26 +60,41 @@ public class JamesState {
         return jamesPhrases != null ? jamesPhrases.expand(name, phraseLimits) : null;
     }
 
+    public String endlessSkyPhrase(String name) {
+        return endlessSky.getPhrases().expand(name, phraseLimits);
+    }
+
     public Reading use() throws InterruptedException {
         return new Reading(modifying.readLock());
     }
 
-    public void update() throws IOException, InterruptedException {
+    private PhraseDatabase readJamesPhrases() throws IOException {
         List<String> jamesData = Utils.readResourceLines("james.txt");
         PhraseDatabase jamesPhrases = new PhraseDatabase();
         if(jamesData != null)
             jamesPhrases.addPhrases(new DataFile(jamesData).getNodes());
+        return jamesPhrases;
+    }
 
-        // FIXME: Read other things here.
+    public void update() throws GitAPIException, IOException, InterruptedException {
+        // Do reentrant-safe things here:
+        logger.info("Beginning James update.");
+        logger.info("Reading james commentary...");
+        PhraseDatabase jamesPhrases = readJamesPhrases();
+        logger.info("Pulling endless-sky repository...");
+        endlessSky.openOrPull();
+        logger.info("Loading data from endless-sky repository...");
+        endlessSky.reloadData();
+        jamesPhrases.setParent(endlessSky.getPhrases());
 
         ReentrantReadWriteLock.WriteLock lock = modifying.writeLock();
         lock.lockInterruptibly();
         try {
             this.jamesPhrases = jamesPhrases;
-            // FIXME: Write other things here.
         } finally {
             lock.unlock();
         }
+        logger.info("James update is complete.");
     }
 
     public class Reading implements AutoCloseable {

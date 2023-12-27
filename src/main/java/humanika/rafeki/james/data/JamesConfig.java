@@ -12,6 +12,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
 
 public class JamesConfig {
     public final URI botRepo;
@@ -21,6 +22,8 @@ public class JamesConfig {
     public final int maxExpandedPhraseLength;
     public final int maxPhraseRecursionDepth;
     public final int maxPhraseExpansions;
+    public final File workArea;
+    public final int maxPhraseCommandRepetitions;
 
     public JamesConfig(String file, Logger logger) throws IOException, JSONException, URISyntaxException {
         // Read file and strip comments
@@ -43,5 +46,7 @@ public class JamesConfig {
         maxExpandedPhraseLength = contents.getInt("max_expanded_phrase_length");
         maxPhraseRecursionDepth = contents.getInt("max_phrase_recursion_depth");
         maxPhraseExpansions = contents.getInt("max_phrase_expansions");
+        workArea = new File(contents.getString("work_area"));
+        maxPhraseCommandRepetitions = contents.getInt("max_phrase_command_repetitions");
     }
 }

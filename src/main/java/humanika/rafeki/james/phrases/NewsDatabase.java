@@ -2,7 +2,7 @@ package humanika.rafeki.james.phrases;
 
 import me.mcofficer.esparser.DataNode;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 
 public class NewsDatabase {
@@ -18,7 +18,11 @@ public class NewsDatabase {
         news = new HashMap<String, NewsStory>();
     }
 
-    public void addNews(ArrayList<DataNode> data) {
+    public void clear() {
+        news.clear();
+    }
+
+    public void addNews(List<DataNode> data) {
         for(DataNode node : data)
             if(node.size() > 1 && node.token(0).equals("news"))
                 news.put(node.token(1), new NewsStory(node));

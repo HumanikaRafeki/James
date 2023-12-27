@@ -51,13 +51,15 @@ public class James {
             jamesConfig = new JamesConfig(JAMES_CONFIG_PATH, LOGGER);
         } catch(Exception pe) {
             LOGGER.error("Unable to read settings from ", pe);
+            System.exit(1);
         }
 
-        jamesState = new JamesState(jamesConfig);
+        jamesState = new JamesState(jamesConfig, LOGGER);
         try {
             jamesState.update();
         } catch(Exception se) {
             LOGGER.error("Unable to load initial data", se);
+            System.exit(1);
         }
         bot.gateway().setSharding(ShardingStrategy.recommended())
             .withGateway(client -> client.on(ReadyEvent.class)

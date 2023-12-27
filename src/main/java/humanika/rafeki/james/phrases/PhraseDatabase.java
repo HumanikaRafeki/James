@@ -1,6 +1,6 @@
 package humanika.rafeki.james.phrases;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.HashSet;
@@ -23,7 +23,19 @@ public class PhraseDatabase implements PhraseProvider {
         this.parent = null;
     }
 
-    public void addPhrases(ArrayList<DataNode> data) {
+    public PhraseDatabase getParent() {
+        return parent;
+    }
+
+    public void setParent(PhraseDatabase parent) {
+        this.parent = parent;
+    }
+
+    public void clear() {
+        expanders.clear();
+    }
+
+    public void addPhrases(List<DataNode> data) {
         for(DataNode node : data)
             if(node.size() > 1 && node.getTokens().get(0).equals("phrase"))
                 addPhrase(node);
