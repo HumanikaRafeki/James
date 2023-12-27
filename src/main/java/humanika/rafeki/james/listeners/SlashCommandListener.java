@@ -1,12 +1,6 @@
 package humanika.rafeki.james.listeners;
 
-import humanika.rafeki.james.commands.PingCommand;
-import humanika.rafeki.james.commands.IndokorathCommand;
-import humanika.rafeki.james.commands.SlashCommand;
-import humanika.rafeki.james.commands.KorathCommand;
-import humanika.rafeki.james.commands.PhrasesCommand;
-import humanika.rafeki.james.commands.NewsCommand;
-import humanika.rafeki.james.commands.SayCommand;
+import humanika.rafeki.james.commands.*;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.GatewayDiscordClient;
 import reactor.core.publisher.Flux;
@@ -31,6 +25,7 @@ public class SlashCommandListener {
         commands.add(new PhrasesCommand());
         commands.add(new NewsCommand());
         commands.add(new SayCommand());
+        commands.add(new CRConvertCommand());
         for(SlashCommand command : commands)
             commandJson.add(command.getJson());
     }

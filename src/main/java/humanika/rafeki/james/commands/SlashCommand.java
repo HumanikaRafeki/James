@@ -9,6 +9,7 @@ import discord4j.core.object.entity.Attachment;
 
 import reactor.core.publisher.Mono;
 import java.util.Optional;
+import java.util.List;
 
 import humanika.rafeki.james.James;
 
@@ -31,6 +32,16 @@ public abstract class SlashCommand {
         return maybeHide.isPresent() && maybeHide.get().equals("hide");
     }
 
+    protected Optional<List<ApplicationCommandInteractionOption>> getSubcommand(ChatInputInteractionEvent event, String name) {
+        Optional<ApplicationCommandInteractionOption> subcommand = event.getOption(name);
+        Optional<List<ApplicationCommandInteractionOption>> result;
+        if(!subcommand.isPresent())
+            result = Optional.empty();
+        else
+            result = Optional.of(subcommand.get().getOptions());
+        return result;
+    }
+
     protected String getStringOrDefault(ChatInputInteractionEvent event, String name, String def) {
         Optional<String> result = getString(event, name);
         return result.isPresent() ? result.get() : def;
@@ -42,11 +53,56 @@ public abstract class SlashCommand {
             .map(ApplicationCommandInteractionOptionValue::asString);
     }
 
+    protected Optional<Long> getLong(ChatInputInteractionEvent event, String name) {
+        return event.getOption(name)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong);
+    }
+
+    protected long getLongOrDefault(ChatInputInteractionEvent event, String name, long def) {
+        Optional<Long> result = getLong(event, name);
+        return result.isPresent() ? result.get() : def;
+    }
+
     protected Optional<Attachment> getAttachment(ChatInputInteractionEvent event, String name) {
         return event.getOption(name)
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asAttachment);
     }
+
+
+    protected String getStringOrDefault(List<ApplicationCommandInteractionOption> options, String name, String def) {
+        Optional<String> result = getString(options, name);
+        return result.isPresent() ? result.get() : def;
+    }
+
+    protected Optional<String> getString(List<ApplicationCommandInteractionOption> options, String name) {
+        for(ApplicationCommandInteractionOption option : options)
+            if(option.getName().equals(name))
+                return option.getValue().flatMap(value -> Optional.of(value.asString()) );
+        return Optional.empty();
+    }
+
+    protected Optional<Long> getLong(List<ApplicationCommandInteractionOption> options, String name) {
+        for(ApplicationCommandInteractionOption option : options)
+            if(option.getName().equals(name))
+                return option.getValue().flatMap(value -> Optional.of(value.asLong()) );
+        return Optional.empty();
+    }
+
+    protected long getLongOrDefault(List<ApplicationCommandInteractionOption> options, String name, long def) {
+        Optional<Long> result = getLong(options, name);
+        return result.isPresent() ? result.get() : def;
+    }
+
+    protected Optional<Attachment> getAttachment(List<ApplicationCommandInteractionOption> options, String name) {
+        for(ApplicationCommandInteractionOption option : options)
+            if(option.getName().equals(name))
+                return option.getValue().flatMap(value -> Optional.of(value.asAttachment()) );
+        return Optional.empty();
+    }
+
+
 
     public Mono<Void> handleDirectMessage(ChatInputInteractionEvent event) {
         String babble = James.getState().jamesPhrase("JAMES::ping");

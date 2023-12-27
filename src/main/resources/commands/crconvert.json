@@ -1,0 +1,67 @@
+{
+    "name": "crconvert",
+    "description": "Converts between combat ratings and points",
+    "dm_permission": false,
+    "options": [
+        {
+	    "name": "cr",
+            "description": "Convert points to combat rating",
+            "type": 1,
+            "options": [
+                {
+                    "name": "value",
+                    "description": "Combat points ('combat rating' data variable).",
+                    "type": 4,
+                    "required": true,
+                    "min_value": 0
+                },
+                {
+                    "name": "hidden",
+                    "description": "Hide response from other users.",
+                    "type": 3,
+                    "required": false,
+                    "choices": [
+                        {
+                            "name": "hide",
+                            "value": "hide"
+                        },
+                        {
+                            "name": "show",
+                            "value": "show"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+	    "name": "points",
+            "description": "Convert combat rating to points",
+            "type": 1,
+            "options": [
+                {
+                    "name": "value",
+                    "description": "Combat rating displayed in the game.",
+                    "type": 4,
+                    "required": true,
+                    "min_value": 0
+                },
+                {
+                    "name": "hidden",
+                    "description": "Hide response from other users.",
+                    "type": 3,
+                    "required": false,
+                    "choices": [
+                        {
+                            "name": "hide",
+                            "value": "hide"
+                        },
+                        {
+                            "name": "show",
+                            "value": "show"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
