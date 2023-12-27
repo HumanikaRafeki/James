@@ -5,6 +5,7 @@ import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.EmbedCreateFields;
+import discord4j.core.object.entity.Attachment;
 
 import reactor.core.publisher.Mono;
 import java.util.Optional;
@@ -39,6 +40,12 @@ public abstract class SlashCommand {
         return event.getOption(name)
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString);
+    }
+
+    protected Optional<Attachment> getAttachment(ChatInputInteractionEvent event, String name) {
+        return event.getOption(name)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asAttachment);
     }
 
     public Mono<Void> handleDirectMessage(ChatInputInteractionEvent event) {

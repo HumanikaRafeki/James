@@ -1,8 +1,13 @@
 package humanika.rafeki.james;
 
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.Request;
+import okhttp3.OkHttpClient;
+
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
@@ -16,29 +21,23 @@ import humanika.rafeki.james.utils.Translator;
 import humanika.rafeki.james.James;
 
 public class Utils {
-    /** Reads the entire contents of a stream of known size
-     * @param size the length of the stream in bytes
-     * @param stream the stream to read
-     * @param timeout total number of nanoseconds to read before giving up
-     * @returns a byte array containing all characters that were read,
-     * or null if nothing was read. The array may be shorter than size
-     * if the entire file could not be written before the timeout or
-     * end-of-file. */
-    public static byte[] readWholeStream(int size, InputStream stream, long timeout) throws IOException {
-        long startTime = System.nanoTime();
-        byte[] b = new byte[size];
-        int count = 0;
-        int offset = 0;
-        while(count >= 0 && offset < size && System.nanoTime() - startTime < timeout) {
-            count = stream.read(b, offset, size - offset);
-            if(count > 0)
-                offset += count;
-        }
-        if(offset <= 0)
-            return null;
-        if(offset < b.length)
-            b = Arrays.copyOf(b, offset);
-        return b;
+    public static String downloadAsString(URL url) throws IOException {
+        return download(url).string();
+    }
+
+    public static byte[] downloadAsBytes(URL url) throws IOException {
+        return download(url).bytes();
+    }
+
+    public static ResponseBody download(URL url) throws IOException {
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0")
+                .get()
+                .build();
+        OkHttpClient okHttpClient = James.getHttpClient();
+        Response response = okHttpClient.newCall(request).execute();
+        return response.body();
     }
 
     /** Applies the Korath cipher to the Indonesian text.

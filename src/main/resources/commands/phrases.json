@@ -42,6 +42,12 @@
                     "value": "show"
                 }
             ]
+        },
+        {
+            "name": "data",
+            "description": "custom Endless Sky text file with phrases",
+            "type": 11,
+            "required": false
         }
     ]
 }
