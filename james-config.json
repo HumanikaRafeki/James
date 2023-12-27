@@ -25,5 +25,8 @@
     "max_phrase_command_repetitions": 20,
 
     // Maximum total size of all attachments (in bytes) to /phrases, /say, and /news
-    "max_phrase_attachment_size": 307200
+    "max_phrase_attachment_size": 307200,
+
+    // Maximum width and height of an image sent to /swizzleimage
+    "max_swizzle_image_size": 1080
 }

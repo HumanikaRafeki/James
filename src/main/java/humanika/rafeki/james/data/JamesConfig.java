@@ -25,6 +25,7 @@ public class JamesConfig {
     public final File workArea;
     public final int maxPhraseCommandRepetitions;
     public final int maxPhraseAttachmentSize;
+    public final int maxSwizzleImageSize;
 
     public JamesConfig(String file, Logger logger) throws IOException, JSONException, URISyntaxException {
         // Read file and strip comments
@@ -50,5 +51,6 @@ public class JamesConfig {
         workArea = new File(contents.getString("work_area"));
         maxPhraseCommandRepetitions = contents.getInt("max_phrase_command_repetitions");
         maxPhraseAttachmentSize = contents.getInt("max_phrase_attachment_size");
+        maxSwizzleImageSize = contents.getInt("max_swizzle_image_size");
     }
 }
