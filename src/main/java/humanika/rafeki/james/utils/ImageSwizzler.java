@@ -56,13 +56,17 @@ public class ImageSwizzler {
      * Blame {@link ImageIO#read(InputStream)} or {@link ImageWriter#write(IIOMetadata, IIOImage, ImageWriteParam)}.
      */
     public InputStream swizzle(BufferedImage img, @Nullable String arg) throws IOException {
-        int[][][] channels = splitByChannels(img);
-
-        BufferedImage output;
+        int width = img.getWidth();
+        int height = img.getHeight();
+        int[] imgData = new int[width * height];
+        int[] work = new int[width * height];
+        img.getRGB(0, 0, width, height, imgData, 0, width);
+        BufferedImage swizzled = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage output = swizzled;
         if(arg == null || arg.isEmpty())
-            output = createAllSwizzles(img, channels);
+            output = createAllSwizzles(width, height, imgData, work, swizzled);
         else
-            output = createSwizzledImage(img.getWidth(), img.getHeight(), channels, swizzles[Integer.parseInt(arg) - 1]);
+            createSwizzledImage(width, height, imgData, work, swizzled, swizzles[Integer.parseInt(arg) - 1], 0, 0);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageWriter writer = ImageIO.getImageWritersByFormatName("png").next();
@@ -80,24 +84,29 @@ public class ImageSwizzler {
         return new ByteArrayInputStream(os.toByteArray());
     }
 
-    private BufferedImage createSwizzledImage(int width, int height, int[][][] channels, String swizzle) {
-
+    private void createSwizzledImage(int width, int height, int[] input, int[] work, BufferedImage swizzled, String swizzle, int offsetX, int offsetY) {
         int channelOne = getChannelIndexByChar(swizzle.charAt(0));
         int channelTwo = getChannelIndexByChar(swizzle.charAt(1));
         int channelThree = getChannelIndexByChar(swizzle.charAt(2));
 
-        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        for(int col = 0; col < width; col++) {
-            for (int row = 0; row < height; row++) {
-                int a = channels[0][col][row];
-                int r = channels[channelOne][col][row];
-                int g = channels[channelTwo][col][row];
-                int b = channels[channelThree][col][row];
-                int pixel = (a << 24) | (r << 16) | (g << 8) | b;
-                img.setRGB(col, row, pixel);
-            }
+        int[] channels = new int[4];
+
+        int points = width * height;
+        for(int i = 0; i < points; i++) {
+            int rgb = input[i];
+            //int rgb = original.getRGB(col, row);
+            channels[0] = (rgb >> 24) & 0x000000FF;
+            channels[1] = (rgb >> 16) & 0x000000FF;
+            channels[2] = (rgb >> 8) & 0x000000FF;
+            channels[3] = (rgb) & 0x000000FF;
+            int a = channels[0];
+            int r = channels[channelOne];
+            int g = channels[channelTwo];
+            int b = channels[channelThree];
+            int pixel = (a << 24) | (r << 16) | (g << 8) | b;
+            work[i] = pixel;
         }
-        return img;
+        swizzled.setRGB(offsetX, offsetY, width, height, work, 0, width);
     }
 
     private int getChannelIndexByChar(char c) {
@@ -107,41 +116,15 @@ public class ImageSwizzler {
         else return 0;
     }
 
-    private int[][][] splitByChannels(BufferedImage img) {
-        int width = img.getWidth();
-        int height = img.getHeight();
-        /* An array that contains 4 channels, with each channel being represented by matrix of integers.
-         the channel order is ARGB. */
-        int[][][] channels = new int[4][width][height];
-        for(int col = 0; col < width; col++) {
-            for (int row = 0; row < height; row++) {
-                int rgb = img.getRGB(col, row);
-                channels[0][col][row] = (rgb >> 24) & 0x000000FF;
-                channels[1][col][row] = (rgb >> 16) & 0x000000FF;
-                channels[2][col][row] = (rgb >> 8) & 0x000000FF;
-                channels[3][col][row] = (rgb) & 0x000000FF;
-            }
-        }
-        return  channels;
-    }
-
-    private BufferedImage createAllSwizzles(BufferedImage img, int[][][] channels) {
-        int width = img.getWidth();
-        int height = img.getHeight();
-
-        BufferedImage[] images = new BufferedImage[6];
-        for (int i = 0; i < 6; i++)
-            images[i] = createSwizzledImage(width, height, channels, swizzles[i]);
-
+    private BufferedImage createAllSwizzles(int width, int height, int[] imgData, int[] work, BufferedImage swizzled) {
         BufferedImage output = new BufferedImage(width * 3, height * 2, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = output.createGraphics();
-        g2d.drawImage(images[0], null, 0, 0);
-        g2d.drawImage(images[1], null, width, 0);
-        g2d.drawImage(images[2], null, width * 2, 0);
-        g2d.drawImage(images[3], null, 0, height);
-        g2d.drawImage(images[4], null, width, height);
-        g2d.drawImage(images[5], null, width * 2, height);
-        g2d.dispose();
+        int scansize = width * 3;
+        createSwizzledImage(width, height, imgData, work, output, swizzles[0], 0, 0);
+        createSwizzledImage(width, height, imgData, work, output, swizzles[1], width, 0);
+        createSwizzledImage(width, height, imgData, work, output, swizzles[2], width * 2, 0);
+        createSwizzledImage(width, height, imgData, work, output, swizzles[3], 0, height);
+        createSwizzledImage(width, height, imgData, work, output, swizzles[4], width, height);
+        createSwizzledImage(width, height, imgData, work, output, swizzles[5], width * 2, height);
 
         return output;
     }
