@@ -5,9 +5,12 @@
     // URL of Endless Sky repository
     "endless_sky_repo": "https://github.com/endless-sky/endless-sky",
 
-    // Raw data files come from endless_sky_data + file_path + endless_sky_data_query
+    // Some data files come from endless_sky_data + file_path + endless_sky_data_query
     "endless_sky_data": "https://api.github.com/repos/endless-sky/endless-sky/contents/",
     "endless_sky_data_query": "?ref=master",
+
+    // Path for swizzled images:
+    "swizzled_thumbnail_path": "https://raw.githubusercontent.com/EndlessSkyCommunity/EndlessSky-Discord-Bot/master/thumbnails/swizzles/";
 
     // Maximum length of text after expanding all phrases recursively
     "max_expanded_phrase_length": 10000,
@@ -28,5 +31,5 @@
     "max_phrase_attachment_size": 307200,
 
     // Maximum width and height of an image sent to /swizzleimage
-    "max_swizzle_image_size": 1080
+    "max_swizzle_image_size": 1280
 }

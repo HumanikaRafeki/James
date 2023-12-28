@@ -56,7 +56,7 @@ public class James {
 
         jamesState = new JamesState(jamesConfig, LOGGER);
         try {
-            jamesState.update();
+            jamesState.update(jamesConfig);
         } catch(Exception se) {
             LOGGER.error("Unable to load initial data", se);
             System.exit(1);

@@ -9,12 +9,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 import java.util.Optional;
 import java.net.URI;
-
+import java.awt.image.BufferedImage;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
 import me.mcofficer.esparser.DataFile;
 
 import humanika.rafeki.james.Utils;
+import humanika.rafeki.james.James;
 import humanika.rafeki.james.phrases.PhraseDatabase;
 import humanika.rafeki.james.phrases.Phrase;
 import humanika.rafeki.james.phrases.PhraseLimits;
@@ -23,18 +24,17 @@ public class JamesState implements AutoCloseable {
     private final ReentrantReadWriteLock modifying;
     private final PhraseLimits phraseLimits;
     private final URI botUri;
+    private final Logger logger;
 
     // Objects that may be replaced at any time:
-    private PhraseDatabase jamesPhrases;
-    private EndlessSky endlessSky;
-    private final Logger logger;
+    private PhraseDatabase jamesPhrases = null;
+    private EndlessSky endlessSky = null;
 
     public JamesState(JamesConfig config, Logger logger) {
         modifying = new ReentrantReadWriteLock();
         this.botUri = config.botRepo;
         this.phraseLimits = new PhraseLimits(config.maxExpandedPhraseLength, config.maxPhraseRecursionDepth);
         this.logger = logger;
-        jamesPhrases = null;
         endlessSky = new EndlessSky(config);
     }
 
@@ -53,6 +53,10 @@ public class JamesState implements AutoCloseable {
 
     public EndlessSky getEndlessSky() {
         return endlessSky;
+    }
+
+    public Optional<List<Government>> governmentsWithSwizzle(int swizzle) {
+        return endlessSky.governmentsWithSwizzle(swizzle);
     }
 
     public String jamesPhrase(String name) {
@@ -76,7 +80,7 @@ public class JamesState implements AutoCloseable {
         return jamesPhrases;
     }
 
-    public void update() throws GitAPIException, IOException, InterruptedException {
+    public void update(JamesConfig config) throws GitAPIException, IOException, InterruptedException {
         // Do reentrant-safe things here:
         logger.info("Beginning James update.");
         logger.info("Reading james commentary...");

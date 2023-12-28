@@ -32,6 +32,8 @@ public class SwizzleImageCommand extends SlashCommand {
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
+        if(!event.getInteraction().getGuildId().isPresent())
+            return handleDirectMessage(event);
         StringBuffer errors = new StringBuffer();
         List<Attachment> imageAttachments;
 

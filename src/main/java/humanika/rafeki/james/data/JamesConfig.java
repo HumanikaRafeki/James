@@ -19,6 +19,7 @@ public class JamesConfig {
     public final URI endlessSkyRepo;
     public final String endlessSkyData;
     public final String endlessSkyDataQuery;
+    public final String swizzledThumbnailPath;
     public final int maxExpandedPhraseLength;
     public final int maxPhraseRecursionDepth;
     public final int maxPhraseExpansions;
@@ -45,6 +46,7 @@ public class JamesConfig {
         endlessSkyRepo = new URI(contents.getString("endless_sky_repo"));
         endlessSkyData = contents.getString("endless_sky_data");
         endlessSkyDataQuery = contents.getString("endless_sky_data_query");
+        swizzledThumbnailPath = contents.getString("swizzled_thumbnail_path");
         maxExpandedPhraseLength = contents.getInt("max_expanded_phrase_length");
         maxPhraseRecursionDepth = contents.getInt("max_phrase_recursion_depth");
         maxPhraseExpansions = contents.getInt("max_phrase_expansions");

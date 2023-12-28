@@ -9,11 +9,17 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Optional;
+import java.awt.image.BufferedImage;
+
 
 import humanika.rafeki.james.phrases.PhraseDatabase;
 import humanika.rafeki.james.phrases.NewsDatabase;
@@ -25,7 +31,8 @@ public class EndlessSky implements AutoCloseable {
     private Git repo;
     private PhraseDatabase phrases = null;
     private NewsDatabase news = null;
-    private HashMap dataFiles = null;
+    private NodeLookups lookups = null;
+    private ImageCatalog images = null;
 
     private final static int OPEN_ACTION = 1;
     private final static int PULL_ACTION = 2;
@@ -53,7 +60,20 @@ public class EndlessSky implements AutoCloseable {
         repo.close();
         phrases = null;
         news = null;
-        dataFiles = null;
+        lookups = null;
+        images = null;
+    }
+
+    public Optional<List<Government>> governmentsWithSwizzle(int swizzle) {
+        if(lookups != null)
+            return lookups.governmentsWithSwizzle(swizzle);
+        return Optional.empty();
+    }
+
+    public Optional<BufferedImage> loadImage(String name) throws IOException {
+        if(images != null)
+            return images.loadImage(name);
+        return Optional.empty();
     }
 
     public PhraseDatabase getPhrases() {
@@ -81,17 +101,20 @@ public class EndlessSky implements AutoCloseable {
         PhraseDatabase phrases = new PhraseDatabase();
         NewsDatabase news = new NewsDatabase();
         HashMap dataFiles = new HashMap();
+        NodeLookups lookups = new NodeLookups();
+        ImageCatalog images = new ImageCatalog(new File(workingCopy, "images").toPath());
         List<Path> paths = Files.walk(data).filter(path->path.toString().endsWith(".txt")).collect(Collectors.toList());
         for(Path path : paths) {
             String relative = data.relativize(path).toString();
             List<String> lines = Files.readAllLines(path);
             DataFile read = new DataFile(lines);
-            dataFiles.put(relative, read);
             phrases.addPhrases(read.getNodes());
             news.addNews(read.getNodes());
+            lookups.addFile(relative, read);
         }
         this.phrases = phrases;
         this.news = news;
-        this.dataFiles = dataFiles;
+        this.lookups = lookups;
+        this.images = images;
     }
 }
