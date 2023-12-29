@@ -70,6 +70,10 @@ public class EndlessSky implements AutoCloseable {
         return Optional.empty();
     }
 
+    public Optional<List<NodeInfo>> fuzzyMatchNodeNames(String query, int maxSearch) {
+        return lookups.fuzzyMatchNodeNames(query, maxSearch);
+    }
+
     public Optional<BufferedImage> loadImage(String name) throws IOException {
         if(images != null)
             return images.loadImage(name);

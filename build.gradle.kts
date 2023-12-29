@@ -31,6 +31,7 @@ sourceSets {
             implementation("com.squareup.okhttp3:okhttp")
             implementation("org.json:json:20231013")
             implementation("org.eclipse.jgit:org.eclipse.jgit:6.8.0.202311291450-r")
+            implementation("com.github.mpkorstanje:simmetrics-core:4.1.1")
         }
     }
 }

@@ -1,0 +1,31 @@
+{
+    "name": "show",
+    "description": "Searches for the image and description of a query.",
+    "dm_permission": false,
+    "options": [
+        {
+            "name": "query",
+            "description": "String to search for.",
+            "type": 3,
+            "required": true,
+            "min_length": 1,
+            "max_length": 80
+        },
+        {
+            "name": "hidden",
+            "description": "Hide response from other users.",
+            "type": 3,
+            "required": false,
+            "choices": [
+                {
+                    "name": "hide",
+                    "value": "hide"
+                },
+                {
+                    "name": "show",
+                    "value": "show"
+                }
+            ]
+        }
+    ]
+}

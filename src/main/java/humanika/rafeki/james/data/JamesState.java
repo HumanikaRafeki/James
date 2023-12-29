@@ -1,6 +1,6 @@
 package humanika.rafeki.james.data;
-import org.slf4j.Logger;
 
+import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +41,8 @@ public class JamesState implements AutoCloseable {
     public void close() {
         endlessSky.close();
         jamesPhrases.clear();
+        endlessSky = null;
+        jamesPhrases = null;
     }
 
     public URI getBotUri() {
@@ -59,6 +61,10 @@ public class JamesState implements AutoCloseable {
         return endlessSky.governmentsWithSwizzle(swizzle);
     }
 
+    public Optional<List<NodeInfo>> fuzzyMatchNodeNames(String query, int maxSearch) {
+        return endlessSky.fuzzyMatchNodeNames(query, maxSearch);
+    }
+
     public String jamesPhrase(String name) {
         PhraseDatabase jamesPhrases = this.jamesPhrases;
         return jamesPhrases != null ? jamesPhrases.expand(name, phraseLimits) : null;
@@ -68,7 +74,7 @@ public class JamesState implements AutoCloseable {
         return endlessSky.getPhrases().expand(name, phraseLimits);
     }
 
-    public Reading use() throws InterruptedException {
+    public AutoCloseable use() throws InterruptedException {
         return new Reading(modifying.readLock());
     }
 
@@ -86,6 +92,7 @@ public class JamesState implements AutoCloseable {
         logger.info("Reading james commentary...");
         PhraseDatabase jamesPhrases = readJamesPhrases();
         logger.info("Pulling endless-sky repository...");
+        EndlessSky endlessSky = new EndlessSky(config);
         endlessSky.openOrPull();
         logger.info("Loading data from endless-sky repository...");
         endlessSky.reloadData();
@@ -95,13 +102,14 @@ public class JamesState implements AutoCloseable {
         lock.lockInterruptibly();
         try {
             this.jamesPhrases = jamesPhrases;
+            this.endlessSky = endlessSky;
         } finally {
             lock.unlock();
         }
         logger.info("James update is complete.");
     }
 
-    public class Reading implements AutoCloseable {
+    private class Reading implements AutoCloseable {
         ReentrantReadWriteLock.ReadLock lock;
         Reading(ReentrantReadWriteLock.ReadLock lock) throws InterruptedException {
             this.lock = lock;
