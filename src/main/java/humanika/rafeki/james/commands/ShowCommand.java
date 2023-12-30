@@ -22,9 +22,7 @@ import discord4j.core.object.entity.Message;
 import java.util.Arrays;
 
 public class ShowCommand extends SlashCommand {
-    private static String[] emojiNumbers = { ":one:", ":two:", ":three:", ":four:", ":five:",
-                                             ":six:", ":seven:", ":eight:", ":nine:", ":keycap_ten:" };
-
+    protected final static int QUERY_COUNT = 10;
     @Override
     public String getName() {
         return "show";
@@ -62,28 +60,24 @@ public class ShowCommand extends SlashCommand {
         if(listItem.size() < 1)
             return event.reply().withEmbeds(embed).withEphemeral(isEphemeral(event));
 
-        StringBuilder content = new StringBuilder();
-        for(int i = 0; i < 10 ; i++) {
-            if(i != 0)
-                content.append('\n');
-            content.append(emojiNumbers[i]).append(' ').append(listItem.get(i));
-        }
-        embed = embed.withDescription(content.toString());
-
-        ActionRow rows[] = new ActionRow[3];
-        Button buttons[] = new Button[4];
-        for(int i = 0; i <= 10; i++) {
-            if(i == 10) {
-                buttons[i % 4] = Button.success(getName() + ":X:close:close", "close");
-                rows[i / 4] = ActionRow.of(Arrays.copyOfRange(buttons, 0, 3));
+        int count = QUERY_COUNT;
+        int width = 3;
+        int height = (count + 1 + 2) / width;
+        ActionRow rows[] = new ActionRow[height];
+        Button buttons[] = new Button[width];
+        for(int i = 0; i <= count; i++) {
+            if(i == count) {
+                buttons[i % width] = Button.success(getName() + ":X:close:close", "close");
+                rows[i / width] = ActionRow.of(Arrays.copyOfRange(buttons, 0, (i % width) + 1));
             } else {
-                buttons[i % 4] = Button.primary(buttonId.get(i), String.valueOf(i + 1));
-                if(i == 3 || i == 7)
-                    rows[i / 4] = ActionRow.of(buttons);
+                buttons[i % width] = Button.primary(buttonId.get(i), listItem.get(i));
+                if((i + 1) % width == 0)
+                    rows[i / width] = ActionRow.of(buttons);
             }
         }
 
-        return event.reply().withEphemeral(ephemeral).withEmbeds(embed).withComponents(rows);
+        return event.reply().withContent("## Search Results\nFor `" + query.replaceAll("`", "'") + '`')
+            .withEphemeral(ephemeral).withComponents(rows);
     }
 
     public Mono<Void> handleButtonInteraction(ButtonInteractionEvent event) {
@@ -93,16 +87,13 @@ public class ShowCommand extends SlashCommand {
             return Mono.empty();
         }
 
-        System.out.println("Defer edit...");
         event.deferEdit().block();
-        System.out.println("Deferred.");
 
         String type = split[0];
         String flags = split[1];
         String hash = split[2];
         String query = split[3];
         boolean ephemeral = flags.indexOf('E') >= 0;
-        System.out.println("type=\""+type+"\" flags=\""+flags+"\" hash=\""+hash+"\" query=\""+query+'"');
         if(hash.equals("close"))
             event.deleteReply().subscribe();
         else if(split[0].equals(getName())) {
@@ -110,7 +101,6 @@ public class ShowCommand extends SlashCommand {
             if(found.isPresent() && found.get().size() > 0)
                 generateResult(event, found.get(), ephemeral);
             else {
-                System.out.println("No match for hash \""+hash+'"');
                 event.editReply()
                     .withEmbeds(EmbedCreateSpec.create().withTitle("No Match")
                         .withDescription("Query beginning with \"" + query
@@ -118,7 +108,6 @@ public class ShowCommand extends SlashCommand {
                     .subscribe();
             }
         } else {
-            System.out.println("Name \""+split[0]+"\" != \""+getName()+'"');
             event.editReply().withContent("Something got mixed up! The button had an invalid id.").subscribe();
         }
         return Mono.empty();
@@ -161,8 +150,6 @@ public class ShowCommand extends SlashCommand {
 
             Optional<String> maybeThumbnail = info.getBestThumbnail();
             Optional<String> maybeImage = info.getBestImage();
-            System.out.println("maybeThumbnail="+maybeThumbnail);
-            System.out.println("maybeImage="+maybeImage);
             String image = null;
             String thumbnail = null;
             if(maybeImage.isPresent())
@@ -174,14 +161,10 @@ public class ShowCommand extends SlashCommand {
 
             if(image != null) {
                 maybeImage = James.getState().getImageRawUrl(image);
-                if(!maybeImage.isPresent())
-                    System.out.println("Image " + image + " doesn't exist.");
                 image = maybeImage.orElse(null);
             }
             if(thumbnail != null) {
                 maybeThumbnail = James.getState().getImageRawUrl(thumbnail);
-                if(!maybeThumbnail.isPresent())
-                    System.out.println("Thumbnail " + image + " doesn't exist.");
                 thumbnail = maybeThumbnail.orElse(null);
             }
 
@@ -192,31 +175,18 @@ public class ShowCommand extends SlashCommand {
 
             EmbedCreateSpec embed = EmbedCreateSpec.create().withFields(fields)
                 .withTitle(info.getBestType() + ' ' + info.getName());
-            if(image != null) {
-                System.out.println("image "+image);
+            if(image != null)
                 embed = embed.withImage(image);
-            }
-            if(thumbnail != null) {
-                System.out.println("thumbnail "+thumbnail);
+            if(thumbnail != null)
                 embed = embed.withThumbnail(thumbnail);
-            }
             embeds.add(embed);
         }
-        Mono<Message> newReply = event.getReply().flatMap(reply -> event.editReply()
-            .withEmbeds(adjustEmbeds(reply.getEmbeds(), embeds)));
+        Mono<Message> newReply = event.getReply().flatMap(reply -> event.editReply().withEmbeds(embeds));
         newReply.block();
     }
 
-    protected List<EmbedCreateSpec> adjustEmbeds(List<Embed> old, List<EmbedCreateSpec> embeds) {
-        if(old != null && old.size() > 0) {
-            EmbedCreateSpec keep = EmbedCreateSpec.builder().from(old.get(0).getData()).build();
-            embeds.add(0, keep);
-        }
-        return embeds;
-    }
-
     protected Optional<List<NodeInfo>> getMatches(String query) {
-        return James.getState().fuzzyMatchNodeNames(query, 10);
+        return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> !info.isShipVariant() && (info.hasDescription() || info.hasSpaceport() || info.hasImage()) );
     }
 
     protected void getResponse(List<NodeInfo> matches, List<String> listItem, List<String> buttonText, List<String> buttonId, boolean ephemeral) {

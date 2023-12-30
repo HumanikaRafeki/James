@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Optional;
 import java.awt.image.BufferedImage;
+import java.util.function.Predicate;
 
 
 import humanika.rafeki.james.phrases.PhraseDatabase;
@@ -70,8 +71,8 @@ public class EndlessSky implements AutoCloseable {
         return Optional.empty();
     }
 
-    public Optional<List<NodeInfo>> fuzzyMatchNodeNames(String query, int maxSearch) {
-        return lookups.fuzzyMatchNodeNames(query, maxSearch);
+    public Optional<List<NodeInfo>> fuzzyMatchNodeNames(String query, int maxSearch, Predicate<NodeInfo> condition) {
+        return lookups.fuzzyMatchNodeNames(query, maxSearch, condition);
     }
 
     public Optional<List<NodeInfo>> nodesWithHash(String hash) {

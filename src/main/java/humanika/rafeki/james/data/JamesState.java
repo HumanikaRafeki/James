@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 import java.util.Optional;
@@ -15,6 +14,7 @@ import java.nio.file.Path;
 import java.net.URLEncoder;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Predicate;
 
 import me.mcofficer.esparser.DataFile;
 
@@ -68,8 +68,8 @@ public class JamesState implements AutoCloseable {
         return endlessSky.governmentsWithSwizzle(swizzle);
     }
 
-    public Optional<List<NodeInfo>> fuzzyMatchNodeNames(String query, int maxSearch) {
-        return endlessSky.fuzzyMatchNodeNames(query, maxSearch);
+    public Optional<List<NodeInfo>> fuzzyMatchNodeNames(String query, int maxSearch, Predicate<NodeInfo> condition) {
+        return endlessSky.fuzzyMatchNodeNames(query, maxSearch, condition);
     }
 
     public Optional<List<NodeInfo>> nodesWithHash(String hash) {
@@ -84,7 +84,7 @@ public class JamesState implements AutoCloseable {
             return Optional.empty();
         String encoded = "";
         try {
-            encoded = "images/" + URLEncoder.encode(imagePath.get().toString(), utf8).replace("%2F", "/");
+            encoded = "images/" + URLEncoder.encode(imagePath.get().toString(), utf8).replaceAll("%2F", "/").replaceAll("\\+", "%20");
         } catch(UnsupportedEncodingException exc) {
             return Optional.empty();
         }

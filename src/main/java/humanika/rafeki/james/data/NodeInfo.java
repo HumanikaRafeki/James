@@ -284,6 +284,18 @@ public class NodeInfo {
         return displayName.isPresent() ? displayName.get() : name;
     }
 
+    public boolean hasDescription() {
+        return description.isPresent();
+    }
+
+    public boolean hasSpaceport() {
+        return spaceport.isPresent();
+    }
+
+    public boolean hasImage() {
+        return thumbnail.isPresent() || sprite.isPresent() || weaponSprite.isPresent();
+    }
+
     public Optional<List<DataNode>> getDescription() {
         return description;
     }

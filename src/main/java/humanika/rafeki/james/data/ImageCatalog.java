@@ -18,7 +18,7 @@ import java.util.Optional;
 import javax.imageio.ImageIO;
 
 class ImageCatalog extends SimpleFileVisitor<Path> {
-    private final static Pattern pattern = Pattern.compile("^(?<name>.*?)(?<number>[~+-][0-9]+)?\\.(?<extension>[a-z0-9A-Z_]*)$");
+    private final static Pattern pattern = Pattern.compile("^(?<name>.*?)(?<number>[~+-][0-9]*)?\\.(?<extension>[a-z0-9A-Z_]*)$");
 
     private HashMap<String, Object> files = new HashMap<>();
     private Path root;
