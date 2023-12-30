@@ -62,7 +62,7 @@ public class SwizzleCommand extends SlashCommand {
     }
 
     @Override
-    public Mono<Void> handle(ChatInputInteractionEvent event) {
+    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
         if(!event.getInteraction().getGuildId().isPresent())
             return handleDirectMessage(event);
 

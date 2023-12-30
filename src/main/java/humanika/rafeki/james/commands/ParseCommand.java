@@ -43,7 +43,7 @@ abstract class ParseCommand extends SlashCommand {
     protected abstract String[] processInput(int count, PhraseDatabase phrases, NewsDatabase news, String entry, PhraseLimits limits);
 
     @Override
-    public Mono<Void> handle(ChatInputInteractionEvent event) {
+    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
         Interaction interaction = event.getInteraction();
         if(!interaction.getGuildId().isPresent())
             return handleDirectMessage(event);

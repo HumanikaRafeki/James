@@ -74,6 +74,18 @@ public class EndlessSky implements AutoCloseable {
         return lookups.fuzzyMatchNodeNames(query, maxSearch);
     }
 
+    public Optional<List<NodeInfo>> nodesWithHash(String hash) {
+        return lookups.nodesWithHash(hash);
+    }
+
+    public Optional<Path> getImagePath(String name) {
+        return images.getImagePath(name);
+    }
+
+    public Optional<Path> getImageRelativePath(String name) {
+        return images.getImageRelativePath(name);
+    }
+
     public Optional<BufferedImage> loadImage(String name) throws IOException {
         if(images != null)
             return images.loadImage(name);

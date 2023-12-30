@@ -34,7 +34,7 @@ public class NodeLookups {
             NodeInfo info = new NodeInfo(node);
             addToTypeNameNode(type, name, info);
             addToNameNode(name, info);
-            addToHashNode(name, info);
+            addToHashNode(info.getHashString(), info);
             if(type.equals("government"))
                 addToSwizzleGovernment(node);
         }
@@ -82,6 +82,13 @@ public class NodeLookups {
         for(int i = 0; i < stop; i++)
             output.add(work.get(i).node);
         return Optional.of(output);
+    }
+
+    public Optional<List<NodeInfo>> nodesWithHash(String hash) {
+        ArrayList<NodeInfo> got = hashNode.get(hash);
+        if(got == null || got.size() < 1)
+            return Optional.empty();
+        return Optional.of(got);
     }
 
     public Optional<List<Government>> governmentsWithSwizzle(int swizzle) {

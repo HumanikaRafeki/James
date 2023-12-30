@@ -25,7 +25,7 @@ public class IndokorathCommand extends SlashCommand {
     }
 
     @Override
-    public Mono<Void> handle(ChatInputInteractionEvent event) {
+    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
         if(!event.getInteraction().getGuildId().isPresent())
             return handleDirectMessage(event);
         String text = getStringOrDefault(event, "text", "").replaceAll("[@\t\n *<>|]+", " ").strip();

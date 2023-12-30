@@ -47,6 +47,13 @@ class ImageCatalog extends SimpleFileVisitor<Path> {
         return Optional.empty();
     }
 
+    public Optional<Path> getImageRelativePath(String name) {
+        Optional<Path> path = getImagePath(name);
+        if(!path.isPresent())
+            return path;
+        return Optional.of(root.relativize(path.get()));
+    }
+
     public Optional<BufferedImage> loadImage(String name) throws IOException {
         Optional<Path> path = getImagePath(name);
         if(path.isPresent())

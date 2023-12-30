@@ -6,6 +6,7 @@ import humanika.rafeki.james.listeners.SlashCommandListener;
 import humanika.rafeki.james.data.JamesState;
 import humanika.rafeki.james.data.JamesConfig;
 import humanika.rafeki.james.phrases.PhraseLimits;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.DiscordClient;
@@ -83,7 +84,8 @@ public class James {
         }
 
         //Register our slash command listener
-        gateway.on(ChatInputInteractionEvent.class, SlashCommandListener::handle)
+        gateway.on(ChatInputInteractionEvent.class, SlashCommandListener::handleChatCommand)
+            .mergeWith(gateway.on(ButtonInteractionEvent.class, SlashCommandListener::handleButtonInteraction))
             .then(gateway.onDisconnect())
             .block(); // We use .block() as there is not another non-daemon thread and the jvm would close otherwise.
     }

@@ -14,7 +14,7 @@ public class GreetCommand extends SlashCommand {
     }
 
     @Override
-    public Mono<Void> handle(ChatInputInteractionEvent event) {
+    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
         /*
         Since slash command options are optional according to discord, we will wrap it into the following function
         that gets the value of our option as a String without chaining several .get() on all the optional values

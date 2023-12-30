@@ -11,6 +11,10 @@ import java.util.Optional;
 import java.net.URI;
 import java.awt.image.BufferedImage;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import java.nio.file.Path;
+import java.net.URLEncoder;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import me.mcofficer.esparser.DataFile;
 
@@ -25,16 +29,19 @@ public class JamesState implements AutoCloseable {
     private final PhraseLimits phraseLimits;
     private final URI botUri;
     private final Logger logger;
+    private final String utf8 = StandardCharsets.UTF_8.name();
 
     // Objects that may be replaced at any time:
     private PhraseDatabase jamesPhrases = null;
     private EndlessSky endlessSky = null;
+    private JamesConfig config = null;
 
     public JamesState(JamesConfig config, Logger logger) {
         modifying = new ReentrantReadWriteLock();
         this.botUri = config.botRepo;
         this.phraseLimits = new PhraseLimits(config.maxExpandedPhraseLength, config.maxPhraseRecursionDepth);
         this.logger = logger;
+        this.config = config;
         endlessSky = new EndlessSky(config);
     }
 
@@ -63,6 +70,33 @@ public class JamesState implements AutoCloseable {
 
     public Optional<List<NodeInfo>> fuzzyMatchNodeNames(String query, int maxSearch) {
         return endlessSky.fuzzyMatchNodeNames(query, maxSearch);
+    }
+
+    public Optional<List<NodeInfo>> nodesWithHash(String hash) {
+        return endlessSky.nodesWithHash(hash);
+    }
+
+    public Optional<String> getImageRawUrl(String name) {
+        if(name == null)
+            return Optional.empty();
+        Optional<Path> imagePath = getImageRelativePath(name);
+        if(!imagePath.isPresent())
+            return Optional.empty();
+        String encoded = "";
+        try {
+            encoded = "images/" + URLEncoder.encode(imagePath.get().toString(), utf8).replace("%2F", "/");
+        } catch(UnsupportedEncodingException exc) {
+            return Optional.empty();
+        }
+        return Optional.of(config.endlessSkyRaw + encoded);
+    }
+
+    public Optional<Path> getImagePath(String name) {
+        return endlessSky.getImagePath(name);
+    }
+
+    public Optional<Path> getImageRelativePath(String name) {
+        return endlessSky.getImageRelativePath(name);
     }
 
     public String jamesPhrase(String name) {
@@ -103,6 +137,7 @@ public class JamesState implements AutoCloseable {
         try {
             this.jamesPhrases = jamesPhrases;
             this.endlessSky = endlessSky;
+            this.config = config;
         } finally {
             lock.unlock();
         }

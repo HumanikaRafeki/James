@@ -8,6 +8,7 @@
     // Some data files come from endless_sky_data + file_path + endless_sky_data_query
     "endless_sky_data": "https://api.github.com/repos/endless-sky/endless-sky/contents/",
     "endless_sky_data_query": "?ref=master",
+    "endless_sky_raw": "https://raw.githubusercontent.com/endless-sky/endless-sky/master/",
 
     // Path for swizzled images:
     "swizzled_thumbnail_path": "https://raw.githubusercontent.com/EndlessSkyCommunity/EndlessSky-Discord-Bot/master/thumbnails/swizzles/";

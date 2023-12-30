@@ -2,6 +2,7 @@ package humanika.rafeki.james.data;
 
 import me.mcofficer.esparser.DataNode;
 
+import java.util.List;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -42,8 +43,8 @@ public class NodeInfo {
     private final Optional<String> sprite;
     private final Optional<String> weaponSprite;
     private final Optional<String> thumbnail;
-    private final Optional<ArrayList<DataNode>> description;
-    private final Optional<ArrayList<DataNode>> spaceport;
+    private final Optional<List<DataNode>> description;
+    private final Optional<List<DataNode>> spaceport;
 
     /** For Ship variants, "base" is the name of the template ship and "dataName" is the variant name */
     private final Optional<String> base;
@@ -172,18 +173,18 @@ public class NodeInfo {
                             spaceport = new ArrayList<>();
                         spaceport.add(child);
                         break;
-                    case "displayName":
-                        displayName = node.token(1);
+                    case "display name":
+                        displayName = child.token(1);
                         break;
                     case "name":
-                        name = node.token(1);
+                        name = child.token(1);
                         break;
                     case "landscape":
                     case "sprite":
-                        sprite = node.token(1);
+                        sprite = child.token(1);
                         break;
                     case "thumbnail":
-                        thumbnail = node.token(1);
+                        thumbnail = child.token(1);
                         break;
                     }
                 }
@@ -208,8 +209,6 @@ public class NodeInfo {
         builder.append(dataName);
         if(name != dataName)
             builder.append(' ').append(name);
-        if(displayName != null && displayName != name)
-            builder.append(' ').append(displayName);
         this.searchString = builder.toString().toLowerCase();
 
         builder.delete(0, builder.length());
@@ -285,11 +284,11 @@ public class NodeInfo {
         return displayName.isPresent() ? displayName.get() : name;
     }
 
-    public Optional<ArrayList<DataNode>> getDescription() {
+    public Optional<List<DataNode>> getDescription() {
         return description;
     }
 
-    public Optional<ArrayList<DataNode>> getSpaceport() {
+    public Optional<List<DataNode>> getSpaceport() {
         return spaceport;
     }
 }

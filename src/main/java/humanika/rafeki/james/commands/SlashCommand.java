@@ -1,6 +1,7 @@
 package humanika.rafeki.james.commands;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -16,7 +17,7 @@ import humanika.rafeki.james.James;
 /**
  * A simple interface defining our slash command class contract.
  *  a getName() method to provide the case-sensitive name of the command.
- *  and a handle() method which will house all the logic for processing each command.
+ *  and a handleChatCommand() method which will house all the logic for processing each command.
  */
 public abstract class SlashCommand {
 
@@ -25,8 +26,13 @@ public abstract class SlashCommand {
         return getName() + ".json";
     }
 
-    public abstract Mono<Void> handle(ChatInputInteractionEvent event);
+    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
+        return Mono.empty();
+    }
 
+    public Mono<Void> handleButtonInteraction(ButtonInteractionEvent event) {
+        return Mono.empty();
+    }
 
     protected Optional<List<ApplicationCommandInteractionOption>> getSubcommand(ChatInputInteractionEvent event, String name) {
         Optional<ApplicationCommandInteractionOption> subcommand = event.getOption(name);

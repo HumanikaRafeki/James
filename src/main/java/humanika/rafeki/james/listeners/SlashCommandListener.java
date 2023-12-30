@@ -2,6 +2,7 @@ package humanika.rafeki.james.listeners;
 
 import humanika.rafeki.james.commands.*;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.Interaction;
 import discord4j.common.util.Snowflake;
@@ -43,11 +44,8 @@ public class SlashCommandListener {
         new GlobalCommandRegistrar(gateway.getRestClient()).registerCommands(commandJson);
     }
 
-    public static Mono<Void> handle(ChatInputInteractionEvent event) {
-        StringBuilder message = new StringBuilder();
-        message.append(event.getCommandName());
-
-        Interaction interaction = event.getInteraction();
+    private static boolean buildLogMessage(String what, String name, Interaction interaction, StringBuilder message) {
+        message.append(what).append(" ").append(name).append(" id=").append(interaction.getId().asLong());
 
         Optional<Snowflake> guildId = interaction.getGuildId();
         if(guildId.isPresent())
@@ -65,6 +63,14 @@ public class SlashCommandListener {
             message.append(" member=").append(member.getId().asLong());
         }
 
+        return isBot;
+    }
+
+    public static Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
+        StringBuilder message = new StringBuilder();
+        String commandName = event.getCommandName();
+        boolean isBot = buildLogMessage("command", commandName, event.getInteraction(), message);
+
         if(isBot)
             message.append(" REJECT: bot");
         else
@@ -78,10 +84,39 @@ public class SlashCommandListener {
         // Convert our array list to a flux that we can iterate through
         return Flux.fromIterable(commands)
             //Filter out all commands that don't match the name of the command this event is for
-            .filter(command -> command.getName().equals(event.getCommandName()))
+            .filter(command -> command.getName().equals(commandName))
             // Get the first (and only) item in the flux that matches our filter
             .next()
             //have our command class handle all the logic related to its specific command.
-            .flatMap(command -> command.handle(event));
+            .flatMap(command -> command.handleChatCommand(event));
+    }
+
+    public static Mono<Void> handleButtonInteraction(ButtonInteractionEvent event) {
+        StringBuilder message = new StringBuilder();
+
+        String[] split = event.getCustomId().split(":", 2);
+        String commandName = split[0];
+
+        boolean isBot = buildLogMessage("button", commandName, event.getInteraction(), message);
+
+        if(isBot)
+            message.append(" REJECT: bot");
+        else
+            message.append(" ACCEPT");
+
+        LOGGER.info(message.toString());
+
+        if(isBot)
+            return Mono.empty();
+
+        // Convert our array list to a flux that we can iterate through
+        return Flux.fromIterable(commands)
+            //Filter out all commands that don't match the name of the command this event is for
+            .filter(command -> command.getName().equals(commandName))
+            // Get the first (and only) item in the flux that matches our filter
+            .next()
+            //have our command class handle all the logic related to its specific command.
+            .flatMap(command -> command.handleButtonInteraction(event));
+
     }
 }
