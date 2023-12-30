@@ -22,7 +22,8 @@ import discord4j.core.object.entity.Message;
 import java.util.Arrays;
 
 public class ShowCommand extends SlashCommand {
-    protected final static int QUERY_COUNT = 10;
+    protected final static int QUERY_COUNT = 14;
+    protected final static int PRIMARY_COUNT = 6;
     @Override
     public String getName() {
         return "show";
@@ -70,7 +71,10 @@ public class ShowCommand extends SlashCommand {
                 buttons[i % width] = Button.success(getName() + ":X:close:close", "close");
                 rows[i / width] = ActionRow.of(Arrays.copyOfRange(buttons, 0, (i % width) + 1));
             } else {
-                buttons[i % width] = Button.primary(buttonId.get(i), listItem.get(i));
+                if(i < PRIMARY_COUNT)
+                    buttons[i % width] = Button.primary(buttonId.get(i), listItem.get(i));
+                else
+                    buttons[i % width] = Button.secondary(buttonId.get(i), listItem.get(i));
                 if((i + 1) % width == 0)
                     rows[i / width] = ActionRow.of(buttons);
             }
