@@ -199,6 +199,7 @@ public class ShowCommand extends SlashCommand {
         private int paragraphsInField = 0;
         private StringBuilder builder = new StringBuilder(100);
         private int maxFields;
+        private int sectionStart = 0;
 
         public AddParagraphFields(int maxFields) {
             this.maxFields = maxFields;
@@ -215,6 +216,8 @@ public class ShowCommand extends SlashCommand {
         public void add(String title, List<EmbedCreateFields.Field> fields, List<DataNode> paragraphs) {
             paragraphsInField = 0;
             builder.delete(0, builder.length());
+            fieldsSent = fields.size();
+            sectionStart = fieldsSent;
 
             for(DataNode node : paragraphs) {
                 if(node.size() < 1)
@@ -245,7 +248,7 @@ public class ShowCommand extends SlashCommand {
         }
 
         private boolean addField(String title, List<EmbedCreateFields.Field> fields) {
-            if(fieldsSent == 0)
+            if(fieldsSent == sectionStart)
                 fields.add(EmbedCreateFields.Field.of(title, builder.toString(), false));
             else
                 fields.add(EmbedCreateFields.Field.of("", builder.toString(), false));
