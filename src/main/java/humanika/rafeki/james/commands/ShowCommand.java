@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 
 public class ShowCommand extends SlashCommand {
-    protected final static int QUERY_COUNT = 14;
+    protected final static int QUERY_COUNT = 13;
     protected final static int PRIMARY_COUNT = 6;
     protected final static int MAX_CHARS_PER_FIELD = 1000;
 
@@ -69,18 +69,21 @@ public class ShowCommand extends SlashCommand {
         int height = (count + 1 + 2) / width;
         ActionRow rows[] = new ActionRow[height];
         Button buttons[] = new Button[width];
-        for(int i = 0; i <= count; i++) {
-            if(i == count) {
-                buttons[i % width] = Button.success(getName() + ":X:close:close", "close");
+        for(int i = 0; i <= count + 1; i++) {
+            if(i == count + 1) {
+                buttons[i % width] = Button.danger(getName() + ":X:delete:delete", "delete");
                 rows[i / width] = ActionRow.of(Arrays.copyOfRange(buttons, 0, (i % width) + 1));
+                continue;
+            } else if(i == count) {
+                buttons[i % width] = Button.success(getName() + ":X:done:done", "done");
             } else {
                 if(i < PRIMARY_COUNT)
                     buttons[i % width] = Button.primary(buttonId.get(i), listItem.get(i));
                 else
                     buttons[i % width] = Button.secondary(buttonId.get(i), listItem.get(i));
-                if((i + 1) % width == 0)
-                    rows[i / width] = ActionRow.of(buttons);
             }
+            if((i + 1) % width == 0)
+                rows[i / width] = ActionRow.of(buttons);
         }
 
         return event.reply().withContent("## Search Results\nFor `" + query.replaceAll("`", "'") + '`')
@@ -101,8 +104,10 @@ public class ShowCommand extends SlashCommand {
         String hash = split[2];
         String query = split[3];
         boolean ephemeral = flags.indexOf('E') >= 0;
-        if(hash.equals("close"))
+        if(hash.equals("delete") || hash.equals("close"))
             event.deleteReply().subscribe();
+        else if(hash.equals("done"))
+            event.editReply().withComponents().subscribe();
         else if(split[0].equals(getName())) {
             Optional<List<NodeInfo>> found = James.getState().nodesWithHash(hash);
             if(found.isPresent() && found.get().size() > 0)
@@ -114,9 +119,9 @@ public class ShowCommand extends SlashCommand {
                                        + "\" comes from an out-of-date search. Please try again."))
                     .subscribe();
             }
-        } else {
-            event.editReply().withContent("Something got mixed up! The button had an invalid id.").subscribe();
-        }
+        } else
+            event.editReply().withEmbeds(EmbedCreateSpec.create().withTitle("Error")
+                 .withDescription("Something got mixed up! The button had an invalid id.")).subscribe();
         return Mono.empty();
     }
 
