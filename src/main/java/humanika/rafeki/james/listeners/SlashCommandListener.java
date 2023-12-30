@@ -35,7 +35,7 @@ public class SlashCommandListener {
         commands.add(new CRConvertCommand());
         commands.add(new SwizzleImageCommand());
         commands.add(new SwizzleCommand());
-        commands.add(new ShowCommand());
+        commands.add(new LookupCommand());
         for(SlashCommand command : commands)
             commandJson.add(command.getJson());
     }

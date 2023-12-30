@@ -12,6 +12,14 @@
             "max_length": 80
         },
         {
+            "name": "type",
+            "description": "Node type to search for.",
+            "type": 3,
+            "required": false,
+            "min_length": 1,
+            "max_length": 80
+        },
+        {
             "name": "hidden",
             "description": "Hide response from other users.",
             "type": 3,
