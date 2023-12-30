@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.OptionalInt;
 
 public class ImageSwizzler {
 
@@ -53,22 +54,12 @@ public class ImageSwizzler {
      * Else returns an image with 2x height and 3x width, containing images of all color channel swaps defined in swizzles.
      * @param imgStream The image.
      * @param arg The number of the swizzle that should be applied.
-     * @return A .png-encoded image.
+     * @return An InputStream containing the .png-encoded image.
      * @throws IOException if an error occurs during reading or writing.
      * Blame {@link ImageIO#read(InputStream)} or {@link ImageWriter#write(IIOMetadata, IIOImage, ImageWriteParam)}.
      */
-    public InputStream swizzle(BufferedImage img, @Nullable String arg) throws IOException {
-        int width = img.getWidth();
-        int height = img.getHeight();
-        int[] imgData = new int[width * height];
-        int[] work = new int[width * height];
-        img.getRGB(0, 0, width, height, imgData, 0, width);
-        BufferedImage swizzled = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        BufferedImage output = swizzled;
-        if(arg == null || arg.isEmpty())
-            output = createAllSwizzles(width, height, imgData, work, swizzled);
-        else
-            createSwizzledImage(width, height, imgData, work, swizzled, swizzles[Integer.parseInt(arg) - 1], 0, 0);
+    public InputStream swizzle(BufferedImage img, OptionalInt swizzle) throws IOException {
+        BufferedImage output = swizzleToImage(img, swizzle);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ImageWriter writer = ImageIO.getImageWritersByFormatName("png").next();
@@ -84,6 +75,31 @@ public class ImageSwizzler {
         writer.dispose();
 
         return new ByteArrayInputStream(os.toByteArray());
+    }
+
+    /**
+     * Swizzles (swaps color channels) an image.
+     * If arg is defined, swaps an image's color channels in accordance to arg's value in {@link #swizzles}.
+     * Else returns an image with 2x height and 3x width, containing images of all color channel swaps defined in swizzles.
+     * @param imgStream The image.
+     * @param arg The number of the swizzle that should be applied.
+     * @return A BufferedImage with the swizzled image.
+     * @throws IOException if an error occurs during reading.
+     * Blame {@link ImageIO#read(InputStream)} or {@link ImageWriter#write(IIOMetadata, IIOImage, ImageWriteParam)}.
+     */
+    public BufferedImage swizzleToImage(BufferedImage img, OptionalInt swizzle) throws IOException {
+        int width = img.getWidth();
+        int height = img.getHeight();
+        int[] imgData = new int[width * height];
+        int[] work = new int[width * height];
+        img.getRGB(0, 0, width, height, imgData, 0, width);
+        BufferedImage swizzled = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage output = swizzled;
+        if(!swizzle.isPresent())
+            output = createAllSwizzles(width, height, imgData, work, swizzled);
+        else
+            createSwizzledImage(width, height, imgData, work, swizzled, swizzles[swizzle.getAsInt()], 0, 0);
+        return output;
     }
 
     private void createSwizzledImage(int width, int height, int[] input, int[] work, BufferedImage swizzled, String swizzle, int offsetX, int offsetY) {

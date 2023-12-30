@@ -10,12 +10,14 @@ import java.io.*;
 import java.net.URL;
 import java.net.MalformedURLException;
 import javax.imageio.ImageIO;
-
+import discord4j.core.object.command.Interaction;
+import discord4j.core.object.entity.Member;
 import reactor.core.publisher.Mono;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.spec.MessageCreateFields;
-
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.utils.ImageSwizzler;
 
@@ -32,13 +34,24 @@ public class SwizzleImageCommand extends SlashCommand {
 
     @Override
     public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
-        if(!event.getInteraction().getGuildId().isPresent())
+        Interaction interaction = event.getInteraction();
+        if(!interaction.getGuildId().isPresent())
             return handleDirectMessage(event);
+
+        MessageChannel channel = interaction.getChannel().block();
+        if(channel instanceof TextChannel) {
+            TextChannel textChannel = (TextChannel)channel;
+            if(textChannel.isNsfw())
+                return event.reply().withContent("I'm under 18 years of age and will not accept images in NSFW (age-restricted) channels. There's nothing wrong with having a beard at my age. Stop judging me.");
+        }
+
         StringBuffer errors = new StringBuffer();
         List<Attachment> imageAttachments;
 
-        Optional<Long> swizzle = getLong(event, "swizzle");
-        String arg = swizzle.isPresent() ? swizzle.get().toString() : null;
+        Optional<Long> swizzleLong = getLong(event, "swizzle");
+        OptionalInt swizzleInt = OptionalInt.empty();
+        if(swizzleLong.isPresent())
+            swizzleInt = OptionalInt.of(swizzleLong.get().intValue());
         ArrayList<MessageCreateFields.File> result = new ArrayList<>();
 
         for(String var : VAR_LIST) {
@@ -47,7 +60,7 @@ public class SwizzleImageCommand extends SlashCommand {
                 continue;
             Attachment data = maybeData.get();
             try {
-                processOneFile(data, errors, result, arg);
+                processOneFile(data, errors, result, swizzleInt);
             } catch(IOException ioe) {
                 errors.append(data.getFilename() + ": unable to read file");
             }
@@ -59,12 +72,30 @@ public class SwizzleImageCommand extends SlashCommand {
                 errors.append("Please attach one or more images.");
             return event.reply(errors.toString()).withEphemeral(isEphemeral(event));
         } else if(errors.length() > 0)
-            return event.reply(errors.toString()).withFiles(result).withEphemeral(isEphemeral(event));
+            return event.reply(errors.toString()).withFiles(result).withEphemeral(isEphemeral(event)).withContent(describe(swizzleLong, interaction));
         else
-            return event.reply().withFiles(result).withEphemeral(isEphemeral(event));
+            return event.reply().withFiles(result).withEphemeral(isEphemeral(event)).withContent(describe(swizzleLong, interaction));
     }
 
-    private void processOneFile(Attachment data, StringBuffer errors, ArrayList<MessageCreateFields.File> result, String swizzle) throws IOException {
+    private String describe(Optional<Long> swizzle, Interaction interaction) {
+        StringBuilder builder = new StringBuilder();
+        Optional<Member> member = interaction.getMember();
+        if(member.isPresent())
+            builder.append(member.get().getMention()).append(" sent this image");
+        else
+            builder.append("You sent this image");
+        if(swizzle.isPresent())
+            builder.append(" and asked me to recolor it for swizzle ").append(swizzle.get());
+        else
+            builder.append(" and asked me to recolor it for swizzles 1 through 6.");
+        if(member.isPresent())
+            builder.append(" If you don't like the image, it's their fault.");
+        else
+            builder.append(" If you don't like the image, it's your fault.");
+        return builder.toString();
+    }
+
+    private void processOneFile(Attachment data, StringBuffer errors, ArrayList<MessageCreateFields.File> result, OptionalInt swizzle) throws IOException {
         int maxSwizzleImageSize = James.getConfig().maxSwizzleImageSize;
         String filename = data.getFilename();
         OptionalInt width = data.getWidth();
@@ -82,6 +113,9 @@ public class SwizzleImageCommand extends SlashCommand {
         String urlString = data.getUrl();
         URL url = new URL(urlString);
         BufferedImage image = ImageIO.read(url);
+        // ImageIO.write(image, "png", new File("/tmp/swizzles/0.png"));
+        // for(int i = 0; i < 28; i++)
+        //     ImageIO.write(new ImageSwizzler().swizzleToImage(image, OptionalInt.of(i)), "png", new File("/tmp/swizzles/"+(i+1)+".png"));
         InputStream swizzled = new ImageSwizzler().swizzle(image, swizzle);
         String outputName = filename.replace("\\.[^.]+$","") + ".png";
         if(data.isSpoiler())

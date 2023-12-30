@@ -1,0 +1,23 @@
+{
+    "name": "rant",
+    "description": "Words of wisdom.",
+    "dm_permission": false,
+    "options": [
+        {
+            "name": "hidden",
+            "description": "Hide response from other users.",
+            "type": 3,
+            "required": false,
+            "choices": [
+                {
+                    "name": "hide",
+                    "value": "hide"
+                },
+                {
+                    "name": "show",
+                    "value": "show"
+                }
+            ]
+        }
+    ]
+}

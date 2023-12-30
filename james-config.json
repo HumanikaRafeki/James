@@ -11,7 +11,7 @@
     "endless_sky_raw": "https://raw.githubusercontent.com/endless-sky/endless-sky/master/",
 
     // Path for swizzled images:
-    "swizzled_thumbnail_path": "https://raw.githubusercontent.com/EndlessSkyCommunity/EndlessSky-Discord-Bot/master/thumbnails/swizzles/";
+    "swizzled_thumbnail_path": "https://raw.githubusercontent.com/HumanikaRafeki/EndlessSky-Discord-Bot/develop/thumbnails/swizzles/";
 
     // Maximum length of text after expanding all phrases recursively
     "max_expanded_phrase_length": 10000,

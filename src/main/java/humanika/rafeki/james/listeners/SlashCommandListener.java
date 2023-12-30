@@ -26,6 +26,7 @@ public class SlashCommandListener {
 
     static {
         //We register our commands here when the class is initialized
+        commands.add(new RantCommand());
         commands.add(new PingCommand());
         commands.add(new IndokorathCommand());
         commands.add(new KorathCommand());
