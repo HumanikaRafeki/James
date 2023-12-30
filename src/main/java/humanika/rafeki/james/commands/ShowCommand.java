@@ -223,7 +223,7 @@ public class ShowCommand extends SlashCommand {
                 if(node.size() < 1)
                     continue;
                 
-                String paragraph = node.token(1);
+                String paragraph = node.size() > 1 ? node.token(1) : node.token(0);
                 int maxFieldSize = MAX_CHARS_PER_FIELD;
                 if(fieldsSent == 0)
                     maxFieldSize -= title.length() + 1;

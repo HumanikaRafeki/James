@@ -131,6 +131,9 @@ public class NodeInfo {
 
         name = dataName;
 
+        if(type.equals("tip"))
+            description = node.getChildren();
+
         if(type.equals("star"))
             sprite = dataName;
 
