@@ -7,7 +7,8 @@ import humanika.rafeki.james.data.JamesState;
 import humanika.rafeki.james.data.JamesConfig;
 import humanika.rafeki.james.phrases.PhraseLimits;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
@@ -16,8 +17,9 @@ import discord4j.core.shard.ShardingStrategy;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import java.lang.management.ThreadInfo;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.net.URI;
@@ -62,11 +64,34 @@ public class James {
             LOGGER.error("Unable to load initial data", se);
             System.exit(1);
         }
-        bot.gateway().setSharding(ShardingStrategy.recommended())
-            .withGateway(client -> client.on(ReadyEvent.class)
-                         .doOnNext(ready -> withGatewayClient(bot, client) ))
-                         .then()
-            .block();
+        Thread thread = new Thread() {
+                public void run() {
+                    bot.gateway().setSharding(ShardingStrategy.recommended())
+                        .withGateway(client -> client.on(ReadyEvent.class)
+                                     .doOnNext(ready -> withGatewayClient(bot, client) ))
+                        .then().block();
+                }
+            };
+        LOGGER.info("Main thread is started.");
+        thread.start();
+        while(thread.isAlive()) {
+            try {
+                thread.join(30000);
+            } catch(InterruptedException ie) {
+                LOGGER.info("Main thread join was interrupted.", ie);
+            }
+            ThreadMXBean tmx = ManagementFactory.getThreadMXBean();
+            long[] ids = tmx.findDeadlockedThreads();
+            if (ids != null) {
+                ThreadInfo[] infos = tmx.getThreadInfo(ids, true, true);
+                System.out.println("The following threads are deadlocked:");
+                for (ThreadInfo ti : infos) {
+                    LOGGER.error("Deadlocked: "+ti);
+                    System.out.println(ti);
+                }
+            } else
+                LOGGER.info("All is well.");
+        }
     }
 
     private static void withGatewayClient(DiscordClient bot, GatewayDiscordClient gateway) {
@@ -87,6 +112,6 @@ public class James {
         gateway.on(ChatInputInteractionEvent.class, SlashCommandListener::handleChatCommand)
             .mergeWith(gateway.on(ButtonInteractionEvent.class, SlashCommandListener::handleButtonInteraction))
             .then(gateway.onDisconnect())
-            .block(); // We use .block() as there is not another non-daemon thread and the jvm would close otherwise.
+            .block();
     }
 }
