@@ -20,7 +20,8 @@ import org.slf4j.LoggerFactory;
 import java.lang.management.ThreadInfo;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
-
+import reactor.core.scheduler.Schedulers;
+import discord4j.core.event.EventDispatcher;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -48,6 +49,9 @@ public class James {
 
     public static void main(String[] args) {
         //Creates the gateway client and connects to the gateway
+        EventDispatcher customDispatcher = EventDispatcher.builder()
+            .eventScheduler(Schedulers.boundedElastic())
+            .build();
         DiscordClient bot = DiscordClient.create(System.getenv("BOT_TOKEN"));
 
         try {
@@ -66,7 +70,7 @@ public class James {
         }
         Thread thread = new Thread() {
                 public void run() {
-                    bot.gateway().setSharding(ShardingStrategy.recommended())
+                    bot.gateway().setEventDispatcher(customDispatcher).setSharding(ShardingStrategy.recommended())
                         .withGateway(client -> client.on(ReadyEvent.class)
                                      .doOnNext(ready -> withGatewayClient(bot, client) ))
                         .then().block();
