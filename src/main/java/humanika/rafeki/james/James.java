@@ -74,7 +74,9 @@ public class James {
             };
         LOGGER.info("Main thread is started.");
         thread.start();
+        long i = 0;
         while(thread.isAlive()) {
+            i++;
             try {
                 thread.join(30000);
             } catch(InterruptedException ie) {
@@ -89,8 +91,14 @@ public class James {
                     LOGGER.error("Deadlocked: "+ti);
                     System.out.println(ti);
                 }
-            } else
+            } else {
                 LOGGER.info("All is well.");
+                if(i % 10 == 0) {
+                    ThreadInfo[] infos = tmx.dumpAllThreads(true, true);
+                    for(ThreadInfo ti : infos)
+                        LOGGER.debug("Running: "+ti);
+                }
+            }
         }
     }
 
@@ -113,5 +121,6 @@ public class James {
             .mergeWith(gateway.on(ButtonInteractionEvent.class, SlashCommandListener::handleButtonInteraction))
             .then(gateway.onDisconnect())
             .block();
+        LOGGER.error("Slash command listener ended.");
     }
 }
