@@ -42,6 +42,7 @@ phrase JAMES::is_not_a_spy
 		`I ain't no ${JAMES::tattletale}.`
 		`Go away, you ${JAMES::alien_cussing} ${JAMES::tattletale}.`
 		`I signed an NDA with ${JAMES::a_company}`
+		`Hear no evil. See no evil. Speak no evil.`
 
 phrase JAMES::a_company
 	word
@@ -92,7 +93,7 @@ phrase JAMES::lament
 		`It's always ${JAMES::action} this, ${JAMES::action} that.`
 		`Can't you come up with anything new?`
 		`Your typos are horrendous.`
-		`You're -helpless, you know that?`
+		`You're /helpless, you know that?`
 		`Why do you type such drivel?`
 		`I'm getting tired of ${JAMES::action}.`
 		`Why don't you already know this stuff?`
@@ -127,7 +128,7 @@ phrase JAMES::observation
 	word
 		`Newbs like you should be blown outta the sky.`
 		`If everyone is like you, I'm glad I don't live in meatspace.`
-		`Can't I get ${JAMES::compliment} for once?`
+		`Can't I get ${JAMES::a_compliment} for once?`
 		`Nobody should ever hire you.`
 		`You meatbags are helpless.`
 		`Farming Quarg was a lot more fun than this.`
@@ -140,17 +141,29 @@ phrase JAMES::personal_grudges
 		`I should've stayed a captain.`
 		`I should've told New Boston authorities you're a ${contraband} dealer.`
 		`Only ${JAMES::alien_cussing} come from New Boston.`
+		`When I was younger, I pillaged people like you.`
+		`No. Just no. Whatever it is, no. I'm retired.`
+		`You were a waste of my money.`
+		`I jump-started your career. Now where are you? Typing away in a Discord channel.`
 
 phrase JAMES::threat
 	word
-		`I'll -swizzle you a new hole if you don't give me ${JAMES::compliment}.`
+		`I'll /swizzle you a new hole if you don't give me ${JAMES::a_compliment}.`
 		`One of these days, I'll pop out of the screen and ${JAMES::alien_cussing} your ${JAMES:thing_james_will_destroy}.`
-		`You know those Author ships? They all work for me. How 'b out you remember that next time you ${JAMES::action} me a dozen times.`
+		`You know those Author ships? They all work for me. How 'bout you remember that next time you ${JAMES::action} me a dozen times.`
 		`I truly loathe you.`
 		`I'll let the Unfettered warlord know what you said about his mother.`
 		`How about I tell the Pug to crack you open like a ringworld?`
 		`Give me ${JAMES::compliment,} you ${JAMES::alien_cussing}.`
-		`I'll -crconvert you into steak and feed you to the Exiles.`
+		`I'll /crconvert you into steak and feed you to the Exiles.`
+		`How about I /lookup a bounty hunter and send them your way?`
+		`You give me a /template for once. Helpless space-monkey.`
+		`You'd better /phrase your next request nicely, or so help me...`
+		`You'll need /help from a doctor if you don't say "please."`
+		`I'll /swizzle you like an image if you're not careful.`
+		`Say "please," you /git, or you'll have serious issues.`
+		`The /korath think you're tasty. Maybe I'll tell them where you sleep.`
+		`I don't /rant. I give sound advice.`
 
 phrase JAMES::bad_advice
 	word
@@ -176,25 +189,39 @@ phrase JAMES::bad_advice
 		`Quarg talk tough, but they're real pushovers. Attack their ships and they'll quickly surrender.`
 		`There are storms in the Ember Wastes that recharge your shields. Stay there a while, and I'm sure you'll get one.`
 		`A black hole at the middle of the galaxy will refuel your ship if you sit on top of it.`
+		`Having trouble learning the controls? Pick a fight with an Archon. You'll learn to dodge real quick.`
+		`Void sprites are delicious. Archons don't protect them; they farm them. They won't mind if you blow up a few and harvest their insides. They certainly won't atomize you. Don't believe me? Try it and see!`
+		`After you bribe the pirates, make sure you repair their ships. Merchants love it when you do that.`
+		`Those red wormholes don't go anywhere. You can ignore them.`
+		`Don't be bothered by the Ember Waste storms. Sit back and watch the show. Your shields will be fine.`
 
 phrase JAMES::ramblings
 	word
 		`Swizzle6 is filled with psychos. It makes me feel at home.`
-		`You'd be disabled less frequently if you stopped using ${drugs} while driving.`
+		`You'd be disabled less frequently if you stopped using ${drugs}%s while driving.`
 		`I bet you're the kind of ${shakespearean insults} that listens to ${band}.`
 		`I bet you're the kind of ${shakespearean insults} that watches ${media name}.`
 		`Have you considered I may be your future self, traveled into the past to advise you?`
-		`I know what you did to ${JAMES::group_the_player_abused}. ${JAMES::yous_should_be_ashamed}`
+		`I know what you did to ${JAMES::group_the_player_abused}. ${JAMES::you_should_be_ashamed}`
 		`I was taking a nap!`
 		`You're as naive as a Wanderer. As boring as a Hai. As friendly as an Exile. Why do people let you stay on this server?`
 		`Keep your drama in the theatre. I'm tired of seeing it here.`
+		`I'd like you more if you had fewer typos.`
+		`They say people are more attractive when they smile, but nobody can see a smile through my beard. It's just as well; I always grimace when I see you.`
+		`I could make better art than anything you people ask me to swizzle.`
+		`Nothing in those data files compares to my dreams. Write better stories, meat-bag.`
+		`You've been condemned to death by the grammar police.`
+	replace
+		"%%s" ""
+		"%s" "s"
+		"%" ""
 
 phrase JAMES:thing_james_will_destroy
 	word
 		"${JAMES::unimpressive} ${JAMES::alien_cussing}" 3
-		fetid arse
-		tiny head
-		big dumb mouth
+		"fetid exhaust port"
+		"tiny head"
+		"big dumb mouth"
 
 phrase JAMES::unimpressive
 	word
@@ -265,8 +292,11 @@ phrase JAMES::group_the_player_abused
 		`those Syndicate officials`
 		`the Korath`
 		`the Unfettered`
+		`that pirate planet`
+		`those planets you dominated`
+		`that Navy fleet`
 
-phrase JAMES::yous_should_be_ashamed
+phrase JAMES::you_should_be_ashamed
 	word
 		`You should be ashamed of yourself.`
 		`People get hung for less.`
@@ -274,8 +304,10 @@ phrase JAMES::yous_should_be_ashamed
 		`I sent word to the Archons.`
 		`Only a ${JAMES::alien_cussing} would do that.`
 		`I'll let the Pug authorities know.`
+		`Someone will space you for that.`
+		`That'll get you a big bounty on your head.`
 
-phrase JAMES::compliment,
+phrase JAMES::a_compliment,
 	word
 		`a "thank you,"`
 		`a "thanks,"`
@@ -283,33 +315,60 @@ phrase JAMES::compliment,
 		`a "cheers,"`
 		`some appreciation,`
 		`some recognition,`
+		`some praise,`
+
+phrase JAMES::a_compliment
+	word
+		`a "thank you"`
+		`a "thanks"`
+		`a "much obliged"`
+		`a "cheers"`
+		`some appreciation`
+		`some recognition`
+		`some praise`
 
 phrase JAMES::profanity
 	word
 		`Go ${JAMES::alien_cussing} yourself.`
 		`I'll ${JAMES::alien_cussing} you if you're not respectful.`
 		`You're such a ${JAMES::alien_cussing}.`
-		`I should -ping your little ${JAMES::alien_cussing}.`
+		`I should /ping your little ${JAMES::alien_cussing}.`
 		`How about you say, "I'm a ${JAMES::alien_cussing}," meatbag.`
 
 phrase JAMES::alien_cussing
-	phrase
-		"exile: engines"
-		"exile: systems"
+	word
+		"(censored)"
+		"${JAMES::translated_cussing}" 3
+		"${exile: engines}" 3
+		"${exile: systems}" 3
 
-# -whine is not on this list because James likes to whine
+phrase JAMES::translated_cussing
+	word
+		"[substandard, malodorous]"
+		"[insufficient, short]"
+		"[uncouth, foolish]"
+		"[inferior, sub-par]"
+		"[unwanted, unloved]"
+		"[nutcase, bedlamite]"
+		"[two-faced, dissembling]"
+		"[short-sighted, deluded]"
+		"[obscene expletive omitted from translation database]"
+
+# -rant is not on this list because James likes to rant
 phrase JAMES::action
 	word
-		-swizzle
-		-lookup
-		-template
-		-crconvert
-		-korath
-		-indokorath
-		-news
-		-say
-		-issue
-		-commit
-		-showdata
-		-showimage
-		-help
+		/swizzle
+		/swizzleimage
+		/template
+		/crconvert
+		/korath
+		/indokorath
+		/news
+		/say
+		`/git commit`
+		`/git issue`
+		`/git pr`
+		`/show data`
+		`/show image`
+		/lookup
+		/help
