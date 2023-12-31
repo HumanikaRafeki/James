@@ -97,7 +97,7 @@ public class James {
                 }
             } else {
                 LOGGER.info("All is well.");
-                if(i % 10 == 0) {
+                if(i % 120 == 0) {
                     ThreadInfo[] infos = tmx.dumpAllThreads(true, true);
                     for(ThreadInfo ti : infos)
                         LOGGER.debug("Running: "+ti);
