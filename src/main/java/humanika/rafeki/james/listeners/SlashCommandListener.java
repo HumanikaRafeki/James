@@ -18,12 +18,15 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.Set;
 
 public class SlashCommandListener {
     //An array list of classes that implement the SlashCommand interface
     private final static List<SlashCommand> commands = new ArrayList<>();
     private final static List<String> commandJson = new ArrayList<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(James.class);
+    private static final Set<Long> handled = new ConcurrentSkipListSet<Long>();
 
     static {
         //We register our commands here when the class is initialized
@@ -95,17 +98,27 @@ public class SlashCommandListener {
 
     public static Mono<Void> handleButtonInteraction(ButtonInteractionEvent event) {
         StringBuilder message = new StringBuilder();
-
         String[] split = event.getCustomId().split(":", 2);
         String commandName = split[0];
 
         boolean isBot = buildLogMessage("button", commandName, event.getInteraction(), message);
-
-        if(isBot)
+        
+        if(isBot) {
             message.append(" REJECT: bot");
-        else
-            message.append(" ACCEPT");
+            LOGGER.info(message.toString());
+            return Mono.empty();
+        }
 
+        Long id = Long.valueOf(event.getMessageId().asLong());
+        message.append(" message=").append(id.longValue());
+        if(handled.contains(id)) {
+            message.append(" REJECT: duplicate");
+            LOGGER.info(message.toString());
+            return Mono.empty();
+        }
+        handled.add(id);
+
+        message.append(" ACCEPT");
         LOGGER.info(message.toString());
 
         if(isBot)
