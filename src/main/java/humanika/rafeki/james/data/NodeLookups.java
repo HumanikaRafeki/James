@@ -62,16 +62,19 @@ public class NodeLookups {
     public Optional<List<NodeInfo>> fuzzyMatchNodeNames(String query, int maxSearch, Predicate<NodeInfo> condition) {
         int threshold = maxSearch > 0 ? 3 * maxSearch : 0;
         ShrinkableList work = new ShrinkableList();
-        for(Map.Entry<String, ArrayList<NodeInfo>> entry : nameNode.entrySet())
-            for(NodeInfo info : entry.getValue()) {
-                if(condition.test(info)) {
-                    work.add(new FloatNode(metric.compare(query, info.getSearchString()), info));
-                    if(threshold > 0 && work.size() > threshold) {
-                        work.sort(FloatNode::compare);
-                        work.shrink(maxSearch);
-                    }
+        for(Map.Entry<String, ArrayList<NodeInfo>> entry : nameNode.entrySet()) {
+            ArrayList<NodeInfo> list = entry.getValue();
+            if(list.size() < 1)
+                continue;
+            NodeInfo info = list.get(list.size() - 1);
+            if(condition.test(info)) {
+                work.add(new FloatNode(metric.compare(query, info.getSearchString()), info));
+                if(threshold > 0 && work.size() > threshold) {
+                    work.sort(FloatNode::compare);
+                    work.shrink(maxSearch);
                 }
             }
+        }
 
         if(work.size() < 1)
             return Optional.empty();
