@@ -101,7 +101,7 @@ public class EndlessSky implements AutoCloseable {
         return news;
     }
 
-    public synchronized void repoAction(int action) throws GitAPIException, IOException {
+    public /* synchronized */ void repoAction(int action) throws GitAPIException, IOException {
         if(action == OPEN_ACTION) {
             if(workingCopy.exists()) {
                 Git repo = Git.open(workingCopy);
@@ -113,7 +113,7 @@ public class EndlessSky implements AutoCloseable {
             repo.pull().call();
     }
 
-    private synchronized void readGameData() throws IOException {
+    private /* synchronized */ void readGameData() throws IOException {
         Path data = new File(workingCopy, "data").toPath();
         PhraseDatabase phrases = new PhraseDatabase();
         NewsDatabase news = new NewsDatabase();

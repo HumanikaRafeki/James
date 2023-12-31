@@ -23,7 +23,7 @@ public class AddParagraphFields {
         return maxFields;
     }
 
-    public synchronized void add(String title, List<EmbedCreateFields.Field> fields, List<DataNode> paragraphs, int maxCharsPerField) {
+    public /* synchronized */ void add(String title, List<EmbedCreateFields.Field> fields, List<DataNode> paragraphs, int maxCharsPerField) {
         paragraphsInField = 0;
         builder.delete(0, builder.length());
         fieldsSent = fields.size();

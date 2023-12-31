@@ -33,7 +33,7 @@ public abstract class ShowCommand extends SlashCommand {
         return "show";
     }
 
-    protected abstract void generateResult(ButtonInteractionEvent event, List<NodeInfo> found, boolean ephemeral);
+    protected abstract Mono<Void> generateResult(ButtonInteractionEvent event, List<NodeInfo> found, boolean ephemeral);
 
     protected abstract Optional<List<NodeInfo>> getMatches(String query, Optional<String> type);
 
@@ -120,8 +120,6 @@ public abstract class ShowCommand extends SlashCommand {
             return Mono.empty();
         }
 
-        event.deferEdit().block();
-
         String type = split[0];
         String flags = split[1];
         String hash = split[2];
@@ -134,17 +132,17 @@ public abstract class ShowCommand extends SlashCommand {
         else if(split[0].equals(getName())) {
             Optional<List<NodeInfo>> found = James.getState().nodesWithHash(hash);
             if(found.isPresent() && found.get().size() > 0)
-                generateResult(event, found.get(), ephemeral);
+                return generateResult(event, found.get(), ephemeral);
             else {
-                event.editReply()
+                return event.editReply()
                     .withEmbeds(EmbedCreateSpec.create().withTitle("No Match")
                         .withDescription("Query beginning with \"" + query
                                        + "\" comes from an out-of-date search. Please try again."))
-                    .subscribe();
+                    .then();
             }
         } else
-            event.editReply().withEmbeds(EmbedCreateSpec.create().withTitle("Error")
-                 .withDescription("Something got mixed up! The button had an invalid id.")).subscribe();
+            return event.editReply().withEmbeds(EmbedCreateSpec.create().withTitle("Error")
+                 .withDescription("Something got mixed up! The button had an invalid id.")).then();
         return Mono.empty();
     }
 

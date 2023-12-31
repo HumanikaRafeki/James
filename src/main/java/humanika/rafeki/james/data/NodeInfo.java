@@ -220,7 +220,7 @@ public class NodeInfo {
         this.shipVariantFlag = type.equals("ship") && base != null;
     }
 
-    private static synchronized String generateBase64Hash(String content) {
+    private static /* synchronized */ String generateBase64Hash(String content) {
         return encoder.encodeToString(hasher.digest(content.getBytes(StandardCharsets.UTF_8)));
     }
 

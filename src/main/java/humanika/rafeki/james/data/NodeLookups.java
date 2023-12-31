@@ -24,7 +24,7 @@ public class NodeLookups {
 
     }
 
-    synchronized void addFile(String relativePath, DataFile file) {
+    /* synchronized */ void addFile(String relativePath, DataFile file) {
         dataFiles.put(relativePath, file);
         for(DataNode node : file.getNodes()) {
             if(node.size() < 2)

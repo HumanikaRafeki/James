@@ -30,7 +30,7 @@ public class LookupCommand extends ShowCommand {
         return "lookup";
     }
 
-    protected void generateResult(ButtonInteractionEvent event, List<NodeInfo> found, boolean ephemeral) {
+    protected Mono<Void> generateResult(ButtonInteractionEvent event, List<NodeInfo> found, boolean ephemeral) {
         List<EmbedCreateSpec> embeds = new ArrayList<>();
         StringBuilder builder = new StringBuilder(100);
         String before = James.getConfig().endlessSkyData;
@@ -61,8 +61,7 @@ public class LookupCommand extends ShowCommand {
                 embed = embed.withThumbnail(imageAndThumbnail[1]);
             embeds.add(embed);
         }
-        Mono<Message> newReply = event.getReply().flatMap(reply -> event.editReply().withEmbeds(embeds));
-        newReply.block();
+        return event.getReply().flatMap(reply -> event.editReply().withEmbeds(embeds)).then();
     }
 
     protected Optional<List<NodeInfo>> getMatches(String query, Optional<String> maybeType) {

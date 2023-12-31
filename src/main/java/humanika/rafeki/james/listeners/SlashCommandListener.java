@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Optional;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
 
 public class SlashCommandListener {
     //An array list of classes that implement the SlashCommand interface
@@ -110,14 +111,15 @@ public class SlashCommandListener {
         if(isBot)
             return Mono.empty();
 
+        Mono<Void> deferEdit = event.deferEdit();
         // Convert our array list to a flux that we can iterate through
-        return Flux.fromIterable(commands)
+        Mono<Void> buttonInteraction = Flux.fromIterable(commands)
             //Filter out all commands that don't match the name of the command this event is for
             .filter(command -> command.getName().equals(commandName))
             // Get the first (and only) item in the flux that matches our filter
             .next()
             //have our command class handle all the logic related to its specific command.
             .flatMap(command -> command.handleButtonInteraction(event));
-
+        return deferEdit.concatWith(buttonInteraction).then();
     }
 }
