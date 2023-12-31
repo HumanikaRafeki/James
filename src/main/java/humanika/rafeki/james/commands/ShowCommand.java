@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 
 public abstract class ShowCommand extends SlashCommand {
-    protected final static int QUERY_COUNT = 13;
+    protected final static int QUERY_COUNT = 14;
     protected final static int PRIMARY_COUNT = 6;
     protected final static int MAX_CHARS_PER_FIELD = 1000;
     protected final static int MAX_BUTTON_LABEL_LENGTH = 60;
@@ -85,17 +85,14 @@ public abstract class ShowCommand extends SlashCommand {
         if(count > listItem.size())
             count = listItem.size();
         int width = 3;
-        int height = (count + 1 + 2) / width;
+        int height = (count + 1 + 1) / width;
         ActionRow rows[] = new ActionRow[height];
         Button buttons[] = new Button[width];
-        for(int i = 0; i <= count + 1; i++) {
-            if(i == count + 1) {
-                buttons[i % width] = Button.danger(getName() + ":X:delete:delete", "delete");
-                rows[i / width] = ActionRow.of(Arrays.copyOfRange(buttons, 0, (i % width) + 1));
-                continue;
-            } else if(i == count) {
-                buttons[i % width] = Button.success(getName() + ":X:done:done", "done");
+        for(int i = 0; i <= count; i++) {
+            if(i == count) {
+                buttons[i % width] = Button.success(getName() + ":X:close:close", "close");
             } else {
+                System.out.println("Button "+i+" id = "+buttonId.get(i));
                 String label = listItem.get(i);
                 if(label.length() > MAX_BUTTON_LABEL_LENGTH) {
                     label = label.substring(0, MAX_BUTTON_LABEL_LENGTH - 3) + "...";

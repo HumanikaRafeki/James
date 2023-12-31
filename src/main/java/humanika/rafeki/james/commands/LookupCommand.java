@@ -61,7 +61,7 @@ public class LookupCommand extends ShowCommand {
                 embed = embed.withThumbnail(imageAndThumbnail[1]);
             embeds.add(embed);
         }
-        return event.getReply().flatMap(reply -> event.editReply().withEmbeds(embeds)).then();
+        return event.getReply().flatMap(reply -> event.editReply().withEmbeds(embeds).withComponents()).then();
     }
 
     protected Optional<List<NodeInfo>> getMatches(String query, Optional<String> maybeType) {
