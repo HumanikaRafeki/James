@@ -1,37 +1,122 @@
 {
     "name": "show",
-    "description": "Searches for the image and description of a query.",
+    "description": "Finds game node data and images.",
     "dm_permission": false,
     "options": [
         {
-            "name": "query",
-            "description": "String to search for.",
-            "type": 3,
-            "required": true,
-            "min_length": 1,
-            "max_length": 80
-        },
-        {
-            "name": "type",
-            "description": "Node type to search for.",
-            "type": 3,
-            "required": false,
-            "min_length": 1,
-            "max_length": 80
-        },
-        {
-            "name": "hidden",
-            "description": "Hide response from other users.",
-            "type": 3,
-            "required": false,
-            "choices": [
+	    "name": "data",
+            "description": "Finds game data nodes",
+            "type": 1,
+            "options": [
                 {
-                    "name": "hide",
-                    "value": "hide"
+                    "name": "query",
+                    "description": "String to search for",
+                    "type": 3,
+                    "required": true,
+                    "min_length": 1,
+                    "max_length": 80
                 },
                 {
-                    "name": "show",
-                    "value": "show"
+                    "name": "type",
+                    "description": "Node type to search for",
+                    "type": 3,
+                    "required": false,
+                    "min_length": 1,
+                    "max_length": 80
+                },
+                {
+                    "name": "hidden",
+                    "description": "Hide response from other users.",
+                    "type": 3,
+                    "required": false,
+                    "choices": [
+                        {
+                            "name": "hide",
+                            "value": "hide"
+                        },
+                        {
+                            "name": "show",
+                            "value": "show"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+	    "name": "image",
+            "description": "Finds images in game data nodes",
+            "type": 1,
+            "options": [
+                {
+                    "name": "query",
+                    "description": "String to search for",
+                    "type": 3,
+                    "required": true,
+                    "min_length": 1,
+                    "max_length": 80
+                },
+                {
+                    "name": "type",
+                    "description": "Node type to search for",
+                    "type": 3,
+                    "required": false,
+                    "min_length": 1,
+                    "max_length": 80
+                },
+                {
+                    "name": "hidden",
+                    "description": "Hide response from other users.",
+                    "type": 3,
+                    "required": false,
+                    "choices": [
+                        {
+                            "name": "hide",
+                            "value": "hide"
+                        },
+                        {
+                            "name": "show",
+                            "value": "show"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+	    "name": "all",
+            "description": "Finds game data nodes and associated images",
+            "type": 1,
+            "options": [
+                {
+                    "name": "query",
+                    "description": "String to search for",
+                    "type": 3,
+                    "required": true,
+                    "min_length": 1,
+                    "max_length": 80
+                },
+                {
+                    "name": "type",
+                    "description": "Node type to search for",
+                    "type": 3,
+                    "required": false,
+                    "min_length": 1,
+                    "max_length": 80
+                },
+                {
+                    "name": "hidden",
+                    "description": "Hide response from other users.",
+                    "type": 3,
+                    "required": false,
+                    "choices": [
+                        {
+                            "name": "hide",
+                            "value": "hide"
+                        },
+                        {
+                            "name": "show",
+                            "value": "show"
+                        }
+                    ]
                 }
             ]
         }

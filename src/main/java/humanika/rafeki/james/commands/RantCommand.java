@@ -11,8 +11,8 @@ public class RantCommand extends SlashCommand {
     }
 
     @Override
-    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
+    public Mono<Void> handleChatCommand() {
         String babble = James.getState().jamesPhrase("JAMES::rant");
-        return event.reply(babble!=null ? babble : "I have nothing to say to you.").withEphemeral(isEphemeral(event));
+        return event.reply(babble!=null ? babble : "I have nothing to say to you.").withEphemeral(isEphemeral());
     }
 }

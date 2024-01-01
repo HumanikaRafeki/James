@@ -26,11 +26,11 @@ public class KorathCommand extends SlashCommand {
     }
 
     @Override
-    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
+    public Mono<Void> handleChatCommand() {
         if(!event.getInteraction().getGuildId().isPresent())
-            return handleDirectMessage(event);
-        String text = getStringOrDefault(event, "text", "").replaceAll("[@\t\n *<>|]+", " ").strip();
-        boolean ephemeral = isEphemeral(event);
+            return handleDirectMessage();
+        String text = getStringOrDefault("text", "").replaceAll("[@\t\n *<>|]+", " ").strip();
+        boolean ephemeral = isEphemeral();
 
         EmbedCreateSpec creator = EmbedCreateSpec.create().withTitle(TITLE)
             .withFooter(EmbedCreateFields.Footer.of(FOOTER_MESSAGE, null));

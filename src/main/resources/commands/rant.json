@@ -1,6 +1,6 @@
 {
     "name": "rant",
-    "description": "Words of wisdom.",
+    "description": "Words of wisdom from an old captain.",
     "dm_permission": false,
     "options": [
         {

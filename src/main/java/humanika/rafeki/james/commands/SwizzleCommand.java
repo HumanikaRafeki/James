@@ -13,7 +13,6 @@ import javax.imageio.ImageIO;
 
 import reactor.core.publisher.Mono;
 import discord4j.core.object.entity.Attachment;
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.spec.MessageCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 
@@ -62,11 +61,11 @@ public class SwizzleCommand extends SlashCommand {
     }
 
     @Override
-    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
+    public Mono<Void> handleChatCommand() {
         if(!event.getInteraction().getGuildId().isPresent())
-            return handleDirectMessage(event);
+            return handleDirectMessage();
 
-        Optional<Long> swizzleArg = getLong(event, "swizzle");
+        Optional<Long> swizzleArg = getLong("swizzle");
 
         int swizzle = swizzleArg.isPresent() ? (int)swizzleArg.get().longValue() : 0;
         if(swizzle < 0 || swizzle >= vectorStrings.length)
@@ -91,6 +90,6 @@ public class SwizzleCommand extends SlashCommand {
             description.append("\n\n**No governments use this swizzle.**\n");
 
         embed = embed.withDescription(description.toString());
-        return event.reply().withEmbeds(embed).withEphemeral(isEphemeral(event));
+        return event.reply().withEmbeds(embed).withEphemeral(isEphemeral());
     }
 }

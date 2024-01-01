@@ -22,26 +22,26 @@ public class PingCommand extends SlashCommand {
     }
 
     @Override
-    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
+    public Mono<Void> handleChatCommand() {
         if(!event.getInteraction().getGuildId().isPresent())
-            return handleDirectMessage(event);
+            return handleDirectMessage();
         EmbedCreateSpec creator = EmbedCreateSpec.create()
-            .withDescription(getPing(event))
-            .withFooter(EmbedCreateFields.Footer.of(getCommentary(event), null));
+            .withDescription(getPing())
+            .withFooter(EmbedCreateFields.Footer.of(getCommentary(), null));
 
         String uriString = James.getConfig().botRepo.toString();
         String last = uriString.replaceAll("/*$", "").replaceAll(".*/", "");
         creator = creator.withUrl(uriString).withTitle(last);
 
-        return event.reply().withEmbeds(creator).withEphemeral(isEphemeral(event));
+        return event.reply().withEmbeds(creator).withEphemeral(isEphemeral());
     }
 
-    private String getCommentary(ChatInputInteractionEvent event) {
+    private String getCommentary() {
         String babble = James.getState().jamesPhrase("JAMES::ping");
         return babble!=null ? babble : "*no commentary*";
     }
 
-    private String getPing(ChatInputInteractionEvent event) {
+    private String getPing() {
         ShardInfo shard = event.getShardInfo();
         int shardId = shard.getIndex();
         GatewayDiscordClient discord = event.getClient();

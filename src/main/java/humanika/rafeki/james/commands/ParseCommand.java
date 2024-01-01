@@ -43,10 +43,10 @@ abstract class ParseCommand extends SlashCommand {
     protected abstract String[] processInput(int count, PhraseDatabase phrases, NewsDatabase news, String entry, PhraseLimits limits);
 
     @Override
-    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
+    public Mono<Void> handleChatCommand() {
         Interaction interaction = event.getInteraction();
         if(!interaction.getGuildId().isPresent())
-            return handleDirectMessage(event);
+            return handleDirectMessage();
 
         JamesState state = James.getState();
         PhraseLimits limits = state.getPhraseLimits();
@@ -54,7 +54,7 @@ abstract class ParseCommand extends SlashCommand {
         PhraseDatabase phrases = sky.getPhrases();
         NewsDatabase news = sky.getNews();
 
-        Optional<Attachment> maybeData = getAttachment(event, "data");
+        Optional<Attachment> maybeData = getAttachment("data");
         if(maybeData.isPresent()) {
             Attachment data = maybeData.get();
             List<Attachment> attachments = new ArrayList<Attachment>();
@@ -80,7 +80,7 @@ abstract class ParseCommand extends SlashCommand {
             }
         }
         String description = "";
-        boolean ephemeral = isEphemeral(event);
+        boolean ephemeral = isEphemeral();
         if(!ephemeral) {
             String mention = event.getInteraction().getUser().getMention();
             description = "Requested by " + mention;
@@ -91,7 +91,7 @@ abstract class ParseCommand extends SlashCommand {
         List<EmbedCreateFields.Field> fields = new ArrayList<EmbedCreateFields.Field>();
         int linesRemaining = maxRepetitions;
         for(String var : getVarList()) {
-            String entry = getStringOrDefault(event, var, "").trim().replace("\\s+"," ");
+            String entry = getStringOrDefault(var, "").trim().replace("\\s+"," ");
             if(entry.length() < 1)
                 continue;
             Matcher matcher = REPITITION.matcher(entry);

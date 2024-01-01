@@ -2,10 +2,8 @@ package humanika.rafeki.james;
 
 import okhttp3.OkHttpClient;
 
-import humanika.rafeki.james.listeners.SlashCommandListener;
 import humanika.rafeki.james.data.JamesState;
 import humanika.rafeki.james.data.JamesConfig;
-import humanika.rafeki.james.phrases.PhraseLimits;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -79,50 +77,50 @@ public class James {
         LOGGER.info("Main thread is started.");
         thread.start();
         long i = 0;
+        final long naptime = 30000;
+        final long dumpInterval = 120;
+        boolean deadlockDetected = false;
         while(thread.isAlive()) {
             i++;
             try {
-                thread.join(30000);
+                thread.join(naptime);
             } catch(InterruptedException ie) {
                 LOGGER.info("Main thread join was interrupted.", ie);
             }
-            ThreadMXBean tmx = ManagementFactory.getThreadMXBean();
-            long[] ids = tmx.findDeadlockedThreads();
-            if (ids != null) {
-                ThreadInfo[] infos = tmx.getThreadInfo(ids, true, true);
-                System.out.println("The following threads are deadlocked:");
-                for (ThreadInfo ti : infos) {
-                    LOGGER.error("Deadlocked: "+ti);
-                    System.out.println(ti);
-                }
-            } else {
-                LOGGER.info("All is well.");
-                if(i % 120 == 0) {
-                    ThreadInfo[] infos = tmx.dumpAllThreads(true, true);
-                    for(ThreadInfo ti : infos)
-                        LOGGER.debug("Running: "+ti);
+            if(!deadlockDetected || i % dumpInterval == 0) {
+                ThreadMXBean tmx = ManagementFactory.getThreadMXBean();
+                long[] ids = tmx.findDeadlockedThreads();
+                deadlockDetected = false;
+                if (ids != null) {
+                    deadlockDetected = true;
+                    ThreadInfo[] infos = tmx.getThreadInfo(ids, true, true);
+                    System.out.println("The following threads are deadlocked:");
+                    for (ThreadInfo ti : infos) {
+                        LOGGER.error("Deadlocked: "+ti);
+                        System.out.println(ti);
+                    }
+                } else {
+                    LOGGER.info("All is well.");
+                    if(i % dumpInterval == 0) {
+                        ThreadInfo[] infos = tmx.dumpAllThreads(true, true);
+                        for(ThreadInfo ti : infos)
+                            LOGGER.debug("Running: "+ti);
+                    }
                 }
             }
         }
     }
 
     private static void withGatewayClient(DiscordClient bot, GatewayDiscordClient gateway) {
-        /* Call our code to handle creating/deleting/editing our global slash commands.
-
-        We have to hard code our list of command files since iterating over a list of files in a resource directory
-         is overly complicated for such a simple demo and requires handling for both IDE and .jar packaging.
-
-         Using SpringBoot we can avoid all of this and use their resource pattern matcher to do this for us.
-         */
         try {
-            SlashCommandListener.registerCommands(gateway);
+            Commands.registerCommands(gateway).block();
         } catch (Exception e) {
             LOGGER.error("Error trying to register global slash commands", e);
         }
 
         //Register our slash command listener
-        gateway.on(ChatInputInteractionEvent.class, SlashCommandListener::handleChatCommand)
-            .mergeWith(gateway.on(ButtonInteractionEvent.class, SlashCommandListener::handleButtonInteraction))
+        gateway.on(ChatInputInteractionEvent.class, Commands::handleChatCommand)
+            .mergeWith(gateway.on(ButtonInteractionEvent.class, Commands::handleButtonInteraction))
             .then(gateway.onDisconnect())
             .block();
         LOGGER.error("Slash command listener ended.");

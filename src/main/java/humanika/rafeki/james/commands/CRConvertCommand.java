@@ -23,40 +23,26 @@ public class CRConvertCommand extends SlashCommand {
     }
 
     @Override
-    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
+    public Mono<Void> handleChatCommand() {
         if(!event.getInteraction().getGuildId().isPresent())
-            return handleDirectMessage(event);
+            return handleDirectMessage();
 
-        Optional<List<ApplicationCommandInteractionOption>> cr = getSubcommand(event, "cr");
-        Optional<List<ApplicationCommandInteractionOption>> points = getSubcommand(event, "points");
+	Optional<SlashSubcommand> subcommand = findSubcommand();
+        if(!subcommand.isPresent())
+            // Should never get here.
+            return event.reply("You must use the cr or points subcommands.");
 
+        return subcommand.get().handleChatCommand();
+    }
+
+    @Override
+    protected Optional<SlashSubcommand> findSubcommand() {
+        Optional<List<ApplicationCommandInteractionOption>> cr = getSubcommandOptions("cr");
         if(cr.isPresent())
-            return handleCr(event, cr.get());
-        else if(points.isPresent())
-            return handlePoints(event, points.get());
-        // Should never get here.
-        return event.reply("You must use the cr or points subcommands.");
-    }
-
-    private Mono<Void> handleCr(ChatInputInteractionEvent event, List<ApplicationCommandInteractionOption> options) {
-        long value = getLongOrDefault(options, "value", 0);
-        return event.reply(String.format("Combat points %s gives a rating of %s.",
-                                         value, getRatingFromPoints(value)))
-            .withEphemeral(isEphemeral(options));
-    }
-
-    private Mono<Void> handlePoints(ChatInputInteractionEvent event, List<ApplicationCommandInteractionOption> options) {
-        long value = getLong(options, "value").get();
-        return event.reply(String.format("Combat rating %s requires %s combat points.",
-                                         value, getPointsFromRating(value)))
-            .withEphemeral(isEphemeral(options));
-    }
-
-    private long getRatingFromPoints(long points) {
-        return points > 0 ? (long)Math.log(points) : 0;
-    }
-
-    private long getPointsFromRating(long rating) {
-        return rating > 0 ? (long)Math.ceil(Math.exp(rating)) : 0;
+            return Optional.of(new CRConvertValueSubcommand().forChatEvent(cr.get(), event));
+        Optional<List<ApplicationCommandInteractionOption>> points = getSubcommandOptions("points");
+        if(points.isPresent())
+            return Optional.of(new CRConvertPointsSubcommand().forChatEvent(points.get(), event));
+        return Optional.empty();
     }
 }

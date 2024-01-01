@@ -24,13 +24,14 @@ import java.util.function.BooleanSupplier;
 
 import humanika.rafeki.james.utils.AddParagraphFields;
 
-public class LookupCommand extends ShowCommand {
+public class LookupCommand extends NodeInfoCommand {
     @Override
     public String getName() {
         return "lookup";
     }
 
-    protected Mono<Void> generateResult(ButtonInteractionEvent event, List<NodeInfo> found, boolean ephemeral) {
+    @Override
+    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, SlashSubcommand subcommand) {
         List<EmbedCreateSpec> embeds = new ArrayList<>();
         StringBuilder builder = new StringBuilder(100);
         String before = James.getConfig().endlessSkyData;
@@ -61,7 +62,7 @@ public class LookupCommand extends ShowCommand {
                 embed = embed.withThumbnail(imageAndThumbnail[1]);
             embeds.add(embed);
         }
-        return event.getReply().flatMap(reply -> event.editReply().withEmbeds(embeds).withComponents()).then();
+        return buttonEvent.getReply().flatMap(reply -> buttonEvent.editReply().withEmbeds(embeds).withComponents()).then();
     }
 
     protected Optional<List<NodeInfo>> getMatches(String query, Optional<String> maybeType) {

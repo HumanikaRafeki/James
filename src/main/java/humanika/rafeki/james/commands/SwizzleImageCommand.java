@@ -33,10 +33,10 @@ public class SwizzleImageCommand extends SlashCommand {
     }
 
     @Override
-    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
+    public Mono<Void> handleChatCommand() {
         Interaction interaction = event.getInteraction();
         if(!interaction.getGuildId().isPresent())
-            return handleDirectMessage(event);
+            return handleDirectMessage();
 
         MessageChannel channel = interaction.getChannel().block();
         if(channel instanceof TextChannel) {
@@ -48,14 +48,14 @@ public class SwizzleImageCommand extends SlashCommand {
         StringBuffer errors = new StringBuffer();
         List<Attachment> imageAttachments;
 
-        Optional<Long> swizzleLong = getLong(event, "swizzle");
+        Optional<Long> swizzleLong = getLong("swizzle");
         OptionalInt swizzleInt = OptionalInt.empty();
         if(swizzleLong.isPresent())
             swizzleInt = OptionalInt.of(swizzleLong.get().intValue());
         ArrayList<MessageCreateFields.File> result = new ArrayList<>();
 
         for(String var : VAR_LIST) {
-            Optional<Attachment> maybeData = getAttachment(event, var);
+            Optional<Attachment> maybeData = getAttachment(var);
             if(!maybeData.isPresent())
                 continue;
             Attachment data = maybeData.get();
@@ -70,11 +70,11 @@ public class SwizzleImageCommand extends SlashCommand {
             if(errors.length() < 1)
                 // Should never happen, but just in case of logic errors:
                 errors.append("Please attach one or more images.");
-            return event.reply(errors.toString()).withEphemeral(isEphemeral(event));
+            return event.reply(errors.toString()).withEphemeral(isEphemeral());
         } else if(errors.length() > 0)
-            return event.reply(errors.toString()).withFiles(result).withEphemeral(isEphemeral(event)).withContent(describe(swizzleLong, interaction));
+            return event.reply(errors.toString()).withFiles(result).withEphemeral(isEphemeral()).withContent(describe(swizzleLong, interaction));
         else
-            return event.reply().withFiles(result).withEphemeral(isEphemeral(event)).withContent(describe(swizzleLong, interaction));
+            return event.reply().withFiles(result).withEphemeral(isEphemeral()).withContent(describe(swizzleLong, interaction));
     }
 
     private String describe(Optional<Long> swizzle, Interaction interaction) {

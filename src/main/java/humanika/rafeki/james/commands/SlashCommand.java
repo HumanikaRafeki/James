@@ -11,7 +11,8 @@ import discord4j.core.object.entity.Attachment;
 import reactor.core.publisher.Mono;
 import java.util.Optional;
 import java.util.List;
-
+import java.util.HashMap;
+import java.util.function.Supplier;
 import humanika.rafeki.james.James;
 
 /**
@@ -20,21 +21,76 @@ import humanika.rafeki.james.James;
  *  and a handleChatCommand() method which will house all the logic for processing each command.
  */
 public abstract class SlashCommand {
+    /** Chat event being processed. Will be null in responses */
+    protected ChatInputInteractionEvent event = null;
+
+    /** Button event being processed. Will be null in any other situation. */
+    protected ButtonInteractionEvent buttonEvent = null;
+
+    public SlashCommand withChatEvent(ChatInputInteractionEvent event) {
+        try {
+            SlashCommand cloned = clone();
+            cloned.event = event;
+            return cloned;
+        } catch(CloneNotSupportedException cnse) {
+            // Should never happen.
+            return null;
+        }
+    }
+
+    public SlashCommand withButtonEvent(ButtonInteractionEvent buttonEvent) {
+        try {
+            SlashCommand cloned = clone();
+            cloned.buttonEvent = buttonEvent;
+            return cloned;
+        } catch(CloneNotSupportedException cnse) {
+            // Should never happen.
+            return null;
+        }
+    }
+
+    @Override
+    public SlashCommand clone() throws CloneNotSupportedException {
+        try {
+            SlashCommand cloned = this.getClass().newInstance();
+            cloned.event = event;
+            return cloned;
+        } catch(InstantiationException ie) {
+            throw new CloneNotSupportedException(ie.toString());
+        } catch(IllegalAccessException ie) {
+            throw new CloneNotSupportedException(ie.toString());
+        }
+    }
 
     public abstract String getName();
+
+    /** Full of the Subcommand being processed. Syntax: "commandname subcommand subsubcommand" */
+    protected String getActiveSubcommandPath() {
+        return getName();
+    }
+
     public String getJson() {
         return getName() + ".json";
     }
 
-    public Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
+    public Mono<Void> handleChatCommand() {
         return Mono.empty();
     }
 
-    public Mono<Void> handleButtonInteraction(ButtonInteractionEvent event) {
+    public Mono<Void> handleButtonInteraction() {
         return Mono.empty();
     }
 
-    protected Optional<List<ApplicationCommandInteractionOption>> getSubcommand(ChatInputInteractionEvent event, String name) {
+    protected Optional<SlashSubcommand> findSubcommand() {
+        return Optional.empty();
+    }
+
+    protected boolean isEphemeral() {
+        Optional<String> maybeHide = getString("hidden");
+        return maybeHide.isPresent() && maybeHide.get().equals("hide");
+    }
+
+    protected Optional<List<ApplicationCommandInteractionOption>> getSubcommandOptions(String name) {
         Optional<ApplicationCommandInteractionOption> subcommand = event.getOption(name);
         Optional<List<ApplicationCommandInteractionOption>> result;
         if(!subcommand.isPresent())
@@ -44,80 +100,35 @@ public abstract class SlashCommand {
         return result;
     }
 
-
-    protected boolean isEphemeral(ChatInputInteractionEvent event) {
-        Optional<String> maybeHide = getString(event, "hidden");
-        return maybeHide.isPresent() && maybeHide.get().equals("hide");
-    }
-
-    protected String getStringOrDefault(ChatInputInteractionEvent event, String name, String def) {
-        Optional<String> result = getString(event, name);
+    protected String getStringOrDefault(String name, String def) {
+        Optional<String> result = getString(name);
         return result.isPresent() ? result.get() : def;
     }
 
-    protected Optional<String> getString(ChatInputInteractionEvent event, String name) {
+    protected Optional<String> getString(String name) {
         return event.getOption(name)
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString);
     }
 
-    protected Optional<Long> getLong(ChatInputInteractionEvent event, String name) {
+    protected Optional<Long> getLong(String name) {
         return event.getOption(name)
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong);
     }
 
-    protected long getLongOrDefault(ChatInputInteractionEvent event, String name, long def) {
-        Optional<Long> result = getLong(event, name);
+    protected long getLongOrDefault(String name, long def) {
+        Optional<Long> result = getLong(name);
         return result.isPresent() ? result.get() : def;
     }
 
-    protected Optional<Attachment> getAttachment(ChatInputInteractionEvent event, String name) {
+    protected Optional<Attachment> getAttachment(String name) {
         return event.getOption(name)
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asAttachment);
     }
 
-
-
-    protected boolean isEphemeral(List<ApplicationCommandInteractionOption> options) {
-        return getStringOrDefault(options, "hidden", "show").equals("hide");
-    }
-
-    protected String getStringOrDefault(List<ApplicationCommandInteractionOption> options, String name, String def) {
-        Optional<String> result = getString(options, name);
-        return result.isPresent() ? result.get() : def;
-    }
-
-    protected Optional<String> getString(List<ApplicationCommandInteractionOption> options, String name) {
-        for(ApplicationCommandInteractionOption option : options)
-            if(option.getName().equals(name))
-                return option.getValue().flatMap(value -> Optional.of(value.asString()) );
-        return Optional.empty();
-    }
-
-    protected Optional<Long> getLong(List<ApplicationCommandInteractionOption> options, String name) {
-        for(ApplicationCommandInteractionOption option : options)
-            if(option.getName().equals(name))
-                return option.getValue().flatMap(value -> Optional.of(value.asLong()) );
-        return Optional.empty();
-    }
-
-    protected long getLongOrDefault(List<ApplicationCommandInteractionOption> options, String name, long def) {
-        Optional<Long> result = getLong(options, name);
-        return result.isPresent() ? result.get() : def;
-    }
-
-    protected Optional<Attachment> getAttachment(List<ApplicationCommandInteractionOption> options, String name) {
-        for(ApplicationCommandInteractionOption option : options)
-            if(option.getName().equals(name))
-                return option.getValue().flatMap(value -> Optional.of(value.asAttachment()) );
-        return Optional.empty();
-    }
-
-
-
-    public Mono<Void> handleDirectMessage(ChatInputInteractionEvent event) {
+    public Mono<Void> handleDirectMessage() {
         String babble = James.getState().jamesPhrase("JAMES::ping");
         EmbedCreateSpec creator = EmbedCreateSpec.create()
             .withDescription("This command is unavailable in direct messages.")
