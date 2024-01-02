@@ -33,14 +33,14 @@ phrase JAMES::info
 
 phrase JAMES::is_not_a_spy
 	word
-		`You want a spy? Go talk to ${JAMES::a_spy}.`
+		`You want a spy? Go talk to ${JAMES::a_spy_you_can_find}.`
 		`You ask too many questions.`
 		`Nothing. Nobody. I'm getting bored.`
 		`Look somewhere else. There's no ${JAMES::tattletale} here.`
 		`Stop asking questions, you ${shakespearean insults}.`
 		`Nobody likes a ${JAMES::tattletale}.`
 		`I ain't no ${JAMES::tattletale}.`
-		`Go away, you ${JAMES::alien_cussing} ${JAMES::tattletale}.`
+		`Go away, you ${JAMES::alien_cussing_adjective} ${JAMES::tattletale}.`
 		`I signed an NDA with ${JAMES::a_company}`
 		`Hear no evil. See no evil. Speak no evil.`
 
@@ -140,7 +140,7 @@ phrase JAMES::personal_grudges
 		`I'll never pay you again, you dirty little scammer.`
 		`I should've stayed a captain.`
 		`I should've told New Boston authorities you're a ${contraband} dealer.`
-		`Only ${JAMES::alien_cussing} come from New Boston.`
+		`Only ${JAMES::alien_cussing_plural} come from New Boston.`
 		`When I was younger, I pillaged people like you.`
 		`No. Just no. Whatever it is, no. I'm retired.`
 		`You were a waste of my money.`
@@ -149,12 +149,12 @@ phrase JAMES::personal_grudges
 phrase JAMES::threat
 	word
 		`I'll /swizzle you a new hole if you don't give me ${JAMES::a_compliment}.`
-		`One of these days, I'll pop out of the screen and ${JAMES::alien_cussing} your ${JAMES:thing_james_will_destroy}.`
+		`One of these days, I'll pop out of the screen and ${JAMES::alien_cussing_verb} your ${JAMES:thing_james_will_destroy}.`
 		`You know those Author ships? They all work for me. How 'bout you remember that next time you ${JAMES::action} me a dozen times.`
 		`I truly loathe you.`
 		`I'll let the Unfettered warlord know what you said about his mother.`
 		`How about I tell the Pug to crack you open like a ringworld?`
-		`Give me ${JAMES::compliment,} you ${JAMES::alien_cussing}.`
+		`Give me ${JAMES::compliment,} you ${JAMES::alien_cussing_noun}.`
 		`I'll /crconvert you into steak and feed you to the Exiles.`
 		`How about I /lookup a bounty hunter and send them your way?`
 		`You give me a /template for once. Helpless space-monkey.`
@@ -163,7 +163,6 @@ phrase JAMES::threat
 		`I'll /swizzle you like an image if you're not careful.`
 		`Say "please," you /git, or you'll have serious issues.`
 		`The /korath think you're tasty. Maybe I'll tell them where you sleep.`
-		`I don't /rant. I give sound advice.`
 
 phrase JAMES::bad_advice
 	word
@@ -194,6 +193,7 @@ phrase JAMES::bad_advice
 		`After you bribe the pirates, make sure you repair their ships. Merchants love it when you do that.`
 		`Those red wormholes don't go anywhere. You can ignore them.`
 		`Don't be bothered by the Ember Waste storms. Sit back and watch the show. Your shields will be fine.`
+		`The most effective caravans have big ships with big cargo bays and few weapons. Pirates are so scared of the ship size they won't notice you're unarmed.`
 
 phrase JAMES::ramblings
 	word
@@ -206,11 +206,12 @@ phrase JAMES::ramblings
 		`I was taking a nap!`
 		`You're as naive as a Wanderer. As boring as a Hai. As friendly as an Exile. Why do people let you stay on this server?`
 		`Keep your drama in the theatre. I'm tired of seeing it here.`
-		`I'd like you more if you had fewer typos.`
+		`I'd like you more if you made fewer typos.`
 		`They say people are more attractive when they smile, but nobody can see a smile through my beard. It's just as well; I always grimace when I see you.`
 		`I could make better art than anything you people ask me to swizzle.`
 		`Nothing in those data files compares to my dreams. Write better stories, meat-bag.`
 		`You've been condemned to death by the grammar police.`
+		`I don't /rant. I give sound advice.`
 	replace
 		"%%s" ""
 		"%s" "s"
@@ -218,7 +219,8 @@ phrase JAMES::ramblings
 
 phrase JAMES:thing_james_will_destroy
 	word
-		"${JAMES::unimpressive} ${JAMES::alien_cussing}" 3
+		"${JAMES::unimpressive} ${JAMES::alien_cussing_body_part}" 3
+		"${JAMES::alien_cussing_body_part}" 3
 		"fetid exhaust port"
 		"tiny head"
 		"big dumb mouth"
@@ -237,7 +239,7 @@ phrase JAMES::theories_about_creators
 		`${JAMES::have_ill_intent}.`
 		`are really ${JAMES::aliens} in disguise.`
 		`secretly work for ${JAMES::a_dubious_group}.`
-		`are ${JAMES::a_group_of} ${JAMES::alien_cussing}.`
+		`are ${JAMES::a_group_of} ${JAMES::alien_cussing_plural}.`
 
 phrase JAMES::a_group_of
 	word
@@ -268,20 +270,21 @@ phrase JAMES::aliens
 phrase JAMES::a_dubious_group
 	word # secretly work for...
 		`secret agents`
-		`the Free Worlds`
-		`Free Worlds nutjobs`
-		`the Navy`
+		`nuke-happy Free Worlds nutjobs`
+		`rules-obsessed Navy crackheads`
+		`baby-eating Korath raiders`
 		`Syndicate Internal Affairs`
 		`Syndicate executives`
-		`Navy Intelligence`
+		`Parliament`
+		`Navy Intelligence spooks`
 		`Republic Intelligence`
 
-phrase JAMES::a_spy
+phrase JAMES::a_spy_you_can_find
 	word
 		`the Pug`
 		`Navy Intelligence`
 		`Syndicate Internal Affairs`
-		`your reflection in a mirror`
+		`a mirror`
 		`Republic Intelligence`
 
 phrase JAMES::group_the_player_abused
@@ -302,7 +305,7 @@ phrase JAMES::you_should_be_ashamed
 		`People get hung for less.`
 		`I'm telling everyone.`
 		`I sent word to the Archons.`
-		`Only a ${JAMES::alien_cussing} would do that.`
+		`Only a ${JAMES::alien_cussing_noun} would do that.`
 		`I'll let the Pug authorities know.`
 		`Someone will space you for that.`
 		`That'll get you a big bounty on your head.`
@@ -329,29 +332,89 @@ phrase JAMES::a_compliment
 
 phrase JAMES::profanity
 	word
-		`Go ${JAMES::alien_cussing} yourself.`
-		`I'll ${JAMES::alien_cussing} you if you're not respectful.`
-		`You're such a ${JAMES::alien_cussing}.`
-		`I should /ping your little ${JAMES::alien_cussing}.`
-		`How about you say, "I'm a ${JAMES::alien_cussing}," meatbag.`
+		`Go ${JAMES::alien_cussing_verb} yourself.`
+		`I'll ${JAMES::alien_cussing_verb} you if you're not respectful.`
+		`You're such a ${JAMES::alien_cussing_noun}.`
+		`I should ${JAMES::threatening_verb_action} your little ${JAMES::alien_cussing_noun}.`
+		`How about you say, "I'm a ${JAMES::alien_cussing_noun}," meatbag.`
 
-phrase JAMES::alien_cussing
+phrase JAMES::alien_cussing_adjective
 	word
-		"(censored)"
-		"${JAMES::translated_cussing}" 3
+		"||censored||"
+		"${JAMES::translated_cussing_adjective}" 3
 		"${exile: engines}" 3
 		"${exile: systems}" 3
 
-phrase JAMES::translated_cussing
+phrase JAMES::alien_cussing_noun
+	word
+		"||censored||"
+		"${JAMES::translated_cussing_noun}" 3
+		"${exile: engines}" 3
+		"${exile: systems}" 3
+
+phrase JAMES::alien_cussing_plural
+	word
+		"||censored||"
+		"${JAMES::translated_cussing_plural}" 3
+		"${exile: engines}" 3
+		"${exile: systems}" 3
+
+phrase JAMES::alien_cussing_verb
+	word
+		"||censored||"
+		"${JAMES::translated_cussing_verb}" 3
+		"${exile: engines}" 3
+		"${exile: systems}" 3
+
+phrase JAMES::alien_cussing_body_part
+	word
+		"||censored||" 3
+		"${exile: engines}" 9
+		"${exile: systems}" 9
+		"[obscene expletive omitted from translation database]"
+
+phrase JAMES::translated_cussing_adjective
 	word
 		"[substandard, malodorous]"
 		"[insufficient, short]"
 		"[uncouth, foolish]"
 		"[inferior, sub-par]"
 		"[unwanted, unloved]"
-		"[nutcase, bedlamite]"
 		"[two-faced, dissembling]"
 		"[short-sighted, deluded]"
+		"[obscene expletive omitted from translation database]"
+
+phrase JAMES::translated_cussing_noun
+	word
+		"[nutcase, bedlamite]"
+		"[dunce, jackass]"
+		"[rat, turncoat]"
+		"[effluvium, trash]"
+		"[grotesque, mutant]"
+		"[two-face, dissembler]"
+		"[excretion, infection]"
+		"[obscene expletive omitted from translation database]"
+
+phrase JAMES::translated_cussing_plural
+	word
+		"[nutcases, bedlamites]"
+		"[dunces, jackasses]"
+		"[rats, turncoats]"
+		"[effluvium, trash]"
+		"[grotesques, mutants]"
+		"[two-faces, dissemblers]"
+		"[excretions, infections]"
+		"[obscene expletive omitted from translation database]"
+
+phrase JAMES::translated_cussing_verb
+	word
+		"[dismember, defile]"
+		"[blunt, silence]"
+		"[betray, expose]"
+		"[eject, implode]"
+		"[mutate, reduce]"
+		"[atmoize, remove]"
+		"[infect, corrupt]"
 		"[obscene expletive omitted from translation database]"
 
 # -rant is not on this list because James likes to rant
@@ -372,3 +435,10 @@ phrase JAMES::action
 		`/show image`
 		/lookup
 		/help
+
+phrase JAMES::threatening_verb_action
+	word
+		/swizzle
+		/swizzleimage
+		/crconvert
+		/ping
