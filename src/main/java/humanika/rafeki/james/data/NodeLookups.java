@@ -29,9 +29,9 @@ public class NodeLookups {
         for(DataNode node : file.getNodes()) {
             if(node.size() < 2)
                 continue;
-            String type = node.token(0);
-            String name = node.token(1);
             NodeInfo info = new NodeInfo(node);
+            String type = info.getType();
+            String name = info.getName();
             addToTypeNameNode(type, name, info);
             addToNameNode(name, info);
             addToHashNode(info.getHashString(), info);
