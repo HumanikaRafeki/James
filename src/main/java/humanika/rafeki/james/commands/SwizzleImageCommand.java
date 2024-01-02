@@ -19,6 +19,7 @@ import discord4j.core.spec.MessageCreateFields;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import humanika.rafeki.james.James;
+import humanika.rafeki.james.data.JamesConfig;
 import humanika.rafeki.james.utils.ImageSwizzler;
 
 public class SwizzleImageCommand extends SlashCommand {
@@ -48,10 +49,13 @@ public class SwizzleImageCommand extends SlashCommand {
         StringBuffer errors = new StringBuffer();
         List<Attachment> imageAttachments;
 
+        boolean swizzleAll = getBooleanOrDefault("all", Boolean.FALSE).booleanValue();
         Optional<Long> swizzleLong = getLong("swizzle");
         OptionalInt swizzleInt = OptionalInt.empty();
-        if(swizzleLong.isPresent())
-            swizzleInt = OptionalInt.of(swizzleLong.get().intValue());
+        if(!swizzleAll) {
+            if(swizzleLong.isPresent())
+                swizzleInt = OptionalInt.of(swizzleLong.get().intValue());
+        }
         ArrayList<MessageCreateFields.File> result = new ArrayList<>();
 
         for(String var : VAR_LIST) {
@@ -60,7 +64,7 @@ public class SwizzleImageCommand extends SlashCommand {
                 continue;
             Attachment data = maybeData.get();
             try {
-                processOneFile(data, errors, result, swizzleInt);
+                processOneFile(data, errors, result, swizzleInt, swizzleAll);
             } catch(IOException ioe) {
                 errors.append(data.getFilename() + ": unable to read file");
             }
@@ -72,19 +76,21 @@ public class SwizzleImageCommand extends SlashCommand {
                 errors.append("Please attach one or more images.");
             return event.reply(errors.toString()).withEphemeral(isEphemeral());
         } else if(errors.length() > 0)
-            return event.reply(errors.toString()).withFiles(result).withEphemeral(isEphemeral()).withContent(describe(swizzleLong, interaction));
+            return event.reply(errors.toString()).withFiles(result).withEphemeral(isEphemeral()).withContent(describe(swizzleLong, swizzleAll, interaction));
         else
-            return event.reply().withFiles(result).withEphemeral(isEphemeral()).withContent(describe(swizzleLong, interaction));
+            return event.reply().withFiles(result).withEphemeral(isEphemeral()).withContent(describe(swizzleLong, swizzleAll, interaction));
     }
 
-    private String describe(Optional<Long> swizzle, Interaction interaction) {
+    private String describe(Optional<Long> swizzle, boolean swizzleAll, Interaction interaction) {
         StringBuilder builder = new StringBuilder();
         Optional<Member> member = interaction.getMember();
         if(member.isPresent())
             builder.append(member.get().getMention()).append(" sent this image");
         else
             builder.append("You sent this image");
-        if(swizzle.isPresent())
+        if(swizzleAll)
+            builder.append(" and decadently asked me to recolor it with all swizzles.");
+        else if(swizzle.isPresent())
             builder.append(" and asked me to recolor it for swizzle ").append(swizzle.get());
         else
             builder.append(" and asked me to recolor it for swizzles 1 through 6.");
@@ -95,8 +101,8 @@ public class SwizzleImageCommand extends SlashCommand {
         return builder.toString();
     }
 
-    private void processOneFile(Attachment data, StringBuffer errors, ArrayList<MessageCreateFields.File> result, OptionalInt swizzle) throws IOException {
-        int maxSwizzleImageSize = James.getConfig().maxSwizzleImageSize;
+    private void processOneFile(Attachment data, StringBuffer errors, ArrayList<MessageCreateFields.File> result, OptionalInt swizzleInt, boolean swizzleAll) throws IOException {
+        JamesConfig config = James.getConfig();
         String filename = data.getFilename();
         OptionalInt width = data.getWidth();
         OptionalInt height = data.getHeight();
@@ -106,8 +112,12 @@ public class SwizzleImageCommand extends SlashCommand {
         }
         int w = width.getAsInt();
         int h = height.getAsInt();
-        if(w > maxSwizzleImageSize || h > maxSwizzleImageSize) {
-            errors.append(filename + " is larger than " + maxSwizzleImageSize + "px.");
+        if(w > config.maxAllSwizzleWidth || h > config.maxAllSwizzleHeight) {
+            errors.append(filename + ": when using all swizzles, image must be " + config.maxAllSwizzleWidth + "x" + config.maxAllSwizzleHeight + "px. or smaller");
+            return;
+        }
+        if(w > config.maxSwizzleImageWidth || h > config.maxSwizzleImageHeight) {
+            errors.append(filename + " is larger than " + config.maxSwizzleImageWidth + "x" + config.maxSwizzleImageHeight + "px.");
             return;
         }
         String urlString = data.getUrl();
@@ -116,6 +126,13 @@ public class SwizzleImageCommand extends SlashCommand {
         // ImageIO.write(image, "png", new File("/tmp/swizzles/0.png"));
         // for(int i = 0; i < 28; i++)
         //     ImageIO.write(new ImageSwizzler().swizzleToImage(image, OptionalInt.of(i)), "png", new File("/tmp/swizzles/"+(i+1)+".png"));
+        int swizzle;
+        if(swizzleAll)
+            swizzle = ImageSwizzler.TWENTY_NINE_SWIZZLES;
+        else if(swizzleInt.isPresent())
+            swizzle = swizzleInt.getAsInt();
+        else
+            swizzle = ImageSwizzler.ALL_OLD_SWIZZLES;
         InputStream swizzled = new ImageSwizzler().swizzle(image, swizzle);
         String outputName = filename.replace("\\.[^.]+$","") + ".png";
         if(data.isSpoiler())

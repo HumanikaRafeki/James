@@ -122,6 +122,17 @@ public abstract class SlashCommand {
         return result.isPresent() ? result.get() : def;
     }
 
+    protected Optional<Boolean> getBoolean(String name) {
+        return event.getOption(name)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asBoolean);
+    }
+
+    protected Boolean getBooleanOrDefault(String name, Boolean def) {
+        Optional<Boolean> result = getBoolean(name);
+        return result.isPresent() ? result.get() : def;
+    }
+
     protected Optional<Attachment> getAttachment(String name) {
         return event.getOption(name)
             .flatMap(ApplicationCommandInteractionOption::getValue)

@@ -31,6 +31,14 @@
     // Maximum total size of all attachments (in bytes) to /phrases, /say, and /news
     "max_phrase_attachment_size": 307200,
 
-    // Maximum width and height of an image sent to /swizzleimage
-    "max_swizzle_image_size": 1280
+    // Maximum sizes of images for /swizzleimage all=no
+    "max_swizzle_image_width": 1280,
+    "max_swizzle_image_height": 1280,
+
+    // Maximum sizes of images for /swizzleimage all=yes
+    "max_all_swizzle_width": 640,
+    "max_all_swizzle_height": 800,
+
+    // File containing the bot token. Must only contain that token, on the first line, with no other text.
+    "bot_token_file": "/home/newbot/.ssh/bot-token"
 }

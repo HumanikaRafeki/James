@@ -17,6 +17,9 @@ import java.util.OptionalInt;
 
 public class ImageSwizzler {
 
+    public static final int ALL_OLD_SWIZZLES = -6;
+    public static final int TWENTY_NINE_SWIZZLES = -29;
+
     private final static String[] swizzles = {
             "rbg",
             "grb",
@@ -58,7 +61,7 @@ public class ImageSwizzler {
      * @throws IOException if an error occurs during reading or writing.
      * Blame {@link ImageIO#read(InputStream)} or {@link ImageWriter#write(IIOMetadata, IIOImage, ImageWriteParam)}.
      */
-    public InputStream swizzle(BufferedImage img, OptionalInt swizzle) throws IOException {
+    public InputStream swizzle(BufferedImage img, int swizzle) throws IOException {
         BufferedImage output = swizzleToImage(img, swizzle);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -87,18 +90,20 @@ public class ImageSwizzler {
      * @throws IOException if an error occurs during reading.
      * Blame {@link ImageIO#read(InputStream)} or {@link ImageWriter#write(IIOMetadata, IIOImage, ImageWriteParam)}.
      */
-    public BufferedImage swizzleToImage(BufferedImage img, OptionalInt swizzle) throws IOException {
+    public BufferedImage swizzleToImage(BufferedImage img, int swizzle) throws IOException {
         int width = img.getWidth();
         int height = img.getHeight();
         int[] imgData = new int[width * height];
         int[] work = new int[width * height];
         img.getRGB(0, 0, width, height, imgData, 0, width);
         BufferedImage swizzled = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        BufferedImage output = swizzled;
-        if(!swizzle.isPresent())
-            output = createAllSwizzles(width, height, imgData, work, swizzled);
-        else
-            createSwizzledImage(width, height, imgData, work, swizzled, swizzles[swizzle.getAsInt()], 0, 0);
+        BufferedImage output = swizzled; // Swizzle 0 = no swizzling
+        if(swizzle == ALL_OLD_SWIZZLES)
+            output = createSixSwizzles(width, height, imgData, work, swizzled);
+        else if(swizzle == TWENTY_NINE_SWIZZLES)
+            output = createTwentyNineSwizzles(width, height, imgData, work, swizzled);
+        else if(swizzle > 0)
+            createSwizzledImage(width, height, imgData, work, swizzled, swizzles[swizzle], 0, 0);
         return output;
     }
 
@@ -136,7 +141,7 @@ public class ImageSwizzler {
         else return 0;
     }
 
-    private BufferedImage createAllSwizzles(int width, int height, int[] imgData, int[] work, BufferedImage swizzled) {
+    private BufferedImage createSixSwizzles(int width, int height, int[] imgData, int[] work, BufferedImage swizzled) {
         BufferedImage output = new BufferedImage(width * 3, height * 2, BufferedImage.TYPE_INT_ARGB);
         int scansize = width * 3;
         createSwizzledImage(width, height, imgData, work, output, swizzles[0], 0, 0);
@@ -146,6 +151,28 @@ public class ImageSwizzler {
         createSwizzledImage(width, height, imgData, work, output, swizzles[4], width, height);
         createSwizzledImage(width, height, imgData, work, output, swizzles[5], width * 2, height);
 
+        return output;
+    }
+
+    private BufferedImage createTwentyNineSwizzles(int width, int height, int[] imgData, int[] work, BufferedImage swizzled) {
+        final BufferedImage output = new BufferedImage(width * 6, height * 5, BufferedImage.TYPE_INT_ARGB);
+        final int collage_width = 6;
+        final int collage_height = 5;
+        final int scansize = width * collage_width;
+        final int swizzle_count = 29;
+        int swizzle = 0;
+        for(int y = 0; y < collage_height; y++)
+            for(int x = 0; x < collage_width && swizzle < swizzle_count; x++, swizzle++) {
+                int slide = 0;
+                int swizzleIndex = swizzle - 1;
+                if(y == collage_height - 1)
+                    slide = width / 2;
+                System.out.println("x="+x+" y="+y+" width="+width+" height="+height+" slide="+slide);
+                if(swizzleIndex >= 0)
+                    createSwizzledImage(width, height, imgData, work, output, swizzles[swizzleIndex], width * x + slide, height * y);
+                else
+                    output.setRGB(width * x + slide, height * y, width, height, imgData, 0, width);
+            }
         return output;
     }
 }

@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.nio.file.Files;
+import java.io.BufferedReader;
 
 public class James {
     private static JamesState jamesState;
@@ -46,18 +48,26 @@ public class James {
     }
 
     public static void main(String[] args) {
+        try {
+            jamesConfig = new JamesConfig(JAMES_CONFIG_PATH, LOGGER);
+        } catch(Exception pe) {
+            LOGGER.error("Unable to read settings from \"" + JAMES_CONFIG_PATH + '"', pe);
+            System.exit(1);
+        }
+
+        String token = null;
+        try(BufferedReader reader = Files.newBufferedReader(jamesConfig.botTokenFile)) {
+            token = reader.readLine().strip();
+        } catch(Exception ioe) {
+            LOGGER.error("Unable to read bot token file from \"" + jamesConfig.botTokenFile + '"', ioe);
+            System.exit(1);
+        }
+
         //Creates the gateway client and connects to the gateway
         EventDispatcher customDispatcher = EventDispatcher.builder()
             .eventScheduler(Schedulers.boundedElastic())
             .build();
-        DiscordClient bot = DiscordClient.create(System.getenv("BOT_TOKEN"));
-
-        try {
-            jamesConfig = new JamesConfig(JAMES_CONFIG_PATH, LOGGER);
-        } catch(Exception pe) {
-            LOGGER.error("Unable to read settings from ", pe);
-            System.exit(1);
-        }
+        DiscordClient bot = DiscordClient.create(token);
 
         jamesState = new JamesState(jamesConfig, LOGGER);
         try {

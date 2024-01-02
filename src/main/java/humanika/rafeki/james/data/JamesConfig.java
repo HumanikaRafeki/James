@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
+import java.nio.file.Path;
 
 public class JamesConfig {
     public final URI botRepo;
@@ -27,7 +28,11 @@ public class JamesConfig {
     public final File workArea;
     public final int maxPhraseCommandRepetitions;
     public final int maxPhraseAttachmentSize;
-    public final int maxSwizzleImageSize;
+    public final int maxSwizzleImageWidth;
+    public final int maxSwizzleImageHeight;
+    public final int maxAllSwizzleWidth;
+    public final int maxAllSwizzleHeight;
+    public final Path botTokenFile;
 
     public JamesConfig(String file, Logger logger) throws IOException, JSONException, URISyntaxException {
         // Read file and strip comments
@@ -55,6 +60,10 @@ public class JamesConfig {
         workArea = new File(contents.getString("work_area"));
         maxPhraseCommandRepetitions = contents.getInt("max_phrase_command_repetitions");
         maxPhraseAttachmentSize = contents.getInt("max_phrase_attachment_size");
-        maxSwizzleImageSize = contents.getInt("max_swizzle_image_size");
+        maxSwizzleImageWidth = contents.getInt("max_swizzle_image_width");
+        maxSwizzleImageHeight = contents.getInt("max_swizzle_image_height");
+        maxAllSwizzleWidth = contents.getInt("max_all_swizzle_width");
+        maxAllSwizzleHeight = contents.getInt("max_all_swizzle_height");
+        botTokenFile = new File(contents.getString("bot_token_file")).toPath();
     }
 }

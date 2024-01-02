@@ -11,11 +11,17 @@
         },
         {
             "name": "swizzle",
-            "description": "Combat points ('combat rating' data variable).",
+            "description": "The swizzle to use. Without this: use swizzles 1-6.",
             "type": 4,
             "required": false,
             "min_value": 1,
             "max_value": 28
+        },
+        {
+            "name": "all",
+            "description": "use all twenty-nine swizzles (overrides \"swizzle\")",
+            "type": 5,
+            "required": false
         },
         {
             "name": "image2",
