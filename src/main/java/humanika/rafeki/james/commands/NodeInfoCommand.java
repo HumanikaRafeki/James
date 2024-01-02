@@ -177,6 +177,13 @@ public abstract class NodeInfoCommand extends SlashCommand {
             thumbnail = null;
         }
 
+        if(info.getType().equals("ship")) {
+            // Ships look better with their shipyard image ("thumbnail" in data files) as the big one and top view as the thumbnail
+            String swap = image;
+            image = thumbnail;
+            thumbnail = swap;
+        }
+
         String[] result = { image, thumbnail };
         return result;
     }
