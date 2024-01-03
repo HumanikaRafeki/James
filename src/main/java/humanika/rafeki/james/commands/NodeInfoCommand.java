@@ -38,14 +38,14 @@ public abstract class NodeInfoCommand extends SlashCommand {
         if(!event.getInteraction().getGuildId().isPresent())
             return handleDirectMessage();
 
-        boolean ephemeral = isEphemeral();
-
+        Optional<SlashSubcommand> subcommand = findSubcommand();
+        boolean ephemeral = subcommand.isPresent() ? subcommand.get().isEphemeral() : isEphemeral();
         Optional<String> maybeType = getType();
         Optional<String> maybeQuery = getQuery();
         if(!maybeQuery.isPresent())
             return event.reply().withContent("Provide a query for the search!").withEphemeral(true);
 
-        String query = maybeQuery.get().replace("\\s+", " ").strip().toLowerCase();
+        String query = maybeQuery.get().toLowerCase().replaceAll("[^0-9a-zA-Z-]+", " ").strip();
         if(query.length() < 1)
             return event.reply().withContent("Provide a query for the search!").withEphemeral(true);
 
@@ -69,9 +69,8 @@ public abstract class NodeInfoCommand extends SlashCommand {
         }
 
         List<String> listItem = new ArrayList<>();
-        List<String> buttonText = new ArrayList<>();
         List<String> buttonId = new ArrayList<>();
-        getResponse(matches, listItem, buttonText, buttonId, ephemeral);
+        getResponse(matches, listItem, buttonId, ephemeral);
         if(listItem.size() < 1) {
             builder.append("\n*No matches.*");
             return event.reply().withContent(builder.toString()).withEphemeral(ephemeral);
@@ -88,7 +87,6 @@ public abstract class NodeInfoCommand extends SlashCommand {
             if(i == count)
                 buttons[i % width] = Button.success(getActiveSubcommandPath() + ":X:close:close", "close");
             else {
-                System.out.println("Button "+i+" id = "+buttonId.get(i));
                 String label = listItem.get(i);
                 if(label.length() > MAX_BUTTON_LABEL_LENGTH) {
                     label = label.substring(0, MAX_BUTTON_LABEL_LENGTH - 3) + "...";
@@ -114,6 +112,7 @@ public abstract class NodeInfoCommand extends SlashCommand {
         }
 
         String type = split[0];
+        String[] names = split[0].split(" ");
         String flags = split[1];
         String hash = split[2];
         String query = split[3];
@@ -122,10 +121,11 @@ public abstract class NodeInfoCommand extends SlashCommand {
             buttonEvent.deleteReply().subscribe();
         else if(hash.equals("done"))
             buttonEvent.editReply().withComponents().subscribe();
-        else if(split[0].equals(getName())) {
+        else if(names[0].equals(getName())) {
+            Optional<SlashSubcommand> subcommand = subcommandFor(names);
             Optional<List<NodeInfo>> found = James.getState().nodesWithHash(hash);
             if(found.isPresent() && found.get().size() > 0)
-                return generateResult(found.get(), ephemeral, null);
+                return generateResult(found.get(), ephemeral, subcommand.orElse(null));
             else {
                 return buttonEvent.editReply()
                     .withEmbeds(EmbedCreateSpec.create().withTitle("No Match")
@@ -151,7 +151,7 @@ public abstract class NodeInfoCommand extends SlashCommand {
         return getString("query");
     }
 
-    protected String[] getImageAndThumbnail(NodeInfo info) {
+    protected String[] getImageAndThumbnail(NodeInfo info, boolean canRecurse) {
         Optional<String> maybeThumbnail = info.getBestThumbnail();
         Optional<String> maybeImage = info.getBestImage();
         String image = null;
@@ -177,7 +177,20 @@ public abstract class NodeInfoCommand extends SlashCommand {
             thumbnail = null;
         }
 
-        if(info.getType().equals("ship")) {
+        if(canRecurse && image == null && thumbnail == null) {
+            String refType = info.getImageRefType().orElse(null);
+            String refDataName = info.getImageRefDataName().orElse(null);
+            if(refType != null && refDataName != null) {
+                Optional<List<NodeInfo>> matches = James.getState().selectNodesByName(refDataName, 10, subinfo -> subinfo.getType().equals(refType));
+                if(matches.isPresent()) {
+                    for(NodeInfo subinfo : matches.get()) {
+                        String[] subresult = getImageAndThumbnail(subinfo, false);
+                        if(subresult[0] != null && subresult[1] != null)
+                            return subresult;
+                    }
+                }
+            }
+        } else if(info.getType().equals("ship")) {
             // Ships look better with their shipyard image ("thumbnail" in data files) as the big one and top view as the thumbnail
             String swap = image;
             image = thumbnail;
@@ -188,7 +201,7 @@ public abstract class NodeInfoCommand extends SlashCommand {
         return result;
     }
 
-    protected void getResponse(List<NodeInfo> matches, List<String> listItem, List<String> buttonText, List<String> buttonId, boolean ephemeral) {
+    protected void getResponse(List<NodeInfo> matches, List<String> listItem, List<String> buttonId, boolean ephemeral) {
         StringBuilder builder = new StringBuilder(100);
         int i = 0;
         for(NodeInfo node : matches) {
@@ -200,14 +213,20 @@ public abstract class NodeInfoCommand extends SlashCommand {
             String built = builder.toString();
             listItem.add(built);
 
-            buttonText.add(String.valueOf(i));
-
             builder.delete(0, builder.length());
-            builder.append(ephemeral ? getName() + ":E:" : getName() + ":-:");
+            builder.append(ephemeral ? getFullName() + ":E:" : getFullName() + ":-:");
             builder.append(node.getHashString()).append(":").append(built);
             if(builder.length() > 95)
                 builder.delete(95, builder.length());
             buttonId.add(builder.toString());
         }
+    }
+
+    protected Optional<SlashSubcommand> findSubcommand() {
+        return Optional.empty();
+    }
+
+    protected Optional<SlashSubcommand> subcommandFor(String[] names) {
+        return Optional.empty();
     }
 }

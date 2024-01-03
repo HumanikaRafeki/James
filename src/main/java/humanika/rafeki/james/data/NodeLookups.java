@@ -14,7 +14,6 @@ import org.simmetrics.metrics.StringMetrics;
 
 public class NodeLookups {
     private HashMap<String, DataFile> dataFiles = new HashMap<>();
-    private HashMap<String, HashMap<String, NodeInfo>> typeNameNode = new HashMap<>();
     private HashMap<String, ArrayList<NodeInfo>> nameNode = new HashMap<>();
     private HashMap<String, ArrayList<NodeInfo>> hashNode = new HashMap<>();
     private HashMap<Integer, ArrayList<Government>> swizzleGovernment = new HashMap<>();
@@ -31,8 +30,7 @@ public class NodeLookups {
                 continue;
             NodeInfo info = new NodeInfo(node);
             String type = info.getType();
-            String name = info.getName();
-            addToTypeNameNode(type, name, info);
+            String name = info.getDataName();
             addToNameNode(name, info);
             addToHashNode(info.getHashString(), info);
             if(type.equals("government"))
@@ -59,6 +57,20 @@ public class NodeLookups {
         }
     }
 
+    public Optional<List<NodeInfo>> selectNodesByName(String dataName, int maxSearch, Predicate<NodeInfo> condition) {
+        ArrayList<NodeInfo> infos = nameNode.get(dataName);
+        if(infos == null || infos.size() < 1)
+            return Optional.empty();
+        ArrayList<NodeInfo> results = new ArrayList<>(infos.size());
+        for(NodeInfo info : infos) {
+            if(condition.test(info))
+                results.add(info);
+            if(results.size() >= maxSearch)
+                return Optional.empty();
+        }
+        return Optional.of(results);
+    }
+
     public Optional<List<NodeInfo>> fuzzyMatchNodeNames(String query, int maxSearch, Predicate<NodeInfo> condition) {
         int threshold = maxSearch > 0 ? 3 * maxSearch : 0;
         ShrinkableList work = new ShrinkableList();
@@ -66,12 +78,15 @@ public class NodeLookups {
             ArrayList<NodeInfo> list = entry.getValue();
             if(list.size() < 1)
                 continue;
-            NodeInfo info = list.get(list.size() - 1);
-            if(condition.test(info)) {
-                work.add(new FloatNode(metric.compare(query, info.getSearchString()), info));
-                if(threshold > 0 && work.size() > threshold) {
-                    work.sort(FloatNode::compare);
-                    work.shrink(maxSearch);
+            for(NodeInfo info : list) {
+                if(condition.test(info)) {
+                    float score = metric.compare(query, info.getSearchString());
+                    work.add(new FloatNode(score, info));
+                    if(threshold > 0 && work.size() > threshold) {
+                        work.sort(FloatNode::compare);
+                        work.shrink(maxSearch);
+                        break; // Only match one per name or hashes are duplicated and Discord breaks
+                    }
                 }
             }
         }
@@ -99,15 +114,6 @@ public class NodeLookups {
     public Optional<List<Government>> governmentsWithSwizzle(int swizzle) {
         List<Government> got = swizzleGovernment.get(Integer.valueOf(swizzle));
         return got != null ? Optional.of(got) : Optional.empty();
-    }
-
-    private void addToTypeNameNode(String type, String name, NodeInfo info) {
-        HashMap<String, NodeInfo> got = typeNameNode.get(type);
-        if(got == null) {
-            got = new HashMap<>();
-            typeNameNode.put(type, got);
-        }
-        got.put(name, info);
     }
 
     private void addToNameNode(String name, NodeInfo info) {

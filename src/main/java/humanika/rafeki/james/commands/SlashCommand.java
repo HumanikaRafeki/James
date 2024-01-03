@@ -64,6 +64,10 @@ public abstract class SlashCommand {
 
     public abstract String getName();
 
+    public String getFullName() {
+        return getName();
+    }
+
     /** Full of the Subcommand being processed. Syntax: "commandname subcommand subsubcommand" */
     protected String getActiveSubcommandPath() {
         return getName();

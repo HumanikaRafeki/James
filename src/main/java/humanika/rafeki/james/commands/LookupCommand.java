@@ -36,7 +36,7 @@ public class LookupCommand extends NodeInfoCommand {
         StringBuilder builder = new StringBuilder(100);
         String before = James.getConfig().endlessSkyData;
         String after = James.getConfig().endlessSkyDataQuery;
-        AddParagraphFields fieldAdder = new AddParagraphFields(4);
+        AddParagraphFields fieldAdder = new AddParagraphFields(4, false);
         for(NodeInfo info : found) {
             List<EmbedCreateFields.Field> fields = new ArrayList<>();
 
@@ -55,7 +55,7 @@ public class LookupCommand extends NodeInfoCommand {
             EmbedCreateSpec embed = EmbedCreateSpec.create().withFields(fields)
                 .withTitle(info.getBestType() + ' ' + info.getName());
 
-            String[] imageAndThumbnail = getImageAndThumbnail(info);
+            String[] imageAndThumbnail = getImageAndThumbnail(info, false);
             if(imageAndThumbnail[0] != null)
                 embed = embed.withImage(imageAndThumbnail[0]);
             if(imageAndThumbnail[1] != null)
@@ -68,8 +68,12 @@ public class LookupCommand extends NodeInfoCommand {
     protected Optional<List<NodeInfo>> getMatches(String query, Optional<String> maybeType) {
         if(maybeType.isPresent()) {
             final String type = maybeType.get();
-            return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,
-                info -> info.getType().equals(type) && !info.isShipVariant()
+            if(type.equals("variant"))
+                return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,
+                    info -> info.isShipVariant());
+            else
+                return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,
+                    info -> info.getType().equals(type) && !info.isShipVariant()
                         && (info.hasDescription() || info.hasSpaceport() || info.hasImage()) );
         } else
             return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,

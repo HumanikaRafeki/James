@@ -3,3 +3,5 @@
 build
 *.hold
 \#*
+bot-token.txt
+.\#*

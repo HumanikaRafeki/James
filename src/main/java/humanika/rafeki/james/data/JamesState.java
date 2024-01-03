@@ -72,6 +72,10 @@ public class JamesState implements AutoCloseable {
         return endlessSky.fuzzyMatchNodeNames(query, maxSearch, condition);
     }
 
+    public Optional<List<NodeInfo>> selectNodesByName(String dataName, int maxSearch, Predicate<NodeInfo> condition) {
+        return endlessSky.selectNodesByName(dataName, maxSearch, condition);
+    }
+
     public Optional<List<NodeInfo>> nodesWithHash(String hash) {
         return endlessSky.nodesWithHash(hash);
     }

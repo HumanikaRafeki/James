@@ -47,6 +47,7 @@ class Commands {
             new PingCommand(),
             new RantCommand(),
             new SayCommand(),
+            new ShowCommand(),
             new SwizzleCommand(),
             new SwizzleImageCommand()
         };

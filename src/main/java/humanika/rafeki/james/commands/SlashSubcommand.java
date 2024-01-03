@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 import java.util.List;
 
-public abstract class SlashSubcommand {
+public abstract class SlashSubcommand implements Cloneable {
     /** Subcommand options from the original event. Will be null in responses. */
     protected List<ApplicationCommandInteractionOption> options = null;
 
@@ -24,41 +24,38 @@ public abstract class SlashSubcommand {
 
     public abstract String getName();
 
+    public String getFullName() {
+        return getName();
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
     public SlashSubcommand forChatEvent(List<ApplicationCommandInteractionOption> options, ChatInputInteractionEvent chatEvent) {
         try {
-            SlashSubcommand cloned = clone();
-            cloned.options = options;
-            cloned.chatEvent = chatEvent;
-            return cloned;
+            SlashSubcommand result = (SlashSubcommand)clone();
+            result.options = options;
+            result.chatEvent = chatEvent;
+            result.buttonEvent = null;
+            return result;
         } catch(CloneNotSupportedException cnse) {
-            // Should never happen
+            // Should never happen.
             return null;
         }
     }
 
     public SlashSubcommand forButtonEvent(ButtonInteractionEvent buttonEvent) {
         try {
-            SlashSubcommand cloned = clone();
-            cloned.options = options;
-            cloned.buttonEvent = buttonEvent;
-            return cloned;
+            SlashSubcommand result = (SlashSubcommand)clone();
+            result.options = options;
+            result.chatEvent = chatEvent;
+            result.buttonEvent = buttonEvent;
+            return result;
         } catch(CloneNotSupportedException cnse) {
-            // Should never happen
+            // Should never happen.
             return null;
-        }
-    }
-
-    public SlashSubcommand clone() throws CloneNotSupportedException{
-        try {
-            SlashSubcommand cloned = this.getClass().newInstance();
-            cloned.options = options;
-            cloned.chatEvent = chatEvent;
-            cloned.buttonEvent = buttonEvent;
-            return cloned;
-        } catch(InstantiationException ie) {
-            throw new CloneNotSupportedException(ie.toString());
-        } catch(IllegalAccessException ie) {
-            throw new CloneNotSupportedException(ie.toString());
         }
     }
 

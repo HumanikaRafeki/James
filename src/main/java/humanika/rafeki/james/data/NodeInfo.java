@@ -207,21 +207,22 @@ public class NodeInfo {
         this.dataName = dataName;
         this.name = name;
         this.subtype = Optional.ofNullable(subtype);
+        this.shipVariantFlag = type.equals("ship") && base != null;
 
         StringBuilder builder = new StringBuilder();
-        builder.append(dataName);
-        if(name != dataName)
-            builder.append(' ').append(name);
-        this.searchString = builder.toString().toLowerCase();
+        this.searchString = dataName.toString().toLowerCase().replaceAll("[^0-9a-zA-Z-]+", " ").strip();
 
         builder.delete(0, builder.length());
         builder.append("type=").append(type).append(";subtype=").append(subtype).append(";dataName=").append(dataName).append(";base=").append(base);
         this.base64Hash = generateBase64Hash(builder.toString());
-        this.shipVariantFlag = type.equals("ship") && base != null;
     }
 
     private static /* synchronized */ String generateBase64Hash(String content) {
         return encoder.encodeToString(hasher.digest(content.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    public DataNode getDataNode() {
+        return node;
     }
 
     public boolean isShipVariant() {
@@ -234,6 +235,18 @@ public class NodeInfo {
 
     public String getSearchString() {
         return searchString;
+    }
+
+    public Optional<String> getSprite() {
+        return sprite;
+    }
+
+    public Optional<String> getThumbnail() {
+        return thumbnail;
+    }
+
+    public Optional<String> getWeaponSprite() {
+        return weaponSprite;
     }
 
     public Optional<String> getBestImage() {

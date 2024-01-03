@@ -23,7 +23,7 @@
     "max_phrase_expansions": 1000,
 
     // Area for bot to store repo clones
-    "work_area": "/home/newbot/work/commit",
+    "work_area": "work",
 
     // Maximum number of phrase expansions to return in /phrases, /say, and /news
     "max_phrase_command_repetitions": 20,
@@ -40,5 +40,5 @@
     "max_all_swizzle_height": 800,
 
     // File containing the bot token. Must only contain that token, on the first line, with no other text.
-    "bot_token_file": "/home/newbot/.ssh/bot-token"
+    "bot_token_file": "bot-token.txt"
 }

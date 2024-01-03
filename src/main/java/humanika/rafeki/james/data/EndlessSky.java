@@ -75,6 +75,10 @@ public class EndlessSky implements AutoCloseable {
         return lookups.fuzzyMatchNodeNames(query, maxSearch, condition);
     }
 
+    public Optional<List<NodeInfo>> selectNodesByName(String dataName, int maxSearch, Predicate<NodeInfo> condition) {
+        return lookups.selectNodesByName(dataName, maxSearch, condition);
+    }
+
     public Optional<List<NodeInfo>> nodesWithHash(String hash) {
         return lookups.nodesWithHash(hash);
     }

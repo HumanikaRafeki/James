@@ -23,18 +23,83 @@ import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 
 public class ShowCommand extends NodeInfoCommand {
-    @Override
-    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, SlashSubcommand subcommand) {
-        return Mono.empty();
+
+    private ShowSubcommand subcommand = null;
+
+    protected Optional<String> getType() {
+        return subcommand.getString("type");
+    }
+
+    protected Optional<String> getQuery() {
+        return subcommand.getString("query");
     }
 
     @Override
-    protected Optional<List<NodeInfo>> getMatches(String query, Optional<String> type) {
+    public String getFullName() {
+        if(subcommand == null)
+            return "show";
+        else
+            return "show " + subcommand.getFullName();
+    }
+
+    @Override
+    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, SlashSubcommand subcommand) {
+        return( ((ShowSubcommand)subcommand).generateResult(found, ephemeral) );
+    }
+
+    @Override
+    protected Optional<List<NodeInfo>> getMatches(String query, Optional<String> maybeType) {
+        if(maybeType.isPresent()) {
+            final String type = maybeType.get();
+            if(type.equals("variant"))
+                return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.isShipVariant());
+            else
+                return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.getType().equals(type) && !info.isShipVariant());
+        } else
+            return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> !info.isShipVariant());
+    }
+
+    @Override
+    protected Optional<SlashSubcommand> subcommandFor(String[] names) {
+        if(names.length != 2) {
+            return Optional.empty();
+        }
+        if(names[1].equals("data")) {
+            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, false).forButtonEvent(buttonEvent));
+            return Optional.of(subcommand);
+        }
+        else if(names[1].equals("image")) {
+            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(false, true).forButtonEvent(buttonEvent));
+            return Optional.of(subcommand);
+        } else if(names[1].equals("both")) {
+            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, true).forButtonEvent(buttonEvent));
+            return Optional.of(subcommand);
+        }
         return Optional.empty();
     }
 
     @Override
-    public Optional<SlashSubcommand> findSubcommand() {
+    protected Optional<SlashSubcommand> findSubcommand() {
+        Optional<List<ApplicationCommandInteractionOption>> sub;
+
+        sub = getSubcommandOptions("data");
+        if(sub.isPresent()) {
+            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, false).forChatEvent(sub.get(), event));
+            return Optional.of(subcommand);
+        }
+
+        sub = getSubcommandOptions("image");
+        if(sub.isPresent()) {
+            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(false, true).forChatEvent(sub.get(), event));
+            return Optional.of(subcommand);
+        }
+
+        sub = getSubcommandOptions("both");
+        if(sub.isPresent()) {
+            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, true).forChatEvent(sub.get(), event));
+            return Optional.of(subcommand);
+        }
+
         return Optional.empty();
     }
 }

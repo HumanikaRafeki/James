@@ -82,7 +82,7 @@
             ]
         },
         {
-	    "name": "all",
+	    "name": "both",
             "description": "Finds game data nodes and associated images",
             "type": 1,
             "options": [
