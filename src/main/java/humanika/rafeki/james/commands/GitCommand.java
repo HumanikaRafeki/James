@@ -27,9 +27,9 @@ public class GitCommand extends SlashCommand {
 
         options = getSubcommandOptions("issue");
         if(options.isPresent()) {
-            String issue = String.valueOf(new NamedSubcommand().withName("issue").forChatEvent(options.get(), event)
-                .getLongOrDefault("issue", 0));
-            return replyUrl(false, "https://github.com/endless-sky/endless-sky/issues/",
+            SlashSubcommand subcommand = new NamedSubcommand().withName("issue").forChatEvent(options.get(), event);
+            String issue = String.valueOf(subcommand.getLongOrDefault("issue", 0));
+            return replyUrl(false, subcommand.isEphemeral(), "https://github.com/endless-sky/endless-sky/issues/",
                             issue, "issue number", "## Git Issue\n", "## Invalid Git Issue\n");
         }
 
@@ -37,32 +37,31 @@ public class GitCommand extends SlashCommand {
         if(!options.isPresent())
             options = getSubcommandOptions("pull");
         if(options.isPresent()) {
-            String pull = String.valueOf(new NamedSubcommand().withName("pr").forChatEvent(options.get(), event)
-                .getLongOrDefault("pr", 0));
-            return replyUrl(false, "https://github.com/endless-sky/endless-sky/pull/",
+            SlashSubcommand subcommand = new NamedSubcommand().withName("pr").forChatEvent(options.get(), event);
+            String pull = String.valueOf(subcommand.getLongOrDefault("pr", 0));
+            return replyUrl(false, subcommand.isEphemeral(), "https://github.com/endless-sky/endless-sky/pull/",
                             pull, "pull request number", "## Git Pull Request (PR)\n", "## Invalid Pull Request\n");
         }
 
         options = getSubcommandOptions("commit");
         if(options.isPresent()) {
-            String hash = new NamedSubcommand().withName("commit").forChatEvent(options.get(), event)
-                .getStringOrDefault("hash", "1234567");
+            SlashSubcommand subcommand = new NamedSubcommand().withName("commit").forChatEvent(options.get(), event);
+            String hash = subcommand.getStringOrDefault("hash", "1234567");
             boolean isAHash = VALID_HASH.matcher(hash).matches();
-            return replyUrl(!isAHash, "https://github.com/endless-sky/endless-sky/commit/",
+            return replyUrl(!isAHash, subcommand.isEphemeral(), "https://github.com/endless-sky/endless-sky/commit/",
                             hash, "commit hash", "## Git Commit Hash\n", "## Invalid Hash\n");
         }
 
         return Mono.empty();
     }
 
-    private Mono<Void> replyUrl(boolean isInvalid, String baseUrl, String theRest, String what,
+    private Mono<Void> replyUrl(boolean isInvalid, boolean ephemeral, String baseUrl, String theRest, String what,
                                 String successTitle, String failTitle) {
 
         String url = baseUrl + theRest;
 
         StringBuilder response = new StringBuilder();
 
-        boolean ephemeral = isEphemeral();
         String mention = ephemeral ? null : event.getInteraction().getUser().getMention();
         if(mention != null && mention.length() > 0)
             response.append(mention);
