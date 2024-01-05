@@ -60,7 +60,7 @@ class Commands {
         }
     }
 
-    public static Mono<Void> registerCommands(GatewayDiscordClient gateway) throws IOException {
+    public static Mono<Void> registerCommands(GatewayDiscordClient gateway) {
         final RestClient restClient = gateway.getRestClient();
         //Create an ObjectMapper that supports Discord4J classes
         final JacksonResources d4jMapper = JacksonResources.create();
@@ -72,10 +72,14 @@ class Commands {
         //Get our commands json from resources as command data
         List<ApplicationCommandRequest> requests = new ArrayList<>();
         for (String jsonFile : commandJson) {
-            String jsonContent = getResourceFileAsString(commandsFolderName + jsonFile);
-            System.out.println(jsonFile + " => " + jsonContent);
-            requests.add(d4jMapper.getObjectMapper()
-                         .readValue(jsonContent, ApplicationCommandRequest.class));
+            try {
+                String jsonContent = getResourceFileAsString(commandsFolderName + jsonFile);
+                System.out.println(jsonFile + " => " + jsonContent);
+                requests.add(d4jMapper.getObjectMapper()
+                             .readValue(jsonContent, ApplicationCommandRequest.class));
+            } catch(IOException ioe) {
+                LOGGER.error("Cannot read command json \""+jsonFile+'"');
+            }
         }
         /* Bulk overwrite commands. This is now idempotent, so it is safe to use this even when only 1 command
         is changed/added/removed
@@ -109,6 +113,7 @@ class Commands {
     }
 
     public static Mono<Void> handleChatCommand(ChatInputInteractionEvent event) {
+      try {
         StringBuilder message = new StringBuilder();
         String commandName = event.getCommandName();
 
@@ -129,9 +134,14 @@ class Commands {
         LOGGER.info(message.toString());
 
         return command.withChatEvent(event).handleChatCommand();
+      } catch(Exception e) {
+        LOGGER.error("Exception while handling chat command", e);
+        throw e;
+      }
     }
 
     public static Mono<Void> handleButtonInteraction(ButtonInteractionEvent event) {
+      try {
         StringBuilder message = new StringBuilder();
         String[] fields = event.getCustomId().split(":", 2);
         String[] subnames = fields[0].split("\s+");
@@ -157,6 +167,10 @@ class Commands {
         // Tell Discord we are working on the request. Then work on the request.
         return event.deferEdit().concatWith(Mono.defer(
             command.withButtonEvent(event)::handleButtonInteraction)).then();
+      } catch(Exception e) {
+        LOGGER.error("Exception while processing button interaction", e);
+        throw e;
+      }
     }
 
     /**

@@ -2,13 +2,13 @@
 <configuration scan="true">
 
     <!-- Logs we care about -->
-    <logger name="io.netty" level="INFO"/>
-    <logger name="reactor" level="INFO"/>
-    <logger name="proxy" level="INFO"/>
+    <logger name="io.netty" level="DEBUG"/>
+    <logger name="reactor" level="DEBUG"/>
+    <logger name="proxy" level="DEBUG"/>
     <logger name="reactor.retry" level="DEBUG"/>
     <logger name="discord4j.core" level="DEBUG"/>
-    <logger name="discord4j.gateway" level="INFO"/>
-    <logger name="discord4j.gateway.client" level="INFO"/>
+    <logger name="discord4j.gateway" level="DEBUG"/>
+    <logger name="discord4j.gateway.client" level="DEBUG"/>
 
     <!-- Appenders -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
