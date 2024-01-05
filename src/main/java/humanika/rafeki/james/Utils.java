@@ -1,24 +1,24 @@
 package humanika.rafeki.james;
 
-import okhttp3.Response;
-import okhttp3.ResponseBody;
-import okhttp3.Request;
-import okhttp3.OkHttpClient;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-
+import humanika.rafeki.james.James;
 import humanika.rafeki.james.utils.KorathCipher;
 import humanika.rafeki.james.utils.Translator;
-import humanika.rafeki.james.James;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class Utils {
     public static String downloadAsString(URL url) throws IOException {
@@ -27,6 +27,34 @@ public class Utils {
 
     public static byte[] downloadAsBytes(URL url) throws IOException {
         return download(url).bytes();
+    }
+
+    /**
+     * Checks a URL for the HTTP status code.
+     * <p>
+     * Returns 0 if an IOException occurs.
+     * Returns 1 if a MalformedURLException occurs.
+     * Returns -1 if the Response is invalid.
+     * @param url The url to check.
+     * @return The HTTP Status Code.
+     */
+    public static int getHttpStatus(String url) {
+        try {
+            URL u = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) u.openConnection();
+            connection.setRequestMethod("HEAD");
+            connection.setRequestProperty("User-Agent", "MarioB(r)owser4.2");
+            connection.connect();
+            return connection.getResponseCode();
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+            return 1;
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     public static ResponseBody download(URL url) throws IOException {

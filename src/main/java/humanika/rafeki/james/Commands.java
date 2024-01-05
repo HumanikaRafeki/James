@@ -1,10 +1,12 @@
 package humanika.rafeki.james;
 
 import discord4j.common.JacksonResources;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.entity.Member;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.RestClient;
 import discord4j.rest.service.ApplicationService;
@@ -24,8 +26,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
-import discord4j.common.util.Snowflake;
-import discord4j.core.object.entity.Member;
+
 import humanika.rafeki.james.commands.*;
 
 class Commands {
@@ -39,6 +40,7 @@ class Commands {
     static {
         SlashCommand commandArray[] = {
             new CRConvertCommand(),
+            new GitCommand(),
             new IndokorathCommand(),
             new KorathCommand(),
             new LookupCommand(),

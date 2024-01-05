@@ -1,0 +1,127 @@
+{
+    "name": "git",
+    "description": "Information from the Endless Sky git organization.",
+    "dm_permission": false,
+    "options": [
+        {
+	    "name": "issue",
+            "description": "Looks up a Git issue by issue number",
+            "type": 1,
+            "options": [
+                {
+                    "name": "issue",
+                    "description": "The issue number.",
+                    "type": 4,
+                    "required": true,
+                    "min_value": 1
+                },
+                {
+                    "name": "hidden",
+                    "description": "Hide response from other users.",
+                    "type": 3,
+                    "required": false,
+                    "choices": [
+                        {
+                            "name": "hide",
+                            "value": "hide"
+                        },
+                        {
+                            "name": "show",
+                            "value": "show"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+	    "name": "pr",
+            "description": "Looks up a pull request (PR) by PR number",
+            "type": 1,
+            "options": [
+                {
+                    "name": "pr",
+                    "description": "The pull request number.",
+                    "type": 4,
+                    "required": true,
+                    "min_value": 1
+                },
+                {
+                    "name": "hidden",
+                    "description": "Hide response from other users.",
+                    "type": 3,
+                    "required": false,
+                    "choices": [
+                        {
+                            "name": "hide",
+                            "value": "hide"
+                        },
+                        {
+                            "name": "show",
+                            "value": "show"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+	    "name": "pull",
+            "description": "Synonym for git pr (pull request by PR number)",
+            "type": 1,
+            "options": [
+                {
+                    "name": "pr",
+                    "description": "The pull request number.",
+                    "type": 4,
+                    "required": true,
+                    "min_value": 1
+                },
+                {
+                    "name": "hidden",
+                    "description": "Hide response from other users.",
+                    "type": 3,
+                    "required": false,
+                    "choices": [
+                        {
+                            "name": "hide",
+                            "value": "hide"
+                        },
+                        {
+                            "name": "show",
+                            "value": "show"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+	    "name": "commit",
+            "description": "Looks up a commit by its hexadecimal hash",
+            "type": 1,
+            "options": [
+                {
+                    "name": "hash",
+                    "description": "A hexadecimal hash, at least seven characters.",
+                    "type": 3,
+                    "required": true,
+                    "min_length": 7
+                },
+                {
+                    "name": "hidden",
+                    "description": "Hide response from other users.",
+                    "type": 3,
+                    "required": false,
+                    "choices": [
+                        {
+                            "name": "hide",
+                            "value": "hide"
+                        },
+                        {
+                            "name": "show",
+                            "value": "show"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
