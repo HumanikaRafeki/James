@@ -51,7 +51,8 @@ class Commands {
             new SayCommand(),
             new ShowCommand(),
             new SwizzleCommand(),
-            new SwizzleImageCommand()
+            new SwizzleImageCommand(),
+            new TemplateCommand()
         };
         commands = Arrays.asList(commandArray);
         nameCommand = new HashMap();
@@ -76,6 +77,10 @@ class Commands {
         for (String jsonFile : commandJson) {
             try {
                 String jsonContent = getResourceFileAsString(commandsFolderName + jsonFile);
+                if(jsonContent == null || jsonContent.length() < 1) {
+                    LOGGER.error("Cannot read command json \""+jsonFile+'"');
+                    continue;
+                }
                 System.out.println(jsonFile + " => " + jsonContent);
                 requests.add(d4jMapper.getObjectMapper()
                              .readValue(jsonContent, ApplicationCommandRequest.class));

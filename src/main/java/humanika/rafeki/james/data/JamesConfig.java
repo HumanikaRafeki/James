@@ -1,19 +1,21 @@
 package humanika.rafeki.james.data;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import java.util.Map;
 
 public class JamesConfig {
     public final URI botRepo;
@@ -33,6 +35,7 @@ public class JamesConfig {
     public final int maxAllSwizzleWidth;
     public final int maxAllSwizzleHeight;
     public final Path botTokenFile;
+    public final List<CreatorTemplate> creatorTemplates;
 
     public JamesConfig(String file, Logger logger) throws IOException, JSONException, URISyntaxException {
         // Read file and strip comments
@@ -65,5 +68,16 @@ public class JamesConfig {
         maxAllSwizzleWidth = contents.getInt("max_all_swizzle_width");
         maxAllSwizzleHeight = contents.getInt("max_all_swizzle_height");
         botTokenFile = new File(contents.getString("bot_token_file")).toPath();
+
+        JSONArray jsonTemplates = contents.optJSONArray("creator_templates");
+        ArrayList<CreatorTemplate> listTemplates = new ArrayList<>();
+        for(Object obj : jsonTemplates.toList()) {
+            Map jobj = (Map)obj;
+            listTemplates.add(new CreatorTemplate(
+                 (String)(jobj.get("id")),
+                 (String)(jobj.get("explanation")),
+                 (String)(jobj.get("url"))));
+        }
+        creatorTemplates = Collections.unmodifiableList(listTemplates);
     }
 }

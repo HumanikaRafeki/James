@@ -40,5 +40,29 @@
     "max_all_swizzle_height": 800,
 
     // File containing the bot token. Must only contain that token, on the first line, with no other text.
-    "bot_token_file": "bot-token.txt"
+    "bot_token_file": "bot-token.txt",
+
+    // The /templates responses:
+    "creator_templates": [
+        {
+            "id": "plugin",
+            "url": "https://raw.githubusercontent.com/HumanikaRafeki/EndlessSky-Discord-Bot/develop/data/templates/exampleplugin.zip",
+            "explanation": "Example Endless Sky plugin (a .zip archive)"
+        },
+        {
+            "id": "outfit",
+            "url": "https://raw.githubusercontent.com/HumanikaRafeki/EndlessSky-Discord-Bot/develop/data/templates/outfittemplate.blend",
+            "explanation": "A Blender file for creating Endless Sky outfits (a .blend file)"
+        },
+        {
+            "id": "ship",
+            "url": "https://raw.githubusercontent.com/HumanikaRafeki/EndlessSky-Discord-Bot/develop/data/templates/shiptemplate.blend",
+            "explanation": "A Blender file for creating in-space top view images of Endless Sky ships (a .blend file)"
+        },
+        {
+            "id": "thumbnail",
+            "url": "https://raw.githubusercontent.com/HumanikaRafeki/EndlessSky-Discord-Bot/develop/data/templates/thumbnail.blend",
+            "explanation": "A Blender file for creating shipyard images of Endless Sky ships (a .blend file)"
+        }
+    ]
 }
