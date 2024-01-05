@@ -25,7 +25,7 @@ sourceSets {
     all {
         dependencies {
             implementation("com.google.code.findbugs:jsr305:3.0.2")
-            implementation("com.discord4j:discord4j-core:3.3.0-RC1")
+            implementation("com.discord4j:discord4j-core:3.3.0-M2")
             implementation("ch.qos.logback:logback-classic:1.2.3")
 	    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
             implementation("com.squareup.okhttp3:okhttp")
