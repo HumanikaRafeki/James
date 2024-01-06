@@ -16,7 +16,7 @@ import discord4j.gateway.GatewayClient;
 
 import humanika.rafeki.james.James;
 
-public class CRConvertCommand extends SlashCommand {
+public class CRConvertCommand extends PrimitiveSlashCommand {
     @Override
     public String getName() {
         return "crconvert";
@@ -27,7 +27,7 @@ public class CRConvertCommand extends SlashCommand {
         if(!event.getInteraction().getGuildId().isPresent())
             return handleDirectMessage();
 
-	Optional<SlashSubcommand> subcommand = findSubcommand();
+	Optional<PrimitiveSlashSubcommand> subcommand = findSubcommand();
         if(!subcommand.isPresent())
             // Should never get here.
             return event.reply("You must use the cr or points subcommands.");
@@ -36,7 +36,7 @@ public class CRConvertCommand extends SlashCommand {
     }
 
     @Override
-    protected Optional<SlashSubcommand> findSubcommand() {
+    public Optional<PrimitiveSlashSubcommand> findSubcommand() {
         Optional<List<ApplicationCommandInteractionOption>> cr = getSubcommandOptions("cr");
         if(cr.isPresent())
             return Optional.of(new CRConvertValueSubcommand().forChatEvent(cr.get(), event));

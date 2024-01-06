@@ -13,7 +13,7 @@ import java.time.Instant;
 import java.util.Optional;
 import reactor.core.publisher.Mono;
 
-public class PingCommand extends SlashCommand {
+public class PingCommand extends PrimitiveSlashCommand {
     @Override
     public String getName() {
         return "ping";

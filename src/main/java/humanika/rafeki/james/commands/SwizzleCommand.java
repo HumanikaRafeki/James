@@ -20,7 +20,7 @@ import humanika.rafeki.james.James;
 import humanika.rafeki.james.data.Government;
 import humanika.rafeki.james.utils.ImageSwizzler;
 
-public class SwizzleCommand extends SlashCommand {
+public class SwizzleCommand extends PrimitiveSlashCommand {
     private static final String[] vectorStrings = {
         "{GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA}, // 0 red + yellow markings (republic)",
         "{GL_RED, GL_BLUE, GL_GREEN, GL_ALPHA}, // 1 red + magenta markings",

@@ -14,7 +14,7 @@ import humanika.rafeki.james.James;
 import humanika.rafeki.james.Utils;
 import humanika.rafeki.james.utils.KorathCipher;
 
-public class IndokorathCommand extends SlashCommand {
+public class IndokorathCommand extends PrimitiveSlashCommand {
     private static final int MAX_RESPONSE_LENGTH = 4000;
     private static String FOOTER_MESSAGE = "This tool only aids translation. You must massage the words for readability. Sometimes the cipher will produce obscene or offensive terms. Words with standard translations, like human/Humani, won't be correct.";
     private static String TITLE = "Korath Cipher";

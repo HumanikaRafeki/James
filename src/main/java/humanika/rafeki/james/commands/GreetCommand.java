@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
-public class GreetCommand extends SlashCommand {
+public class GreetCommand extends PrimitiveSlashCommand {
     @Override
     public String getName() {
         return "greet";

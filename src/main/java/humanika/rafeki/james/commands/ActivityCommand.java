@@ -4,7 +4,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import humanika.rafeki.james.James;
 import reactor.core.publisher.Mono;
 
-public class ActivityCommand extends SlashCommand {
+public class ActivityCommand extends PrimitiveSlashCommand {
     @Override
     public String getName() {
         return "activity";

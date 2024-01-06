@@ -17,7 +17,7 @@ import java.util.Optional;
 import me.mcofficer.esparser.DataNode;
 import reactor.core.publisher.Mono;
 
-class ShowSubcommand extends SlashSubcommand {
+class ShowSubcommand extends PrimitiveSlashSubcommand {
     private static final int MAX_CHARS_PER_FIELD = 1000; // actual limit is 1024
     private static final int MAX_PRIVATE_LINES = 300;
     private static final int MAX_PUBLIC_LINES = 60;

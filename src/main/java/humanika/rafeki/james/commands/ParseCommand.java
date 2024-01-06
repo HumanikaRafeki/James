@@ -34,7 +34,7 @@ import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 
-abstract class ParseCommand extends SlashCommand {
+abstract class ParseCommand extends PrimitiveSlashCommand {
     protected static final int MAX_STRING_LENGTH = 1000; // max embed field size is 1024
     protected static final Pattern REPITITION = Pattern.compile("\\A(\\d+)\\s+");
 

@@ -1,7 +1,7 @@
 package humanika.rafeki.james.commands;
 import reactor.core.publisher.Mono;
 
-public class CRConvertPointsSubcommand extends SlashSubcommand {
+public class CRConvertPointsSubcommand extends PrimitiveSlashSubcommand {
     @Override
     public String getName() {
         return "points";

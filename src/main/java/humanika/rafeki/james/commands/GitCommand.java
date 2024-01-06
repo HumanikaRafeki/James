@@ -9,7 +9,7 @@ import humanika.rafeki.james.Utils;
 import java.util.List;
 import humanika.rafeki.james.James;
 
-public class GitCommand extends SlashCommand {
+public class GitCommand extends PrimitiveSlashCommand {
 
     private static Pattern VALID_HASH = Pattern.compile("\\A[a-zA-Z0-9]+\\z");
 
@@ -27,7 +27,7 @@ public class GitCommand extends SlashCommand {
 
         options = getSubcommandOptions("issue");
         if(options.isPresent()) {
-            SlashSubcommand subcommand = new NamedSubcommand().withName("issue").forChatEvent(options.get(), event);
+            PrimitiveSlashSubcommand subcommand = new NamedSubcommand().withName("issue").forChatEvent(options.get(), event);
             String issue = String.valueOf(subcommand.getLongOrDefault("issue", 0));
             return replyUrl(false, subcommand.isEphemeral(), "https://github.com/endless-sky/endless-sky/issues/",
                             issue, "issue number", "## Git Issue\n", "## Invalid Git Issue\n");
@@ -37,7 +37,7 @@ public class GitCommand extends SlashCommand {
         if(!options.isPresent())
             options = getSubcommandOptions("pull");
         if(options.isPresent()) {
-            SlashSubcommand subcommand = new NamedSubcommand().withName("pr").forChatEvent(options.get(), event);
+            PrimitiveSlashSubcommand subcommand = new NamedSubcommand().withName("pr").forChatEvent(options.get(), event);
             String pull = String.valueOf(subcommand.getLongOrDefault("pr", 0));
             return replyUrl(false, subcommand.isEphemeral(), "https://github.com/endless-sky/endless-sky/pull/",
                             pull, "pull request number", "## Git Pull Request (PR)\n", "## Invalid Pull Request\n");
@@ -45,7 +45,7 @@ public class GitCommand extends SlashCommand {
 
         options = getSubcommandOptions("commit");
         if(options.isPresent()) {
-            SlashSubcommand subcommand = new NamedSubcommand().withName("commit").forChatEvent(options.get(), event);
+            PrimitiveSlashSubcommand subcommand = new NamedSubcommand().withName("commit").forChatEvent(options.get(), event);
             String hash = subcommand.getStringOrDefault("hash", "1234567");
             boolean isAHash = VALID_HASH.matcher(hash).matches();
             return replyUrl(!isAHash, subcommand.isEphemeral(), "https://github.com/endless-sky/endless-sky/commit/",

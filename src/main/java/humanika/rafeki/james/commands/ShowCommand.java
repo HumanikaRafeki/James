@@ -43,7 +43,7 @@ public class ShowCommand extends NodeInfoCommand {
     }
 
     @Override
-    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, SlashSubcommand subcommand) {
+    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveSlashSubcommand subcommand) {
         return( ((ShowSubcommand)subcommand).generateResult(found, ephemeral) );
     }
 
@@ -60,7 +60,7 @@ public class ShowCommand extends NodeInfoCommand {
     }
 
     @Override
-    protected Optional<SlashSubcommand> subcommandFor(String[] names) {
+    protected Optional<PrimitiveSlashSubcommand> subcommandFor(String[] names) {
         if(names.length != 2) {
             return Optional.empty();
         }
@@ -79,7 +79,7 @@ public class ShowCommand extends NodeInfoCommand {
     }
 
     @Override
-    protected Optional<SlashSubcommand> findSubcommand() {
+    public Optional<PrimitiveSlashSubcommand> findSubcommand() {
         Optional<List<ApplicationCommandInteractionOption>> sub;
 
         sub = getSubcommandOptions("data");

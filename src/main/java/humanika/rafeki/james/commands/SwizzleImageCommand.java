@@ -22,7 +22,7 @@ import humanika.rafeki.james.James;
 import humanika.rafeki.james.data.JamesConfig;
 import humanika.rafeki.james.utils.ImageSwizzler;
 
-public class SwizzleImageCommand extends SlashCommand {
+public class SwizzleImageCommand extends PrimitiveSlashCommand {
     private static final String[] VAR_ARRAY = {"image1", "image2", "image3", "image4"};
     private static final List<String> VAR_LIST = Arrays.asList(VAR_ARRAY);
 
@@ -112,7 +112,7 @@ public class SwizzleImageCommand extends SlashCommand {
         }
         int w = width.getAsInt();
         int h = height.getAsInt();
-        if(w > config.maxAllSwizzleWidth || h > config.maxAllSwizzleHeight) {
+        if(swizzleAll && (w > config.maxAllSwizzleWidth || h > config.maxAllSwizzleHeight)) {
             errors.append(filename + ": when using all swizzles, image must be " + config.maxAllSwizzleWidth + "x" + config.maxAllSwizzleHeight + "px. or smaller");
             return;
         }

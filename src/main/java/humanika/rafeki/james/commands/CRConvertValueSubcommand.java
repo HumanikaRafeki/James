@@ -2,7 +2,7 @@ package humanika.rafeki.james.commands;
 
 import reactor.core.publisher.Mono;
 
-public class CRConvertValueSubcommand extends SlashSubcommand {
+public class CRConvertValueSubcommand extends PrimitiveSlashSubcommand {
 
     @Override
     public String getName() {

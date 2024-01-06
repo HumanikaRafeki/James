@@ -31,14 +31,14 @@ import humanika.rafeki.james.commands.*;
 
 class Commands {
     private static final Logger LOGGER = LoggerFactory.getLogger(James.class);
-    private static final List<SlashCommand> commands;
-    private static final Map<String, SlashCommand> nameCommand;
+    private static final List<InteractionEventHandler> commands;
+    private static final Map<String, InteractionEventHandler> nameCommand;
     private static final List<String> commandJson;
     // The name of the folder the commands json is in, inside our resources folder
     private static final String commandsFolderName = "commands/";
 
     static {
-        SlashCommand commandArray[] = {
+        InteractionEventHandler commandArray[] = {
             new ActivityCommand(),
             new CRConvertCommand(),
             new GitCommand(),
@@ -58,9 +58,13 @@ class Commands {
         commands = Arrays.asList(commandArray);
         nameCommand = new HashMap();
         commandJson = new ArrayList();
-        for(SlashCommand command : commandArray) {
-            commandJson.add(command.getJson());
-            nameCommand.put(command.getName(), command);
+        for(InteractionEventHandler command : commandArray) {
+            Optional<String> json = command.getJson();
+            if(json.isPresent()) {
+                commandJson.add(json.get());
+                nameCommand.put(command.getName(), command);
+            } else
+                LOGGER.error("Command \"" + command.getFullName() + "\" provided no JSON resource name.");
         }
     }
 
@@ -131,7 +135,7 @@ class Commands {
             return Mono.empty();
         }
 
-        SlashCommand command = nameCommand.get(commandName);
+        InteractionEventHandler command = nameCommand.get(commandName);
         if(command == null) {
             message.append(" REJECT: invalid command");
             LOGGER.info(message.toString());
@@ -162,7 +166,7 @@ class Commands {
             return Mono.empty();
         }
 
-        SlashCommand command = nameCommand.get(commandName);
+        InteractionEventHandler command = nameCommand.get(commandName);
         if(command == null) {
             message.append(" REJECT: invalid command");
             LOGGER.info(message.toString());

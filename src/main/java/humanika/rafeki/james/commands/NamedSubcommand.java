@@ -1,6 +1,6 @@
 package humanika.rafeki.james.commands;
 
-public class NamedSubcommand extends SlashSubcommand {
+public class NamedSubcommand extends PrimitiveSlashSubcommand {
     private String name = null;
 
     @Override

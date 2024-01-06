@@ -24,7 +24,7 @@ import java.util.function.BooleanSupplier;
 import me.mcofficer.esparser.DataNode;
 import reactor.core.publisher.Mono;
 
-public abstract class NodeInfoCommand extends SlashCommand {
+public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
     protected final static int DISPLAY_COUNT = 14;
     protected final static int QUERY_COUNT = DISPLAY_COUNT + 5;
     protected final static int PRIMARY_COUNT = 6;
@@ -41,7 +41,7 @@ public abstract class NodeInfoCommand extends SlashCommand {
         if(!event.getInteraction().getGuildId().isPresent())
             return handleDirectMessage();
 
-        Optional<SlashSubcommand> subcommand = findSubcommand();
+        Optional<PrimitiveSlashSubcommand> subcommand = findSubcommand();
         boolean ephemeral = subcommand.isPresent() ? subcommand.get().isEphemeral() : isEphemeral();
         Optional<String> maybeType = getType();
         Optional<String> maybeQuery = getQuery();
@@ -132,7 +132,7 @@ public abstract class NodeInfoCommand extends SlashCommand {
         else if(hash.equals("done"))
             buttonEvent.editReply().withComponents().subscribe();
         else if(names[0].equals(getName())) {
-            Optional<SlashSubcommand> subcommand = subcommandFor(names);
+            Optional<PrimitiveSlashSubcommand> subcommand = subcommandFor(names);
             Optional<List<NodeInfo>> found = James.getState().nodesWithHash(hash);
             if(found.isPresent() && found.get().size() > 0)
                 return generateResult(found.get(), ephemeral, subcommand.orElse(null));
@@ -149,7 +149,7 @@ public abstract class NodeInfoCommand extends SlashCommand {
         return Mono.empty();
     }
 
-    protected abstract Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, SlashSubcommand subcommand);
+    protected abstract Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveSlashSubcommand subcommand);
 
     protected abstract Optional<List<NodeInfo>> getMatches(String query, Optional<String> type);
 
@@ -232,11 +232,11 @@ public abstract class NodeInfoCommand extends SlashCommand {
         }
     }
 
-    protected Optional<SlashSubcommand> findSubcommand() {
+    public Optional<PrimitiveSlashSubcommand> findSubcommand() {
         return Optional.empty();
     }
 
-    protected Optional<SlashSubcommand> subcommandFor(String[] names) {
+    protected Optional<PrimitiveSlashSubcommand> subcommandFor(String[] names) {
         return Optional.empty();
     }
 }

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import discord4j.core.object.component.Button;
 import discord4j.core.object.component.ActionRow;
 
-public class TemplateCommand extends SlashCommand {
+public class TemplateCommand extends PrimitiveSlashCommand {
     private final static int MAX_ROWS = 5;
     private final static int BUTTONS_PER_ROW = 4;
     private final static int MAX_TEMPLATES = BUTTONS_PER_ROW * MAX_ROWS - 1;
