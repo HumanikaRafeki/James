@@ -39,6 +39,7 @@ class Commands {
 
     static {
         SlashCommand commandArray[] = {
+            new ActivityCommand(),
             new CRConvertCommand(),
             new GitCommand(),
             new IndokorathCommand(),

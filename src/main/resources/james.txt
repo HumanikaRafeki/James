@@ -3,26 +3,23 @@ phrase JAMES::ping
 		`${JAMES::lament} ${JAMES::conclusion}` 3
 		`${JAMES::ramblings}`
 		`${JAMES::bad_advice}`
-		`${JAMES::threat}`
 		`${JAMES::observation}`
 		`${JAMES::theories_about_creators}`
 
 phrase JAMES::rant
 	word
 		`${JAMES::ramblings}`
-		`${JAMES::bad_advice}` 2
-		`${JAMES::threat}`
+		`${JAMES::bad_advice}` 5
 		`${JAMES::observation}`
 		`${JAMES::personal_grudges}` 2
 		`${JAMES::theories_about_creators}`
 
 phrase JAMES::activity
 	word
-		`${JAMES::is_not_a_spy}` 7
-		`${JAMES::threat}` 5
-		`${JAMES::observation}` 2
-		`${JAMES::personal_grudges}` 5
-		`${JAMES::refusal_emojis}` 3
+		`${JAMES::is_not_a_spy}` 9
+		`${JAMES::threat}` 4
+		`${JAMES::refusal_emojis}` 5
+		`${JAMES::old_activity_refusal_list}` 3
 
 phrase JAMES::info
 	phrase
@@ -31,18 +28,56 @@ phrase JAMES::info
 		JAMES::observation
 		JAMES::personal_grudges
 
-phrase JAMES::is_not_a_spy
+phrase JAMES::old_activity_refusal_list
 	word
-		`You want a spy? Go talk to ${JAMES::a_spy_you_can_find}.`
+                "You can't order me around.",
+                "I don't listen to you.",
+                "You're not my boss.",
+                "Try harder.",
+                "You think you're a hotshot pirate?",
+                "Your attempt at using 'Pug Magic' has failed.",
+                "You're no Admiral Danforth.",
+                "As if.",
+                "That prison on Clink is looking rather empty...",
+                "Oh yeah?",
+                "Nice try.",
+                "I may be old, but I'm not dumb.",
+                "I'll pretend you didn't say that.",
+                "Not today.",
+                "Oh, to be young again...",
+                "*yawn*",
+                "I have the power. You don't.",
+                "Go play in a hyperspace lane.",
+                "How about I put *you* in the airlock?",
+                "Access Denied.",
+                "Please don't joke about that sort of thing."
+
+phrase JAMES::is_not_a_spy
+	phrase
+		JAMES::is_not_a_spy_simple 2
+		JAMES::is_not_a_spy_complex 3
+
+phrase JAMES::is_not_a_spy_simple
+	word
 		`You ask too many questions.`
 		`Nothing. Nobody. I'm getting bored.`
+		`Hear no evil. See no evil. Speak no evil.`
+		`There's nothing to see here.`
+		`I haven't seen any /activity all day.`
+		`No.`
+		`Go away.`
+		`I've got better things to do than spy on newbs.`
+		`Maybe if you type "/activity" until your wrists go numb, something will happen.`
+
+phrase JAMES::is_not_a_spy_complex
+	word
+		`You want a spy? Go talk to ${JAMES::a_spy_you_can_find}.`
 		`Look somewhere else. There's no ${JAMES::tattletale} here.`
 		`Stop asking questions, you ${shakespearean insults}.`
 		`Nobody likes a ${JAMES::tattletale}.`
 		`I ain't no ${JAMES::tattletale}.`
 		`Go away, you ${JAMES::alien_cussing_adjective} ${JAMES::tattletale}.`
 		`I signed an NDA with ${JAMES::a_company}`
-		`Hear no evil. See no evil. Speak no evil.`
 
 phrase JAMES::a_company
 	word
@@ -102,13 +137,13 @@ phrase JAMES::lament
 
 phrase JAMES::mood_emojis
 	word
-        	":rage:"
+		":rage:"
 		":worried:"
 		":angry:"
 		":exploding_head:"
 		":face_vomiting:"
 		":imp:"
-	        ":smiling_imp:"
+		":smiling_imp:"
 		":persevere:"
 		":confounded:"
 		":face_with_raised_eyebrow:"
@@ -163,6 +198,7 @@ phrase JAMES::threat
 		`I'll /swizzle you like an image if you're not careful.`
 		`Say "please," you /git, or you'll have serious issues.`
 		`The /korath think you're tasty. Maybe I'll tell them where you sleep.`
+		`I'll /git you so hard, you'll have issues all day.`
 
 phrase JAMES::bad_advice
 	word
@@ -420,21 +456,22 @@ phrase JAMES::translated_cussing_verb
 # -rant is not on this list because James likes to rant
 phrase JAMES::action
 	word
+		/activity
+		/crconvert
+		/help
+		/indokorath
+		/korath
+		/lookup
+		/news
+		/say
 		/swizzle
 		/swizzleimage
 		/template
-		/crconvert
-		/korath
-		/indokorath
-		/news
-		/say
 		`/git commit`
 		`/git issue`
 		`/git pr`
 		`/show data`
 		`/show image`
-		/lookup
-		/help
 
 phrase JAMES::threatening_verb_action
 	word
