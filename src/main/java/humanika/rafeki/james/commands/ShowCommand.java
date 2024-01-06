@@ -39,11 +39,11 @@ public class ShowCommand extends NodeInfoCommand {
         if(subcommand == null)
             return "show";
         else
-            return "show " + subcommand.getFullName();
+            return subcommand.getFullName();
     }
 
     @Override
-    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveSlashSubcommand subcommand) {
+    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveCommand subcommand) {
         return( ((ShowSubcommand)subcommand).generateResult(found, ephemeral) );
     }
 
@@ -61,19 +61,24 @@ public class ShowCommand extends NodeInfoCommand {
 
     protected Optional<InteractionEventHandler> subcommandFor(String[] names) {
         if(names.length != 2) {
+System.out.println("INVALID NAMES IN SHOWCOMMAND");
             return Optional.empty();
         }
         if(names[1].equals("data")) {
             subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, false).withButtonEvent(getButtonEvent()));
+System.out.println("DATA IN SHOWCOMMAND");
             return Optional.of(subcommand);
         }
         else if(names[1].equals("image")) {
             subcommand = (ShowSubcommand)(new ShowSubcommand().showing(false, true).withButtonEvent(getButtonEvent()));
+System.out.println("IMAGE IN SHOWCOMMAND");
             return Optional.of(subcommand);
         } else if(names[1].equals("both")) {
             subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, true).withButtonEvent(getButtonEvent()));
+System.out.println("BOTH IN SHOWCOMMAND");
             return Optional.of(subcommand);
         }
+System.out.println("NOTHING IN SHOWCOMMAND");
         return Optional.empty();
     }
 
@@ -98,7 +103,7 @@ public class ShowCommand extends NodeInfoCommand {
             subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, true).withChatOptions(sub.get(), getChatEvent()));
             return Optional.of(subcommand);
         }
-
+System.out.println("NO SUBCOMMAND IN SHOWCOMMAND!!");
         return Optional.empty();
     }
 }

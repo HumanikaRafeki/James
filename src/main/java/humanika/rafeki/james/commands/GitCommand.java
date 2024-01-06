@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import reactor.core.publisher.Mono;
 
-public class GitCommand extends PrimitiveSlashCommand {
+public class GitCommand extends PrimitiveCommand {
 
     private static Pattern VALID_HASH = Pattern.compile("\\A[a-zA-Z0-9]+\\z");
 
@@ -24,7 +24,7 @@ public class GitCommand extends PrimitiveSlashCommand {
 
         options = data.getSubcommandOptions("issue");
         if(options.isPresent()) {
-            InteractionEventHandler subcommand = new NamedSubcommand().withName("issue").withChatOptions(options.get(), getChatEvent());
+            InteractionEventHandler subcommand = new NamedSubcommand().withName("issue", "git issue").withChatOptions(options.get(), getChatEvent());
             String issue = String.valueOf(subcommand.getData().getLongOrDefault("issue", 0));
             return replyUrl(false, subcommand.getData().isEphemeral(),
                             "https://github.com/endless-sky/endless-sky/issues/",
@@ -35,7 +35,7 @@ public class GitCommand extends PrimitiveSlashCommand {
         if(!options.isPresent())
             options = data.getSubcommandOptions("pull");
         if(options.isPresent()) {
-            InteractionEventHandler subcommand = new NamedSubcommand().withName("pr").withChatOptions(options.get(), getChatEvent());
+            InteractionEventHandler subcommand = new NamedSubcommand().withName("pr", "git pr").withChatOptions(options.get(), getChatEvent());
             String pull = String.valueOf(subcommand.getData().getLongOrDefault("pr", 0));
             return replyUrl(false, subcommand.getData().isEphemeral(),
                             "https://github.com/endless-sky/endless-sky/pull/",
@@ -44,7 +44,7 @@ public class GitCommand extends PrimitiveSlashCommand {
 
         options = data.getSubcommandOptions("commit");
         if(options.isPresent()) {
-            InteractionEventHandler subcommand = new NamedSubcommand().withName("commit").withChatOptions(options.get(), getChatEvent());
+            InteractionEventHandler subcommand = new NamedSubcommand().withName("commit", "git commit").withChatOptions(options.get(), getChatEvent());
             String hash = subcommand.getData().getStringOrDefault("hash", "1234567");
             boolean isAHash = VALID_HASH.matcher(hash).matches();
             return replyUrl(!isAHash, subcommand.getData().isEphemeral(),

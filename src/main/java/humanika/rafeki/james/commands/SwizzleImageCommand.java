@@ -22,7 +22,7 @@ import java.util.OptionalInt;
 import javax.imageio.ImageIO;
 import reactor.core.publisher.Mono;
 
-public class SwizzleImageCommand extends PrimitiveSlashCommand {
+public class SwizzleImageCommand extends PrimitiveCommand {
     private static final String[] VAR_ARRAY = {"image1", "image2", "image3", "image4"};
     private static final List<String> VAR_LIST = Arrays.asList(VAR_ARRAY);
 

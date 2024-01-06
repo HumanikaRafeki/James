@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Optional;
 import reactor.core.publisher.Mono;
 
-public class KorathCommand extends PrimitiveSlashCommand {
+public class KorathCommand extends PrimitiveCommand {
     private static final int MAX_RESPONSE_LENGTH = 4000;
     private static String FOOTER_MESSAGE = "This tool only aids translation. You must massage the words for readability. Sometimes the cipher will produce obscene or offensive terms. Words with standard translations, like human/Humani, won't be correct.";
     private static String TITLE = "Korath Encoding";

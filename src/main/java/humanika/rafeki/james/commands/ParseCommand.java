@@ -30,7 +30,7 @@ import me.mcofficer.esparser.DataNode;
 import me.mcofficer.esparser.DataNodeStringLogger;
 import reactor.core.publisher.Mono;
 
-abstract class ParseCommand extends PrimitiveSlashCommand {
+abstract class ParseCommand extends PrimitiveCommand {
     protected static final int MAX_STRING_LENGTH = 1000; // max embed field size is 1024
     protected static final Pattern REPITITION = Pattern.compile("\\A(\\d+)\\s+");
 

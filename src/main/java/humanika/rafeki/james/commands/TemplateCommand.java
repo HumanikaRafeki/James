@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import reactor.core.publisher.Mono;
 
-public class TemplateCommand extends PrimitiveSlashCommand {
+public class TemplateCommand extends PrimitiveCommand {
     private final static int MAX_ROWS = 5;
     private final static int BUTTONS_PER_ROW = 4;
     private final static int MAX_TEMPLATES = BUTTONS_PER_ROW * MAX_ROWS - 1;

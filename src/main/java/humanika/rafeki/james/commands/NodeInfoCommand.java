@@ -24,7 +24,7 @@ import java.util.function.BooleanSupplier;
 import me.mcofficer.esparser.DataNode;
 import reactor.core.publisher.Mono;
 
-public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
+public abstract class NodeInfoCommand extends PrimitiveCommand {
     protected final static int DISPLAY_COUNT = 14;
     protected final static int QUERY_COUNT = DISPLAY_COUNT + 5;
     protected final static int PRIMARY_COUNT = 6;
@@ -107,7 +107,7 @@ public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
                 buttons.clear();
             }
         }
-        buttons.add(Button.success(getActiveSubcommandPath() + ":X:close:close", "close"));
+        buttons.add(Button.success(getFullName() + ":X:close:close", "close"));
         if(buttons.size() > 0)
             rows.add(ActionRow.of(buttons));
 
@@ -124,6 +124,8 @@ public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
 
         String type = split[0];
         String[] names = split[0].split(" ");
+for(String n : names)
+System.out.println("NAME \"" + n + "\" IN NODE INFO COMMAND");
         String flags = split[1];
         String hash = split[2];
         String query = split[3];
@@ -135,8 +137,10 @@ public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
         else if(names[0].equals(getName())) {
             Optional<InteractionEventHandler> subcommand = subcommandFor(names);
             Optional<List<NodeInfo>> found = James.getState().nodesWithHash(hash);
+if(!subcommand.isPresent())
+System.out.println("NO SUBCOMMAND IN NODEINFOCOMMAND!!");
             if(found.isPresent() && found.get().size() > 0)
-                return generateResult(found.get(), ephemeral, (PrimitiveSlashSubcommand)subcommand.orElse(null));
+                return generateResult(found.get(), ephemeral, (PrimitiveCommand)subcommand.orElse(null));
             else {
                 return getButtonEvent().editReply()
                     .withEmbeds(EmbedCreateSpec.create().withTitle("No Match")
@@ -150,7 +154,7 @@ public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
         return Mono.empty();
     }
 
-    protected abstract Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveSlashSubcommand subcommand);
+    protected abstract Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveCommand subcommand);
 
     protected abstract Optional<List<NodeInfo>> getMatches(String query, Optional<String> type);
 

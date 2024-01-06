@@ -18,7 +18,7 @@ import java.util.OptionalInt;
 import javax.imageio.ImageIO;
 import reactor.core.publisher.Mono;
 
-public class SwizzleCommand extends PrimitiveSlashCommand {
+public class SwizzleCommand extends PrimitiveCommand {
     private static final String[] vectorStrings = {
         "{GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA}, // 0 red + yellow markings (republic)",
         "{GL_RED, GL_BLUE, GL_GREEN, GL_ALPHA}, // 1 red + magenta markings",

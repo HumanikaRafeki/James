@@ -4,7 +4,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import humanika.rafeki.james.James;
 import reactor.core.publisher.Mono;
 
-public class RantCommand extends PrimitiveSlashCommand {
+public class RantCommand extends PrimitiveCommand {
     @Override
     public String getName() {
         return "rant";

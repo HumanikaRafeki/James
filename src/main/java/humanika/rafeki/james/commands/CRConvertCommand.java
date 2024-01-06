@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import reactor.core.publisher.Mono;
 
-public class CRConvertCommand extends PrimitiveSlashCommand {
+public class CRConvertCommand extends PrimitiveCommand {
     @Override
     public String getName() {
         return "crconvert";

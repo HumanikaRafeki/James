@@ -1,34 +1,30 @@
 package humanika.rafeki.james.commands;
 
-import discord4j.core.object.command.Interaction;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
+import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
-import humanika.rafeki.james.James;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import reactor.core.publisher.Mono;
 
-/**
- * A simple interface defining our slash command class contract.
- *  a getName() method to provide the case-sensitive name of the command.
- *  and a handleChatCommand() method which will house all the logic for processing each command.
- */
-public abstract class PrimitiveSlashCommand implements Cloneable, InteractionEventHandler {
-    /** Chat event being processed. Will be null in responses */
-    private ChatInputInteractionEvent chatEvent = null;
-
-    /** Button event being processed. Will be null in any other situation. */
-    private ButtonInteractionEvent buttonEvent = null;
+public abstract class PrimitiveCommand implements Cloneable, InteractionEventHandler {
+    /** Subcommand options from the original event. Will be null in responses. */
+    private List<ApplicationCommandInteractionOption> options = null;
 
     protected EventDataProvider data = null;
+
+    /** Chat event currently being processed. Will be null in responses. */
+    private ChatInputInteractionEvent chatEvent;
+
+    /** Button event currently being processed. Will be null otherwise. */
+    private ButtonInteractionEvent buttonEvent;
 
     @Override
     public String getFullName() {
@@ -53,37 +49,46 @@ public abstract class PrimitiveSlashCommand implements Cloneable, InteractionEve
     @Override
     public EventDataProvider getData() {
         return data;
-}
+    }
 
     @Override
-    public PrimitiveSlashCommand withChatEvent(ChatInputInteractionEvent chatEvent) {
+    public InteractionEventHandler withChatEvent(ChatInputInteractionEvent chatEvent) {
         try {
-            PrimitiveSlashCommand cloned = (PrimitiveSlashCommand)clone();
-            cloned.data = new ChatEventDataProvider(chatEvent);
-            cloned.chatEvent = chatEvent;
-            return cloned;
+            PrimitiveCommand result = (PrimitiveCommand)clone();
+            result.data = new ChatEventDataProvider(chatEvent);
+            result.chatEvent = chatEvent;
+            return result;
         } catch(CloneNotSupportedException cnse) {
-            // Should never happen.
             System.out.println("Clone not supported!");
+            // Should never happen.
             return null;
         }
     }
 
     @Override
     public InteractionEventHandler withChatOptions(List<ApplicationCommandInteractionOption> options, ChatInputInteractionEvent chatEvent) {
-        return withChatEvent(chatEvent);
+        try {
+            PrimitiveCommand result = (PrimitiveCommand)clone();
+            result.options = options;
+            result.data = new SubcommandDataProvider(options, chatEvent);
+            result.chatEvent = chatEvent;
+            return result;
+        } catch(CloneNotSupportedException cnse) {
+            System.out.println("Clone not supported!");
+            // Should never happen.
+            return null;
+        }
     }
 
     @Override
-    public PrimitiveSlashCommand withButtonEvent(ButtonInteractionEvent buttonEvent) {
+    public InteractionEventHandler withButtonEvent(ButtonInteractionEvent buttonEvent) {
         try {
-            PrimitiveSlashCommand cloned = (PrimitiveSlashCommand)clone();
-            cloned.data = new ButtonEventDataProvider(buttonEvent);
-            cloned.buttonEvent = buttonEvent;
-            return cloned;
+            PrimitiveCommand result = (PrimitiveCommand)clone();
+            result.data = new ButtonEventDataProvider(buttonEvent);
+            result.buttonEvent = buttonEvent;
+            return result;
         } catch(CloneNotSupportedException cnse) {
             // Should never happen.
-            System.out.println("Clone not supported!");
             return null;
         }
     }
@@ -93,20 +98,19 @@ public abstract class PrimitiveSlashCommand implements Cloneable, InteractionEve
         return super.clone();
     }
 
-    /** Full of the Subcommand being processed. Syntax: "commandname subcommand subsubcommand" */
-    protected String getActiveSubcommandPath() {
-        return getName();
-    }
-
-    public Optional<InteractionEventHandler> findSubcommand() {
-        return Optional.empty();
-    }
-
     protected ChatInputInteractionEvent getChatEvent() {
         return chatEvent;
     }
 
     protected ButtonInteractionEvent getButtonEvent() {
         return buttonEvent;
+    }
+
+    protected List<ApplicationCommandInteractionOption> getOptions() {
+        return options;
+    }
+
+    public Optional<InteractionEventHandler> findSubcommand() {
+        return Optional.empty();
     }
 }

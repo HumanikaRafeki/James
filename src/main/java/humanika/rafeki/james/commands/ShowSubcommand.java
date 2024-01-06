@@ -17,7 +17,7 @@ import java.util.Optional;
 import me.mcofficer.esparser.DataNode;
 import reactor.core.publisher.Mono;
 
-class ShowSubcommand extends PrimitiveSlashSubcommand {
+class ShowSubcommand extends PrimitiveCommand {
     private static final int MAX_CHARS_PER_FIELD = 1000; // actual limit is 1024
     private static final int MAX_PRIVATE_LINES = 300;
     private static final int MAX_PUBLIC_LINES = 60;
@@ -33,6 +33,17 @@ class ShowSubcommand extends PrimitiveSlashSubcommand {
                 return "data";
         } else
             return "image";
+    }
+
+    @Override
+    public String getFullName() {
+        if(showData) {
+            if(showImages)
+                return "show both";
+            else
+                return "show data";
+        } else
+            return "show image";
     }
 
     ShowSubcommand showing(boolean data, boolean images) {

@@ -30,7 +30,7 @@ public class LookupCommand extends NodeInfoCommand {
     }
 
     @Override
-    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveSlashSubcommand subcommand) {
+    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveCommand subcommand) {
         NodeInfo chosen = found.get(found.size() - 1);
         List<EmbedCreateSpec> embeds = new ArrayList<>();
         StringBuilder builder = new StringBuilder(100);

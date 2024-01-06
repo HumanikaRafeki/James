@@ -2,11 +2,16 @@ package humanika.rafeki.james.commands;
 
 import reactor.core.publisher.Mono;
 
-public class CRConvertValueSubcommand extends PrimitiveSlashSubcommand {
+public class CRConvertValueSubcommand extends PrimitiveCommand {
 
     @Override
     public String getName() {
-        return "crconvert";
+        return "cr";
+    }
+
+    @Override
+    public String getFullName() {
+        return "crconvert cr";
     }
 
     @Override
