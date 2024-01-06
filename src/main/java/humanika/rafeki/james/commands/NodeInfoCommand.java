@@ -2,28 +2,31 @@ package humanika.rafeki.james.commands;
 
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.core.object.component.Button;
-import discord4j.core.object.component.ActionRow;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.Embed;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.data.NodeInfo;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import reactor.core.publisher.Mono;
-import discord4j.core.spec.EmbedCreateFields;
-import me.mcofficer.esparser.DataNode;
-import discord4j.core.object.Embed;
-import discord4j.core.object.entity.Message;
-import java.util.Arrays;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
+import me.mcofficer.esparser.DataNode;
+import reactor.core.publisher.Mono;
 
 public abstract class NodeInfoCommand extends SlashCommand {
-    protected final static int QUERY_COUNT = 14;
+    protected final static int DISPLAY_COUNT = 14;
+    protected final static int QUERY_COUNT = DISPLAY_COUNT + 5;
     protected final static int PRIMARY_COUNT = 6;
     protected final static int MAX_CHARS_PER_FIELD = 1000;
     protected final static int MAX_BUTTON_LABEL_LENGTH = 60;
@@ -76,29 +79,36 @@ public abstract class NodeInfoCommand extends SlashCommand {
             return event.reply().withContent(builder.toString()).withEphemeral(ephemeral);
         }
 
-        int count = QUERY_COUNT;
+        int count = DISPLAY_COUNT;
         if(count > listItem.size())
             count = listItem.size();
         int width = 3;
         int height = (count + 1 + 1) / width;
-        ActionRow rows[] = new ActionRow[height];
-        Button buttons[] = new Button[width];
-        for(int i = 0; i <= count; i++) {
-            if(i == count)
-                buttons[i % width] = Button.success(getActiveSubcommandPath() + ":X:close:close", "close");
-            else {
-                String label = listItem.get(i);
-                if(label.length() > MAX_BUTTON_LABEL_LENGTH) {
-                    label = label.substring(0, MAX_BUTTON_LABEL_LENGTH - 3) + "...";
-                }
-                if(i < PRIMARY_COUNT)
-                    buttons[i % width] = Button.primary(buttonId.get(i), label);
-                else
-                    buttons[i % width] = Button.secondary(buttonId.get(i), label);
+        List<ActionRow> rows = new ArrayList<>();
+        List<Button> buttons = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        for(int i = 0; seen.size() < count && i < buttonId.size(); i++) {
+            if(seen.contains(buttonId.get(i)))
+                continue;
+
+            seen.add(buttonId.get(i));
+                
+            String label = listItem.get(i);
+            if(label.length() > MAX_BUTTON_LABEL_LENGTH)
+                label = label.substring(0, MAX_BUTTON_LABEL_LENGTH - 3) + "...";
+            if(seen.size() < PRIMARY_COUNT)
+                buttons.add(Button.primary(buttonId.get(i), label));
+            else
+                buttons.add(Button.secondary(buttonId.get(i), label));
+                
+            if(buttons.size() >= width) {
+                rows.add(ActionRow.of(buttons));
+                buttons.clear();
             }
-            if((i + 1) % width == 0)
-                rows[i / width] = ActionRow.of(buttons);
         }
+        buttons.add(Button.success(getActiveSubcommandPath() + ":X:close:close", "close"));
+        if(buttons.size() > 0)
+            rows.add(ActionRow.of(buttons));
 
         return event.reply().withContent(builder.toString())
                  .withEphemeral(ephemeral).withComponents(rows);

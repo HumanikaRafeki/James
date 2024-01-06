@@ -32,36 +32,39 @@ public class LookupCommand extends NodeInfoCommand {
 
     @Override
     protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, SlashSubcommand subcommand) {
+        NodeInfo chosen = found.get(found.size() - 1);
         List<EmbedCreateSpec> embeds = new ArrayList<>();
         StringBuilder builder = new StringBuilder(100);
         String before = James.getConfig().endlessSkyData;
         String after = James.getConfig().endlessSkyDataQuery;
         AddParagraphFields fieldAdder = new AddParagraphFields(4, false);
-        for(NodeInfo info : found) {
-            List<EmbedCreateFields.Field> fields = new ArrayList<>();
 
-            Optional<List<DataNode>> descriptions = info.getDescription();
-            if(descriptions.isPresent())
-                fieldAdder.add("Description", fields, descriptions.get(), MAX_CHARS_PER_FIELD);
+        NodeInfo info = found.get(found.size() - 1);
 
-            fieldAdder.setMaxFields(5);
-            Optional<List<DataNode>> spaceport = info.getSpaceport();
-            if(spaceport.isPresent())
-                fieldAdder.add("Spaceport", fields, spaceport.get(), MAX_CHARS_PER_FIELD);
+        List<EmbedCreateFields.Field> fields = new ArrayList<>();
 
-            if(fields.size() < 1)
-                fields.add(EmbedCreateFields.Field.of("Description", "*no description*", false));
+        Optional<List<DataNode>> descriptions = info.getDescription();
+        if(descriptions.isPresent())
+            fieldAdder.add("Description", fields, descriptions.get(), MAX_CHARS_PER_FIELD);
 
-            EmbedCreateSpec embed = EmbedCreateSpec.create().withFields(fields)
-                .withTitle(info.getBestType() + ' ' + info.getName());
+        fieldAdder.setMaxFields(5);
+        Optional<List<DataNode>> spaceport = info.getSpaceport();
+        if(spaceport.isPresent())
+            fieldAdder.add("Spaceport", fields, spaceport.get(), MAX_CHARS_PER_FIELD);
 
-            String[] imageAndThumbnail = getImageAndThumbnail(info, false);
-            if(imageAndThumbnail[0] != null)
-                embed = embed.withImage(imageAndThumbnail[0]);
-            if(imageAndThumbnail[1] != null)
-                embed = embed.withThumbnail(imageAndThumbnail[1]);
-            embeds.add(embed);
-        }
+        if(fields.size() < 1)
+            fields.add(EmbedCreateFields.Field.of("Description", "*no description*", false));
+
+        EmbedCreateSpec embed = EmbedCreateSpec.create().withFields(fields)
+            .withTitle(info.getBestType() + ' ' + info.getName());
+
+        String[] imageAndThumbnail = getImageAndThumbnail(info, false);
+        if(imageAndThumbnail[0] != null)
+            embed = embed.withImage(imageAndThumbnail[0]);
+        if(imageAndThumbnail[1] != null)
+            embed = embed.withThumbnail(imageAndThumbnail[1]);
+        embeds.add(embed);
+
         return buttonEvent.getReply().flatMap(reply -> buttonEvent.editReply().withEmbeds(embeds).withComponents()).then();
     }
 
