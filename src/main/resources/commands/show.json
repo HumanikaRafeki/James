@@ -4,6 +4,37 @@
     "dm_permission": false,
     "options": [
         {
+            "name": "swizzle",
+            "description": "Displays information about a swizzle",
+            "type": 1,
+            "options": [
+                {
+                    "name": "swizzle",
+                    "description": "The swizzle number 0-28",
+                    "type": 4,
+                    "min_value": 0,
+                    "max_value": 28,
+                    "required": true
+                },
+                {
+                    "name": "hidden",
+                    "description": "Hide response from other users.",
+                    "type": 3,
+                    "required": false,
+                    "choices": [
+                        {
+                            "name": "hide",
+                            "value": "hide"
+                        },
+                        {
+                            "name": "show",
+                            "value": "show"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
 	    "name": "data",
             "description": "Finds game data nodes",
             "type": 1,

@@ -103,7 +103,7 @@ public class ImageSwizzler {
         else if(swizzle == TWENTY_NINE_SWIZZLES)
             output = createTwentyNineSwizzles(width, height, imgData, work, swizzled);
         else if(swizzle > 0)
-            createSwizzledImage(width, height, imgData, work, swizzled, swizzles[swizzle], 0, 0);
+            createSwizzledImage(width, height, imgData, work, swizzled, swizzles[swizzle - 1], 0, 0);
         return output;
     }
 

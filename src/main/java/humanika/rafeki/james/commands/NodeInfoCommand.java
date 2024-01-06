@@ -40,9 +40,11 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
     public Mono<Void> handleChatCommand() {
         Optional<InteractionEventHandler> subcommand = findSubcommand();
         boolean ephemeral;
-        if(subcommand.isPresent())
+        if(subcommand.isPresent()) {
+            if(!(subcommand.get() instanceof NodeInfoSubcommand))
+                return subcommand.get().handleChatCommand();
             ephemeral = subcommand.get().getData().isEphemeral();
-        else
+        } else
             ephemeral = data.isEphemeral();
         Optional<String> maybeType = getType();
         Optional<String> maybeQuery = getQuery();

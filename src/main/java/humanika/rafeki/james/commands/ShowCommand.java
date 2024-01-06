@@ -86,6 +86,11 @@ System.out.println("NOTHING IN SHOWCOMMAND");
     public Optional<InteractionEventHandler> findSubcommand() {
         Optional<List<ApplicationCommandInteractionOption>> sub;
 
+        sub = data.getSubcommandOptions("swizzle");
+        if(sub.isPresent()) {
+            return Optional.of(new ShowSwizzleSubcommand().withChatOptions(sub.get(), getChatEvent()));
+        }
+
         sub = data.getSubcommandOptions("data");
         if(sub.isPresent()) {
             subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, false).withChatOptions(sub.get(), getChatEvent()));
