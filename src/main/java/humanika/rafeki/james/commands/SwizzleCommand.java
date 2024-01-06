@@ -73,9 +73,8 @@ public class SwizzleCommand extends SlashCommand {
         String vectorInfo = vectorStrings[swizzle];
 
 
-        String uriString = James.getConfig().botRepo.toString();
-        String last = uriString.replaceAll("/*$", "").replaceAll(".*/", "");
-        EmbedCreateSpec embed = EmbedCreateSpec.create().withUrl(uriString).withTitle(last)
+        EmbedCreateSpec embed = EmbedCreateSpec.create()
+            .withTitle("Swizzle " + swizzle + " Sample")
             .withThumbnail(James.getConfig().swizzledThumbnailPath + swizzle + ".png");
 
         StringBuilder description = new StringBuilder();

@@ -1,19 +1,17 @@
 package humanika.rafeki.james.commands;
 
-import java.util.Optional;
-import java.time.Duration;
-import java.net.URI;
-
-// import discord4j.core.event.domain.interaction.InteractionApplicationCommandCallbackReplyMono;
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import reactor.core.publisher.Mono;
-import discord4j.gateway.ShardInfo;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.spec.EmbedCreateFields;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.gateway.GatewayClient;
-
+import discord4j.gateway.ShardInfo;
 import humanika.rafeki.james.James;
+import java.net.URI;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 public class PingCommand extends SlashCommand {
     @Override
@@ -29,9 +27,7 @@ public class PingCommand extends SlashCommand {
             .withDescription(getPing())
             .withFooter(EmbedCreateFields.Footer.of(getCommentary(), null));
 
-        String uriString = James.getConfig().botRepo.toString();
-        String last = uriString.replaceAll("/*$", "").replaceAll(".*/", "");
-        creator = creator.withUrl(uriString).withTitle(last);
+        creator = creator.withTitle("Pong");
 
         return event.reply().withEmbeds(creator).withEphemeral(isEphemeral());
     }
@@ -42,11 +38,19 @@ public class PingCommand extends SlashCommand {
     }
 
     private String getPing() {
+        long interactionTime = event.getInteraction().getId().getTimestamp().toEpochMilli();
+        long interactionAge = Instant.now().toEpochMilli() - interactionTime;
+        double latencyAgeDouble = interactionAge;
+        double interactionBPM = Math.round(60.0 / Math.max(latencyAgeDouble / 1000, 1e-9));
+        String latencyMessage = String.format("Communication latency is %.1f ms (%.1f BPM)\n",
+                                              latencyAgeDouble, interactionBPM);
+
         ShardInfo shard = event.getShardInfo();
         int shardId = shard.getIndex();
         GatewayDiscordClient discord = event.getClient();
         Optional<GatewayClient> optionalGateway = discord.getGatewayClient(shardId);
-        String ping = "*cannot find gateway*";
+        String pingMessage = "*cannot find gateway*";
+
         if(optionalGateway.isPresent()) {
             GatewayClient gateway = optionalGateway.get();
             Duration responseTime = gateway.getResponseTime();
@@ -55,9 +59,9 @@ public class PingCommand extends SlashCommand {
             double milliping = seconds*1e3 + nano*1e-6; // milliseconds
             if(milliping > 0) {
                 double bpm = Math.round(60.0 / Math.max(milliping / 1000, 1e-9));
-                ping = String.format("Last heartbeat took %.1f ms (%.1f BPM).", milliping, bpm);
+                pingMessage = String.format("Last heartbeat took %.1f ms (%.1f BPM).", milliping, bpm);
             }
         }
-        return ping;
+        return latencyMessage + pingMessage;
     }
 }
