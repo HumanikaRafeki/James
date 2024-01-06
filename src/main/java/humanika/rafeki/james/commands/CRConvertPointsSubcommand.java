@@ -1,4 +1,5 @@
 package humanika.rafeki.james.commands;
+
 import reactor.core.publisher.Mono;
 
 public class CRConvertPointsSubcommand extends PrimitiveSlashSubcommand {
@@ -9,14 +10,10 @@ public class CRConvertPointsSubcommand extends PrimitiveSlashSubcommand {
 
     @Override
     public Mono<Void> handleChatCommand() {
-        if(options == null)
-            System.out.println("NULL OPTIONS");
-        if(chatEvent == null)
-            System.out.println("NULL EVENT");
-        long value = getLong("value").get();
-        return chatEvent.reply(String.format("Combat rating %s requires %s combat points.",
+        long value = data.getLongOrDefault("value", 0);
+        return getChatEvent().reply(String.format("Combat rating %s requires %s combat points.",
                                          value, getPointsFromRating(value)))
-            .withEphemeral(isEphemeral());
+            .withEphemeral(data.isEphemeral());
     }
 
     private long getPointsFromRating(long rating) {

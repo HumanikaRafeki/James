@@ -21,62 +21,76 @@ import reactor.core.publisher.Mono;
  *  a getName() method to provide the case-sensitive name of the command.
  *  and a handleChatCommand() method which will house all the logic for processing each command.
  */
-public abstract class PrimitiveSlashCommand implements InteractionEventHandler, EventDataProvider {
+public abstract class PrimitiveSlashCommand implements Cloneable, InteractionEventHandler {
     /** Chat event being processed. Will be null in responses */
-    protected ChatInputInteractionEvent event = null;
+    private ChatInputInteractionEvent chatEvent = null;
 
     /** Button event being processed. Will be null in any other situation. */
-    protected ButtonInteractionEvent buttonEvent = null;
+    private ButtonInteractionEvent buttonEvent = null;
 
-    public DeferrableInteractionEvent getEvent() {
-        if(event != null)
-            return event;
-        return buttonEvent;
+    protected EventDataProvider data = null;
+
+    @Override
+    public String getFullName() {
+        return getName();
     }
 
-    public Interaction getInteraction() {
-        return getEvent().getInteraction();
+    @Override
+    public Optional<String> getJson() {
+        return Optional.of(getName() + ".json");
     }
 
-    public PrimitiveSlashCommand withChatEvent(ChatInputInteractionEvent event) {
+    @Override
+    public Mono<Void> handleChatCommand() {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> handleButtonInteraction() {
+        return Mono.empty();
+    }
+
+    @Override
+    public EventDataProvider getData() {
+        return data;
+}
+
+    @Override
+    public PrimitiveSlashCommand withChatEvent(ChatInputInteractionEvent chatEvent) {
         try {
-            PrimitiveSlashCommand cloned = clone();
-            cloned.event = event;
+            PrimitiveSlashCommand cloned = (PrimitiveSlashCommand)clone();
+            cloned.data = new ChatEventDataProvider(chatEvent);
+            cloned.chatEvent = chatEvent;
             return cloned;
         } catch(CloneNotSupportedException cnse) {
             // Should never happen.
-            return null;
-        }
-    }
-
-    public PrimitiveSlashCommand withButtonEvent(ButtonInteractionEvent buttonEvent) {
-        try {
-            PrimitiveSlashCommand cloned = clone();
-            cloned.buttonEvent = buttonEvent;
-            return cloned;
-        } catch(CloneNotSupportedException cnse) {
-            // Should never happen.
+            System.out.println("Clone not supported!");
             return null;
         }
     }
 
     @Override
-    public PrimitiveSlashCommand clone() throws CloneNotSupportedException {
+    public InteractionEventHandler withChatOptions(List<ApplicationCommandInteractionOption> options, ChatInputInteractionEvent chatEvent) {
+        return withChatEvent(chatEvent);
+    }
+
+    @Override
+    public PrimitiveSlashCommand withButtonEvent(ButtonInteractionEvent buttonEvent) {
         try {
-            PrimitiveSlashCommand cloned = this.getClass().newInstance();
-            cloned.event = event;
+            PrimitiveSlashCommand cloned = (PrimitiveSlashCommand)clone();
+            cloned.data = new ButtonEventDataProvider(buttonEvent);
+            cloned.buttonEvent = buttonEvent;
             return cloned;
-        } catch(InstantiationException ie) {
-            throw new CloneNotSupportedException(ie.toString());
-        } catch(IllegalAccessException ie) {
-            throw new CloneNotSupportedException(ie.toString());
+        } catch(CloneNotSupportedException cnse) {
+            // Should never happen.
+            System.out.println("Clone not supported!");
+            return null;
         }
     }
 
-    public abstract String getName();
-
-    public String getFullName() {
-        return getName();
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 
     /** Full of the Subcommand being processed. Syntax: "commandname subcommand subsubcommand" */
@@ -84,83 +98,15 @@ public abstract class PrimitiveSlashCommand implements InteractionEventHandler, 
         return getName();
     }
 
-    public Optional<String> getJson() {
-        return Optional.of(getName() + ".json");
-    }
-
-    public Mono<Void> handleChatCommand() {
-        return Mono.empty();
-    }
-
-    public Mono<Void> handleButtonInteraction() {
-        return Mono.empty();
-    }
-
-    public Optional<PrimitiveSlashSubcommand> findSubcommand() {
+    public Optional<InteractionEventHandler> findSubcommand() {
         return Optional.empty();
     }
 
-    public boolean isEphemeral() {
-        Optional<String> maybeHide = getString("hidden");
-        return maybeHide.isPresent() && maybeHide.get().equals("hide");
+    protected ChatInputInteractionEvent getChatEvent() {
+        return chatEvent;
     }
 
-    public Optional<List<ApplicationCommandInteractionOption>> getSubcommandOptions(String name) {
-        Optional<ApplicationCommandInteractionOption> subcommand = event.getOption(name);
-        Optional<List<ApplicationCommandInteractionOption>> result;
-        if(!subcommand.isPresent())
-            result = Optional.empty();
-        else
-            result = Optional.of(subcommand.get().getOptions());
-        return result;
-    }
-
-    public String getStringOrDefault(String name, String def) {
-        Optional<String> result = getString(name);
-        return result.isPresent() ? result.get() : def;
-    }
-
-    public Optional<String> getString(String name) {
-        return event.getOption(name)
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asString);
-    }
-
-    public Optional<Long> getLong(String name) {
-        return event.getOption(name)
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asLong);
-    }
-
-    public long getLongOrDefault(String name, long def) {
-        Optional<Long> result = getLong(name);
-        return result.isPresent() ? result.get() : def;
-    }
-
-    public Optional<Boolean> getBoolean(String name) {
-        return event.getOption(name)
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asBoolean);
-    }
-
-    public Boolean getBooleanOrDefault(String name, Boolean def) {
-        Optional<Boolean> result = getBoolean(name);
-        return result.isPresent() ? result.get() : def;
-    }
-
-    public Optional<Attachment> getAttachment(String name) {
-        return event.getOption(name)
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asAttachment);
-    }
-
-    public Mono<Void> handleDirectMessage() {
-        String babble = James.getState().jamesPhrase("JAMES::ping");
-        EmbedCreateSpec creator = EmbedCreateSpec.create()
-            .withDescription("This command is unavailable in direct messages.")
-            .withTitle("Not in Direct Messages");
-        if(babble != null)
-            creator = creator.withFooter(EmbedCreateFields.Footer.of(babble, null));
-        return event.reply().withEmbeds(creator);
+    protected ButtonInteractionEvent getButtonEvent() {
+        return buttonEvent;
     }
 }

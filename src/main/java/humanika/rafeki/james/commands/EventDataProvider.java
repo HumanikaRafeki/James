@@ -1,13 +1,13 @@
 package humanika.rafeki.james.commands;
 
-import java.util.Optional;
-import reactor.core.publisher.Mono;
-import discord4j.core.object.command.Interaction;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
-import java.util.List;
+import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Attachment;
+import java.util.List;
+import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 public interface EventDataProvider {
     public Interaction getInteraction();

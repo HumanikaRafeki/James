@@ -2,36 +2,36 @@ package humanika.rafeki.james.commands;
 
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.core.object.component.Button;
-import discord4j.core.object.component.ActionRow;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.Embed;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.data.NodeInfo;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import reactor.core.publisher.Mono;
-import discord4j.core.spec.EmbedCreateFields;
-import me.mcofficer.esparser.DataNode;
-import discord4j.core.object.Embed;
-import discord4j.core.object.entity.Message;
-import java.util.Arrays;
 import java.util.function.BooleanSupplier;
+import me.mcofficer.esparser.DataNode;
+import reactor.core.publisher.Mono;
 
 public class ShowCommand extends NodeInfoCommand {
 
     private ShowSubcommand subcommand = null;
 
     protected Optional<String> getType() {
-        return subcommand.getString("type");
+        return subcommand.getData().getString("type");
     }
 
     protected Optional<String> getQuery() {
-        return subcommand.getString("query");
+        return subcommand.getData().getString("query");
     }
 
     @Override
@@ -59,44 +59,43 @@ public class ShowCommand extends NodeInfoCommand {
             return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> !info.isShipVariant());
     }
 
-    @Override
-    protected Optional<PrimitiveSlashSubcommand> subcommandFor(String[] names) {
+    protected Optional<InteractionEventHandler> subcommandFor(String[] names) {
         if(names.length != 2) {
             return Optional.empty();
         }
         if(names[1].equals("data")) {
-            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, false).forButtonEvent(buttonEvent));
+            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, false).withButtonEvent(getButtonEvent()));
             return Optional.of(subcommand);
         }
         else if(names[1].equals("image")) {
-            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(false, true).forButtonEvent(buttonEvent));
+            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(false, true).withButtonEvent(getButtonEvent()));
             return Optional.of(subcommand);
         } else if(names[1].equals("both")) {
-            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, true).forButtonEvent(buttonEvent));
+            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, true).withButtonEvent(getButtonEvent()));
             return Optional.of(subcommand);
         }
         return Optional.empty();
     }
 
     @Override
-    public Optional<PrimitiveSlashSubcommand> findSubcommand() {
+    public Optional<InteractionEventHandler> findSubcommand() {
         Optional<List<ApplicationCommandInteractionOption>> sub;
 
-        sub = getSubcommandOptions("data");
+        sub = data.getSubcommandOptions("data");
         if(sub.isPresent()) {
-            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, false).forChatEvent(sub.get(), event));
+            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, false).withChatOptions(sub.get(), getChatEvent()));
             return Optional.of(subcommand);
         }
 
-        sub = getSubcommandOptions("image");
+        sub = data.getSubcommandOptions("image");
         if(sub.isPresent()) {
-            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(false, true).forChatEvent(sub.get(), event));
+            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(false, true).withChatOptions(sub.get(), getChatEvent()));
             return Optional.of(subcommand);
         }
 
-        sub = getSubcommandOptions("both");
+        sub = data.getSubcommandOptions("both");
         if(sub.isPresent()) {
-            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, true).forChatEvent(sub.get(), event));
+            subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, true).withChatOptions(sub.get(), getChatEvent()));
             return Optional.of(subcommand);
         }
 

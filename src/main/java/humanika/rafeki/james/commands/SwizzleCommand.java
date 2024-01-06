@@ -1,24 +1,22 @@
 package humanika.rafeki.james.commands;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import javax.imageio.ImageIO;
-
-import reactor.core.publisher.Mono;
 import discord4j.core.object.entity.Attachment;
-import discord4j.core.spec.MessageCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
-
+import discord4j.core.spec.MessageCreateFields;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.data.Government;
 import humanika.rafeki.james.utils.ImageSwizzler;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
+import javax.imageio.ImageIO;
+import reactor.core.publisher.Mono;
 
 public class SwizzleCommand extends PrimitiveSlashCommand {
     private static final String[] vectorStrings = {
@@ -62,14 +60,11 @@ public class SwizzleCommand extends PrimitiveSlashCommand {
 
     @Override
     public Mono<Void> handleChatCommand() {
-        if(!event.getInteraction().getGuildId().isPresent())
-            return handleDirectMessage();
-
-        Optional<Long> swizzleArg = getLong("swizzle");
+        Optional<Long> swizzleArg = data.getLong("swizzle");
 
         int swizzle = swizzleArg.isPresent() ? (int)swizzleArg.get().longValue() : 0;
         if(swizzle < 0 || swizzle >= vectorStrings.length)
-            return event.reply("Swizzle not found!");
+            return getChatEvent().reply("Swizzle not found!");
         String vectorInfo = vectorStrings[swizzle];
 
 
@@ -89,6 +84,6 @@ public class SwizzleCommand extends PrimitiveSlashCommand {
             description.append("\n\n**No governments use this swizzle.**\n");
 
         embed = embed.withDescription(description.toString());
-        return event.reply().withEmbeds(embed).withEphemeral(isEphemeral());
+        return getChatEvent().reply().withEmbeds(embed).withEphemeral(data.isEphemeral());
     }
 }

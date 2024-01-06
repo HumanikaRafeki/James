@@ -1,12 +1,12 @@
 package humanika.rafeki.james.commands;
 
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.data.CreatorTemplate;
-import reactor.core.publisher.Mono;
-import java.util.List;
 import java.util.ArrayList;
-import discord4j.core.object.component.Button;
-import discord4j.core.object.component.ActionRow;
+import java.util.List;
+import reactor.core.publisher.Mono;
 
 public class TemplateCommand extends PrimitiveSlashCommand {
     private final static int MAX_ROWS = 5;
@@ -24,7 +24,7 @@ public class TemplateCommand extends PrimitiveSlashCommand {
         StringBuilder response = new StringBuilder();
 
         response.append("template:");
-        boolean ephemeral = isEphemeral();
+        boolean ephemeral = data.isEphemeral();
         response.append(ephemeral ? "E:template:" : "-:template:");
         String buttonId = response.toString();
 
@@ -57,21 +57,21 @@ public class TemplateCommand extends PrimitiveSlashCommand {
         if(buttons.size() > 0)
             rows.add(ActionRow.of(buttons));
 
-        return event.reply(response.toString()).withEphemeral(ephemeral).withComponents(rows);
+        return getChatEvent().reply(response.toString()).withEphemeral(ephemeral).withComponents(rows);
     }
 
     public Mono<Void> handleButtonInteraction() {
-        String[] split = buttonEvent.getCustomId().split(":", 4);
+        String[] split = getButtonEvent().getCustomId().split(":", 4);
         String flags = split[1];
         boolean ephemeral = flags.contains("E");
         String action = split[2];
         String id = split[3];
         if(action.equals("close"))
-            return buttonEvent.deleteReply().then();
+            return getButtonEvent().deleteReply().then();
         else {
             StringBuilder response = new StringBuilder();
             String cleaned = id.replaceAll("`", "'");
-            String mention = ephemeral ? null : buttonEvent.getInteraction().getUser().getMention();
+            String mention = ephemeral ? null : getButtonEvent().getInteraction().getUser().getMention();
             if(mention != null && mention.length() > 0)
                 response.append(mention);
             else
@@ -88,7 +88,7 @@ public class TemplateCommand extends PrimitiveSlashCommand {
                 response.append("\nHere it is:\n").append(url);
                 response.insert(0, "## Your Template\n");
             }
-            return buttonEvent.editReply().withContent(response.toString()).withComponents().then();
+            return getButtonEvent().editReply().withContent(response.toString()).withComponents().then();
         }
     }
 }

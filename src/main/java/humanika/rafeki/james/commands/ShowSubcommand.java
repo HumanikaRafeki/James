@@ -93,7 +93,7 @@ class ShowSubcommand extends PrimitiveSlashSubcommand {
                     embeds.add(EmbedCreateSpec.create().withDescription("No images found.").withTitle("No Images"));
             }
 
-            return buttonEvent.getReply().flatMap(reply -> buttonEvent.editReply().withEmbeds(embeds).withComponents().withFiles(attachmentField)).then();
+            return getButtonEvent().getReply().flatMap(reply -> getButtonEvent().editReply().withEmbeds(embeds).withComponents().withFiles(attachmentField)).then();
         } catch(Exception e) {
             try {
                 attachmentStream.close();

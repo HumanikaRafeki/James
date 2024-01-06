@@ -1,20 +1,18 @@
 package humanika.rafeki.james.commands;
 
-import java.util.Optional;
-import java.time.Duration;
-import java.net.URI;
-import java.util.List;
-import discord4j.core.object.command.ApplicationCommandInteractionOption;
-// import discord4j.core.event.domain.interaction.InteractionApplicationCommandCallbackReplyMono;
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import reactor.core.publisher.Mono;
-import discord4j.gateway.ShardInfo;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.spec.EmbedCreateFields;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.gateway.GatewayClient;
-
+import discord4j.gateway.ShardInfo;
 import humanika.rafeki.james.James;
+import java.net.URI;
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 public class CRConvertCommand extends PrimitiveSlashCommand {
     @Override
@@ -24,25 +22,22 @@ public class CRConvertCommand extends PrimitiveSlashCommand {
 
     @Override
     public Mono<Void> handleChatCommand() {
-        if(!event.getInteraction().getGuildId().isPresent())
-            return handleDirectMessage();
-
-	Optional<PrimitiveSlashSubcommand> subcommand = findSubcommand();
+	Optional<InteractionEventHandler> subcommand = findSubcommand();
         if(!subcommand.isPresent())
             // Should never get here.
-            return event.reply("You must use the cr or points subcommands.");
+            return getChatEvent().reply("You must use the cr or points subcommands.");
 
         return subcommand.get().handleChatCommand();
     }
 
     @Override
-    public Optional<PrimitiveSlashSubcommand> findSubcommand() {
-        Optional<List<ApplicationCommandInteractionOption>> cr = getSubcommandOptions("cr");
+    public Optional<InteractionEventHandler> findSubcommand() {
+        Optional<List<ApplicationCommandInteractionOption>> cr = data.getSubcommandOptions("cr");
         if(cr.isPresent())
-            return Optional.of(new CRConvertValueSubcommand().forChatEvent(cr.get(), event));
-        Optional<List<ApplicationCommandInteractionOption>> points = getSubcommandOptions("points");
+            return Optional.of(new CRConvertValueSubcommand().withChatOptions(cr.get(), getChatEvent()));
+        Optional<List<ApplicationCommandInteractionOption>> points = data.getSubcommandOptions("points");
         if(points.isPresent())
-            return Optional.of(new CRConvertPointsSubcommand().forChatEvent(points.get(), event));
+            return Optional.of(new CRConvertPointsSubcommand().withChatOptions(points.get(), getChatEvent()));
         return Optional.empty();
     }
 }

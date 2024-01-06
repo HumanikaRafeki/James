@@ -2,12 +2,12 @@ package humanika.rafeki.james.commands;
 
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.spec.EmbedCreateSpec;
-import java.util.regex.Pattern;
-import reactor.core.publisher.Mono;
-import java.util.Optional;
+import humanika.rafeki.james.James;
 import humanika.rafeki.james.Utils;
 import java.util.List;
-import humanika.rafeki.james.James;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import reactor.core.publisher.Mono;
 
 public class GitCommand extends PrimitiveSlashCommand {
 
@@ -20,35 +20,35 @@ public class GitCommand extends PrimitiveSlashCommand {
 
     @Override
     public Mono<Void> handleChatCommand() {
-        if(!event.getInteraction().getGuildId().isPresent())
-            return handleDirectMessage();
-
         Optional<List<ApplicationCommandInteractionOption>> options;
 
-        options = getSubcommandOptions("issue");
+        options = data.getSubcommandOptions("issue");
         if(options.isPresent()) {
-            PrimitiveSlashSubcommand subcommand = new NamedSubcommand().withName("issue").forChatEvent(options.get(), event);
-            String issue = String.valueOf(subcommand.getLongOrDefault("issue", 0));
-            return replyUrl(false, subcommand.isEphemeral(), "https://github.com/endless-sky/endless-sky/issues/",
+            InteractionEventHandler subcommand = new NamedSubcommand().withName("issue").withChatOptions(options.get(), getChatEvent());
+            String issue = String.valueOf(subcommand.getData().getLongOrDefault("issue", 0));
+            return replyUrl(false, subcommand.getData().isEphemeral(),
+                            "https://github.com/endless-sky/endless-sky/issues/",
                             issue, "issue number", "## Git Issue\n", "## Invalid Git Issue\n");
         }
 
-        options = getSubcommandOptions("pr");
+        options = data.getSubcommandOptions("pr");
         if(!options.isPresent())
-            options = getSubcommandOptions("pull");
+            options = data.getSubcommandOptions("pull");
         if(options.isPresent()) {
-            PrimitiveSlashSubcommand subcommand = new NamedSubcommand().withName("pr").forChatEvent(options.get(), event);
-            String pull = String.valueOf(subcommand.getLongOrDefault("pr", 0));
-            return replyUrl(false, subcommand.isEphemeral(), "https://github.com/endless-sky/endless-sky/pull/",
+            InteractionEventHandler subcommand = new NamedSubcommand().withName("pr").withChatOptions(options.get(), getChatEvent());
+            String pull = String.valueOf(subcommand.getData().getLongOrDefault("pr", 0));
+            return replyUrl(false, subcommand.getData().isEphemeral(),
+                            "https://github.com/endless-sky/endless-sky/pull/",
                             pull, "pull request number", "## Git Pull Request (PR)\n", "## Invalid Pull Request\n");
         }
 
-        options = getSubcommandOptions("commit");
+        options = data.getSubcommandOptions("commit");
         if(options.isPresent()) {
-            PrimitiveSlashSubcommand subcommand = new NamedSubcommand().withName("commit").forChatEvent(options.get(), event);
-            String hash = subcommand.getStringOrDefault("hash", "1234567");
+            InteractionEventHandler subcommand = new NamedSubcommand().withName("commit").withChatOptions(options.get(), getChatEvent());
+            String hash = subcommand.getData().getStringOrDefault("hash", "1234567");
             boolean isAHash = VALID_HASH.matcher(hash).matches();
-            return replyUrl(!isAHash, subcommand.isEphemeral(), "https://github.com/endless-sky/endless-sky/commit/",
+            return replyUrl(!isAHash, subcommand.getData().isEphemeral(),
+                            "https://github.com/endless-sky/endless-sky/commit/",
                             hash, "commit hash", "## Git Commit Hash\n", "## Invalid Hash\n");
         }
 
@@ -62,7 +62,7 @@ public class GitCommand extends PrimitiveSlashCommand {
 
         StringBuilder response = new StringBuilder();
 
-        String mention = ephemeral ? null : event.getInteraction().getUser().getMention();
+        String mention = ephemeral ? null : data.getInteraction().getUser().getMention();
         if(mention != null && mention.length() > 0)
             response.append(mention);
         else
@@ -80,7 +80,7 @@ public class GitCommand extends PrimitiveSlashCommand {
             response.append("\nIt's here:\n").append(url).insert(0, successTitle);
         else
             response.append("\nBut that ").append(what).append(" is invalid. Sorry.").insert(0, failTitle);
-        return event.reply().withContent(response.toString()).withEphemeral(ephemeral);
+        return getChatEvent().reply().withContent(response.toString()).withEphemeral(ephemeral);
     }
 
     private String getCommentary() {

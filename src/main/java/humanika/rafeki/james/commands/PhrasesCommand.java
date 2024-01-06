@@ -1,18 +1,17 @@
 package humanika.rafeki.james.commands;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.Utils;
-import humanika.rafeki.james.utils.KorathCipher;
 import humanika.rafeki.james.data.EndlessSky;
 import humanika.rafeki.james.data.JamesState;
-import humanika.rafeki.james.phrases.PhraseDatabase;
-import humanika.rafeki.james.phrases.PhraseLimits;
 import humanika.rafeki.james.phrases.NewsDatabase;
 import humanika.rafeki.james.phrases.Phrase;
+import humanika.rafeki.james.phrases.PhraseDatabase;
+import humanika.rafeki.james.phrases.PhraseLimits;
+import humanika.rafeki.james.utils.KorathCipher;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class PhrasesCommand extends ParseCommand {
     private static final String[] VAR_ARRAY = {"phrase1", "phrase2", "phrase3", "phrase4"};

@@ -15,19 +15,13 @@ public class GreetCommand extends PrimitiveSlashCommand {
 
     @Override
     public Mono<Void> handleChatCommand() {
-        String name = event.getOption("name")
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asString)
-            .get(); //This is warning us that we didn't check if its present, we can ignore this on required options
+        String name = data.getString("name").get();
 
-        Optional<String> maybeReason = event.getOption("reason")
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asString); //This is warning us that we didn't check if its present, we can ignore this on required options
-
+        Optional<String> maybeReason = data.getString("reason");
         String reason = maybeReason.isPresent() ? maybeReason.get() : "*unspecified*";
 
         //Reply to the slash command, with the name the user supplied
-        return  event.reply()
+        return  getChatEvent().reply()
             .withEphemeral(true)
             .withContent("Hello, " + name + ". I acknowledge your reason: " + reason);
     }

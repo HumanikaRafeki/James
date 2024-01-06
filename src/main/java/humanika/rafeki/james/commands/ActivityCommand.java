@@ -13,6 +13,6 @@ public class ActivityCommand extends PrimitiveSlashCommand {
     @Override
     public Mono<Void> handleChatCommand() {
         String babble = James.getState().jamesPhrase("JAMES::activity");
-        return event.reply(babble!=null ? babble : "I ain't no narc.").withEphemeral(isEphemeral());
+        return getChatEvent().reply(babble!=null ? babble : "I ain't no narc.").withEphemeral(data.isEphemeral());
     }
 }

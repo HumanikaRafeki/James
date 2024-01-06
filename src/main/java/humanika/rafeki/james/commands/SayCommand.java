@@ -3,7 +3,6 @@ package humanika.rafeki.james.commands;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.Utils;
 import humanika.rafeki.james.utils.KorathCipher;

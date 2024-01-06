@@ -1,26 +1,26 @@
 package humanika.rafeki.james.commands;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import javax.imageio.ImageIO;
-import discord4j.core.object.command.Interaction;
-import discord4j.core.object.entity.Member;
-import reactor.core.publisher.Mono;
-import discord4j.core.object.entity.Attachment;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.spec.MessageCreateFields;
+import discord4j.core.object.command.Interaction;
+import discord4j.core.object.entity.Attachment;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.MessageCreateFields;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.data.JamesConfig;
 import humanika.rafeki.james.utils.ImageSwizzler;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
+import javax.imageio.ImageIO;
+import reactor.core.publisher.Mono;
 
 public class SwizzleImageCommand extends PrimitiveSlashCommand {
     private static final String[] VAR_ARRAY = {"image1", "image2", "image3", "image4"};
@@ -35,22 +35,20 @@ public class SwizzleImageCommand extends PrimitiveSlashCommand {
 
     @Override
     public Mono<Void> handleChatCommand() {
-        Interaction interaction = event.getInteraction();
-        if(!interaction.getGuildId().isPresent())
-            return handleDirectMessage();
-
+        Interaction interaction = data.getInteraction();
+        // FIXME: Don't block here.
         MessageChannel channel = interaction.getChannel().block();
         if(channel instanceof TextChannel) {
             TextChannel textChannel = (TextChannel)channel;
             if(textChannel.isNsfw())
-                return event.reply().withContent("I'm under 18 years of age and will not accept images in NSFW (age-restricted) channels. There's nothing wrong with having a beard at my age. Stop judging me.");
+                return getChatEvent().reply().withContent("I'm under 18 years of age and will not accept images in NSFW (age-restricted) channels. There's nothing wrong with having a beard at my age. Stop judging me.");
         }
 
         StringBuffer errors = new StringBuffer();
         List<Attachment> imageAttachments;
 
-        boolean swizzleAll = getBooleanOrDefault("all", Boolean.FALSE).booleanValue();
-        Optional<Long> swizzleLong = getLong("swizzle");
+        boolean swizzleAll = data.getBooleanOrDefault("all", Boolean.FALSE).booleanValue();
+        Optional<Long> swizzleLong = data.getLong("swizzle");
         OptionalInt swizzleInt = OptionalInt.empty();
         if(!swizzleAll) {
             if(swizzleLong.isPresent())
@@ -59,7 +57,7 @@ public class SwizzleImageCommand extends PrimitiveSlashCommand {
         ArrayList<MessageCreateFields.File> result = new ArrayList<>();
 
         for(String var : VAR_LIST) {
-            Optional<Attachment> maybeData = getAttachment(var);
+            Optional<Attachment> maybeData = data.getAttachment(var);
             if(!maybeData.isPresent())
                 continue;
             Attachment data = maybeData.get();
@@ -74,11 +72,14 @@ public class SwizzleImageCommand extends PrimitiveSlashCommand {
             if(errors.length() < 1)
                 // Should never happen, but just in case of logic errors:
                 errors.append("Please attach one or more images.");
-            return event.reply(errors.toString()).withEphemeral(isEphemeral());
+            return getChatEvent().reply(errors.toString()).withEphemeral(data.isEphemeral());
         } else if(errors.length() > 0)
-            return event.reply(errors.toString()).withFiles(result).withEphemeral(isEphemeral()).withContent(describe(swizzleLong, swizzleAll, interaction));
+            return getChatEvent().reply(errors.toString()).withFiles(result)
+                .withEphemeral(data.isEphemeral())
+                .withContent(describe(swizzleLong, swizzleAll, interaction));
         else
-            return event.reply().withFiles(result).withEphemeral(isEphemeral()).withContent(describe(swizzleLong, swizzleAll, interaction));
+            return getChatEvent().reply().withFiles(result).withEphemeral(data.isEphemeral())
+                .withContent(describe(swizzleLong, swizzleAll, interaction));
     }
 
     private String describe(Optional<Long> swizzle, boolean swizzleAll, Interaction interaction) {

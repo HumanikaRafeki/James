@@ -38,19 +38,20 @@ public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
 
     @Override
     public Mono<Void> handleChatCommand() {
-        if(!event.getInteraction().getGuildId().isPresent())
-            return handleDirectMessage();
-
-        Optional<PrimitiveSlashSubcommand> subcommand = findSubcommand();
-        boolean ephemeral = subcommand.isPresent() ? subcommand.get().isEphemeral() : isEphemeral();
+        Optional<InteractionEventHandler> subcommand = findSubcommand();
+        boolean ephemeral;
+        if(subcommand.isPresent())
+            ephemeral = subcommand.get().getData().isEphemeral();
+        else
+            ephemeral = data.isEphemeral();
         Optional<String> maybeType = getType();
         Optional<String> maybeQuery = getQuery();
         if(!maybeQuery.isPresent())
-            return event.reply().withContent("Provide a query for the search!").withEphemeral(true);
+            return getChatEvent().reply().withContent("Provide a query for the search!").withEphemeral(true);
 
         String query = maybeQuery.get().toLowerCase().replaceAll("[^0-9a-zA-Z-]+", " ").strip();
         if(query.length() < 1)
-            return event.reply().withContent("Provide a query for the search!").withEphemeral(true);
+            return getChatEvent().reply().withContent("Provide a query for the search!").withEphemeral(true);
 
         StringBuilder builder = new StringBuilder();
 
@@ -62,13 +63,13 @@ public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
         Optional<List<NodeInfo>> maybeMatches = getMatches(query, maybeType);
         if(!maybeMatches.isPresent()) {
             builder.append("\n*No matches.*");
-            return event.reply().withContent(builder.toString()).withEphemeral(ephemeral);
+            return getChatEvent().reply().withContent(builder.toString()).withEphemeral(ephemeral);
         }
 
         List<NodeInfo> matches = maybeMatches.get();
         if(matches.size() < 1) {
             builder.append("\n*No matches.*");
-            return event.reply().withContent(builder.toString()).withEphemeral(ephemeral);
+            return getChatEvent().reply().withContent(builder.toString()).withEphemeral(ephemeral);
         }
 
         List<String> listItem = new ArrayList<>();
@@ -76,7 +77,7 @@ public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
         getResponse(matches, listItem, buttonId, ephemeral);
         if(listItem.size() < 1) {
             builder.append("\n*No matches.*");
-            return event.reply().withContent(builder.toString()).withEphemeral(ephemeral);
+            return getChatEvent().reply().withContent(builder.toString()).withEphemeral(ephemeral);
         }
 
         int count = DISPLAY_COUNT;
@@ -110,14 +111,14 @@ public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
         if(buttons.size() > 0)
             rows.add(ActionRow.of(buttons));
 
-        return event.reply().withContent(builder.toString())
+        return getChatEvent().reply().withContent(builder.toString())
                  .withEphemeral(ephemeral).withComponents(rows);
     }
 
     public Mono<Void> handleButtonInteraction() {
-        String[] split = buttonEvent.getCustomId().split(":", 4);
+        String[] split = getButtonEvent().getCustomId().split(":", 4);
         if(split.length < 4) {
-            buttonEvent.editReply().withContent("Something got mixed up! The button had an invalid id.");
+            getButtonEvent().editReply().withContent("Something got mixed up! The button had an invalid id.");
             return Mono.empty();
         }
 
@@ -128,23 +129,23 @@ public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
         String query = split[3];
         boolean ephemeral = flags.indexOf('E') >= 0;
         if(hash.equals("delete") || hash.equals("close"))
-            buttonEvent.deleteReply().subscribe();
+            getButtonEvent().deleteReply().subscribe();
         else if(hash.equals("done"))
-            buttonEvent.editReply().withComponents().subscribe();
+            getButtonEvent().editReply().withComponents().subscribe();
         else if(names[0].equals(getName())) {
-            Optional<PrimitiveSlashSubcommand> subcommand = subcommandFor(names);
+            Optional<InteractionEventHandler> subcommand = subcommandFor(names);
             Optional<List<NodeInfo>> found = James.getState().nodesWithHash(hash);
             if(found.isPresent() && found.get().size() > 0)
-                return generateResult(found.get(), ephemeral, subcommand.orElse(null));
+                return generateResult(found.get(), ephemeral, (PrimitiveSlashSubcommand)subcommand.orElse(null));
             else {
-                return buttonEvent.editReply()
+                return getButtonEvent().editReply()
                     .withEmbeds(EmbedCreateSpec.create().withTitle("No Match")
                         .withDescription("Query beginning with \"" + query
                                        + "\" comes from an out-of-date search. Please try again."))
                     .then();
             }
         } else
-            return buttonEvent.editReply().withEmbeds(EmbedCreateSpec.create().withTitle("Error")
+            return getButtonEvent().editReply().withEmbeds(EmbedCreateSpec.create().withTitle("Error")
                  .withDescription("Something got mixed up! The button had an invalid id.")).then();
         return Mono.empty();
     }
@@ -154,11 +155,11 @@ public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
     protected abstract Optional<List<NodeInfo>> getMatches(String query, Optional<String> type);
 
     protected Optional<String> getType() {
-        return getString("type");
+        return data.getString("type");
     }
 
     protected Optional<String> getQuery() {
-        return getString("query");
+        return data.getString("query");
     }
 
     protected String[] getImageAndThumbnail(NodeInfo info, boolean canRecurse) {
@@ -232,11 +233,11 @@ public abstract class NodeInfoCommand extends PrimitiveSlashCommand {
         }
     }
 
-    public Optional<PrimitiveSlashSubcommand> findSubcommand() {
+    public Optional<InteractionEventHandler> findSubcommand() {
         return Optional.empty();
     }
 
-    protected Optional<PrimitiveSlashSubcommand> subcommandFor(String[] names) {
+    protected Optional<InteractionEventHandler> subcommandFor(String[] names) {
         return Optional.empty();
     }
 }

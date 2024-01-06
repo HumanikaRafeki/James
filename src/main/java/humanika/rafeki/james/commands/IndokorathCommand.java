@@ -1,18 +1,16 @@
 package humanika.rafeki.james.commands;
 
-import java.util.Optional;
-
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.entity.User;
-import reactor.core.publisher.Mono;
-import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.EmbedCreateFields;
-
+import discord4j.core.spec.EmbedCreateSpec;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.Utils;
 import humanika.rafeki.james.utils.KorathCipher;
+import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 public class IndokorathCommand extends PrimitiveSlashCommand {
     private static final int MAX_RESPONSE_LENGTH = 4000;
@@ -26,15 +24,13 @@ public class IndokorathCommand extends PrimitiveSlashCommand {
 
     @Override
     public Mono<Void> handleChatCommand() {
-        if(!event.getInteraction().getGuildId().isPresent())
-            return handleDirectMessage();
-        String text = getStringOrDefault("text", "").replaceAll("[@\t\n *<>|]+", " ").strip();
-        boolean ephemeral = isEphemeral();
+        String text = data.getStringOrDefault("text", "").replaceAll("[@\t\n *<>|]+", " ").strip();
+        boolean ephemeral = data.isEphemeral();
 
         EmbedCreateSpec creator = EmbedCreateSpec.create().withTitle(TITLE)
             .withFooter(EmbedCreateFields.Footer.of(FOOTER_MESSAGE, null));
 
-        String mention = ephemeral ? null : event.getInteraction().getUser().getMention();
+        String mention = ephemeral ? null : getChatEvent().getInteraction().getUser().getMention();
         if(mention != null && mention.length() > 0)
             creator = creator.withDescription(mention + " said:\n");
 
@@ -45,6 +41,6 @@ public class IndokorathCommand extends PrimitiveSlashCommand {
                      EmbedCreateFields.Field.of("Exile", results.getExile(), true),
                      EmbedCreateFields.Field.of("Efreti", results.getEfreti(), true));
 
-        return event.reply().withEmbeds(creator).withEphemeral(ephemeral);
+        return getChatEvent().reply().withEmbeds(creator).withEphemeral(ephemeral);
     }
 }

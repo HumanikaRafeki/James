@@ -13,6 +13,6 @@ public class RantCommand extends PrimitiveSlashCommand {
     @Override
     public Mono<Void> handleChatCommand() {
         String babble = James.getState().jamesPhrase("JAMES::rant");
-        return event.reply(babble!=null ? babble : "I have nothing to say to you.").withEphemeral(isEphemeral());
+        return getChatEvent().reply(babble!=null ? babble : "I have nothing to say to you.").withEphemeral(data.isEphemeral());
     }
 }

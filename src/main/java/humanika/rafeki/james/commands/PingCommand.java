@@ -21,15 +21,13 @@ public class PingCommand extends PrimitiveSlashCommand {
 
     @Override
     public Mono<Void> handleChatCommand() {
-        if(!event.getInteraction().getGuildId().isPresent())
-            return handleDirectMessage();
         EmbedCreateSpec creator = EmbedCreateSpec.create()
             .withDescription(getPing())
             .withFooter(EmbedCreateFields.Footer.of(getCommentary(), null));
 
         creator = creator.withTitle("Pong");
 
-        return event.reply().withEmbeds(creator).withEphemeral(isEphemeral());
+        return getChatEvent().reply().withEmbeds(creator).withEphemeral(data.isEphemeral());
     }
 
     private String getCommentary() {
@@ -38,16 +36,16 @@ public class PingCommand extends PrimitiveSlashCommand {
     }
 
     private String getPing() {
-        long interactionTime = event.getInteraction().getId().getTimestamp().toEpochMilli();
+        long interactionTime = data.getInteraction().getId().getTimestamp().toEpochMilli();
         long interactionAge = Instant.now().toEpochMilli() - interactionTime;
         double latencyAgeDouble = interactionAge;
         double interactionBPM = Math.round(60.0 / Math.max(latencyAgeDouble / 1000, 1e-9));
         String latencyMessage = String.format("Communication latency is %.1f ms (%.1f BPM)\n",
                                               latencyAgeDouble, interactionBPM);
 
-        ShardInfo shard = event.getShardInfo();
+        ShardInfo shard = getChatEvent().getShardInfo();
         int shardId = shard.getIndex();
-        GatewayDiscordClient discord = event.getClient();
+        GatewayDiscordClient discord = getChatEvent().getClient();
         Optional<GatewayClient> optionalGateway = discord.getGatewayClient(shardId);
         String pingMessage = "*cannot find gateway*";
 

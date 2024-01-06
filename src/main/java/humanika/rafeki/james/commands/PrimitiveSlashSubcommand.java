@@ -9,59 +9,82 @@ import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import reactor.core.publisher.Mono;
 
-public abstract class PrimitiveSlashSubcommand implements Cloneable, EventDataProvider {
+public abstract class PrimitiveSlashSubcommand implements Cloneable, InteractionEventHandler {
     /** Subcommand options from the original event. Will be null in responses. */
-    protected List<ApplicationCommandInteractionOption> options = null;
+    private List<ApplicationCommandInteractionOption> options = null;
+
+    protected EventDataProvider data = null;
 
     /** Chat event currently being processed. Will be null in responses. */
-    protected ChatInputInteractionEvent chatEvent;
+    private ChatInputInteractionEvent chatEvent;
 
     /** Button event currently being processed. Will be null otherwise. */
-    protected ButtonInteractionEvent buttonEvent;
+    private ButtonInteractionEvent buttonEvent;
 
-    public abstract String getName();
-
+    @Override
     public String getFullName() {
         return getName();
     }
 
-    public DeferrableInteractionEvent getEvent() {
-        if(chatEvent != null)
-            return chatEvent;
-        return buttonEvent;
-    }
-
-    public Interaction getInteraction() {
-        return getEvent().getInteraction();
+    @Override
+    public Optional<String> getJson() {
+        return Optional.empty();
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    public Mono<Void> handleChatCommand() {
+        return Mono.empty();
     }
 
-    public PrimitiveSlashSubcommand forChatEvent(List<ApplicationCommandInteractionOption> options, ChatInputInteractionEvent chatEvent) {
+    @Override
+    public Mono<Void> handleButtonInteraction() {
+        return Mono.empty();
+    }
+
+    @Override
+    public EventDataProvider getData() {
+        return data;
+    }
+
+    @Override
+    public InteractionEventHandler withChatEvent(ChatInputInteractionEvent chatEvent) {
         try {
             PrimitiveSlashSubcommand result = (PrimitiveSlashSubcommand)clone();
-            result.options = options;
+            result.data = new ChatEventDataProvider(chatEvent);
             result.chatEvent = chatEvent;
-            result.buttonEvent = null;
             return result;
         } catch(CloneNotSupportedException cnse) {
+            System.out.println("Clone not supported!");
             // Should never happen.
             return null;
         }
     }
 
-    public PrimitiveSlashSubcommand forButtonEvent(ButtonInteractionEvent buttonEvent) {
+    @Override
+    public InteractionEventHandler withChatOptions(List<ApplicationCommandInteractionOption> options, ChatInputInteractionEvent chatEvent) {
         try {
             PrimitiveSlashSubcommand result = (PrimitiveSlashSubcommand)clone();
             result.options = options;
+            result.data = new SubcommandDataProvider(options, chatEvent);
             result.chatEvent = chatEvent;
+            return result;
+        } catch(CloneNotSupportedException cnse) {
+            System.out.println("Clone not supported!");
+            // Should never happen.
+            return null;
+        }
+    }
+
+    @Override
+    public InteractionEventHandler withButtonEvent(ButtonInteractionEvent buttonEvent) {
+        try {
+            PrimitiveSlashSubcommand result = (PrimitiveSlashSubcommand)clone();
+            result.data = new ButtonEventDataProvider(buttonEvent);
             result.buttonEvent = buttonEvent;
             return result;
         } catch(CloneNotSupportedException cnse) {
@@ -70,71 +93,20 @@ public abstract class PrimitiveSlashSubcommand implements Cloneable, EventDataPr
         }
     }
 
-    public Mono<Void> handleChatCommand() {
-        return Mono.empty();
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 
-    public Mono<Void> handleButtonInteraction() {
-        return Mono.empty();
+    protected ChatInputInteractionEvent getChatEvent() {
+        return chatEvent;
     }
 
-    public Optional<String> getJson() {
-        return Optional.empty();
+    protected ButtonInteractionEvent getButtonEvent() {
+        return buttonEvent;
     }
 
-    public boolean isEphemeral() {
-        return getStringOrDefault("hidden", "show").equals("hide");
+    protected List<ApplicationCommandInteractionOption> getOptions() {
+        return options;
     }
-
-    public Optional<List<ApplicationCommandInteractionOption>> getSubcommandOptions(String name) {
-        for(ApplicationCommandInteractionOption option : options)
-            if(option.getName().equals(name))
-                return Optional.of(option.getOptions());
-        return Optional.empty();
-    }
-
-    public String getStringOrDefault(String name, String def) {
-        Optional<String> result = getString(name);
-        return result.isPresent() ? result.get() : def;
-    }
-
-    public Optional<String> getString(String name) {
-        for(ApplicationCommandInteractionOption option : options)
-            if(option.getName().equals(name))
-                return option.getValue().flatMap(value -> Optional.of(value.asString()) );
-        return Optional.empty();
-    }
-
-    public Optional<Long> getLong(String name) {
-        for(ApplicationCommandInteractionOption option : options)
-            if(option.getName().equals(name))
-                return option.getValue().flatMap(value -> Optional.of(value.asLong()) );
-        return Optional.empty();
-    }
-
-    public long getLongOrDefault(String name, long def) {
-        Optional<Long> result = getLong(name);
-        return result.isPresent() ? result.get() : def;
-    }
-
-    public Optional<Boolean> getBoolean(String name) {
-        for(ApplicationCommandInteractionOption option : options)
-            if(option.getName().equals(name))
-                return option.getValue().flatMap(value -> Optional.of(value.asBoolean()));
-        return Optional.empty();
-    }
-
-    public Boolean getBooleanOrDefault(String name, Boolean def) {
-        Optional<Boolean> result = getBoolean(name);
-        return result.isPresent() ? result.get() : def;
-    }
-
-    public Optional<Attachment> getAttachment(String name) {
-        for(ApplicationCommandInteractionOption option : options)
-            if(option.getName().equals(name))
-                return option.getValue().flatMap(value -> Optional.of(value.asAttachment()) );
-        return Optional.empty();
-    }
-
-
 }

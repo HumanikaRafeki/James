@@ -11,10 +11,10 @@ public class CRConvertValueSubcommand extends PrimitiveSlashSubcommand {
 
     @Override
     public Mono<Void> handleChatCommand() {
-        long value = getLongOrDefault("value", 0);
-        return chatEvent.reply(String.format("Combat points %s gives a rating of %s.",
+        long value = data.getLongOrDefault("value", 0);
+        return getChatEvent().reply(String.format("Combat points %s gives a rating of %s.",
                                              value, getRatingFromPoints(value)))
-            .withEphemeral(isEphemeral());
+            .withEphemeral(data.isEphemeral());
     }
 
     private long getRatingFromPoints(long points) {

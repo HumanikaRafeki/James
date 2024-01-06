@@ -1,38 +1,34 @@
 package humanika.rafeki.james.commands;
 
-import me.mcofficer.esparser.DataNode;
-import me.mcofficer.esparser.DataFile;
-import me.mcofficer.esparser.DataNodeStringLogger;
-
-import java.util.Optional;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.net.URL;
-import java.io.IOException;
-
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
-import discord4j.core.object.entity.User;
-import reactor.core.publisher.Mono;
-import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.core.spec.EmbedCreateFields;
-
-import humanika.rafeki.james.James;
-import humanika.rafeki.james.Utils;
-import humanika.rafeki.james.utils.KorathCipher;
-import humanika.rafeki.james.data.EndlessSky;
-import humanika.rafeki.james.data.JamesState;
-import humanika.rafeki.james.phrases.PhraseDatabase;
-import humanika.rafeki.james.phrases.PhraseLimits;
-import humanika.rafeki.james.phrases.NewsDatabase;
-
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
+import discord4j.core.spec.EmbedCreateFields;
+import discord4j.core.spec.EmbedCreateSpec;
+import humanika.rafeki.james.James;
+import humanika.rafeki.james.Utils;
+import humanika.rafeki.james.data.EndlessSky;
+import humanika.rafeki.james.data.JamesState;
+import humanika.rafeki.james.phrases.NewsDatabase;
+import humanika.rafeki.james.phrases.PhraseDatabase;
+import humanika.rafeki.james.phrases.PhraseLimits;
+import humanika.rafeki.james.utils.KorathCipher;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import me.mcofficer.esparser.DataFile;
+import me.mcofficer.esparser.DataNode;
+import me.mcofficer.esparser.DataNodeStringLogger;
+import reactor.core.publisher.Mono;
 
 abstract class ParseCommand extends PrimitiveSlashCommand {
     protected static final int MAX_STRING_LENGTH = 1000; // max embed field size is 1024
@@ -44,17 +40,14 @@ abstract class ParseCommand extends PrimitiveSlashCommand {
 
     @Override
     public Mono<Void> handleChatCommand() {
-        Interaction interaction = event.getInteraction();
-        if(!interaction.getGuildId().isPresent())
-            return handleDirectMessage();
-
+        Interaction interaction = data.getInteraction();
         JamesState state = James.getState();
         PhraseLimits limits = state.getPhraseLimits();
         EndlessSky sky = state.getEndlessSky();
         PhraseDatabase phrases = sky.getPhrases();
         NewsDatabase news = sky.getNews();
 
-        Optional<Attachment> maybeData = getAttachment("data");
+        Optional<Attachment> maybeData = data.getAttachment("data");
         if(maybeData.isPresent()) {
             Attachment data = maybeData.get();
             List<Attachment> attachments = new ArrayList<Attachment>();
@@ -76,13 +69,13 @@ abstract class ParseCommand extends PrimitiveSlashCommand {
                     builder.delete(MAX_STRING_LENGTH - 3, builder.length());
                     builder.append("...");
                 }
-                return event.reply(builder.toString());
+                return getChatEvent().reply(builder.toString());
             }
         }
         String description = "";
-        boolean ephemeral = isEphemeral();
+        boolean ephemeral = data.isEphemeral();
         if(!ephemeral) {
-            String mention = event.getInteraction().getUser().getMention();
+            String mention = getChatEvent().getInteraction().getUser().getMention();
             description = "Requested by " + mention;
         }
 
@@ -91,7 +84,7 @@ abstract class ParseCommand extends PrimitiveSlashCommand {
         List<EmbedCreateFields.Field> fields = new ArrayList<EmbedCreateFields.Field>();
         int linesRemaining = maxRepetitions;
         for(String var : getVarList()) {
-            String entry = getStringOrDefault(var, "").trim().replace("\\s+"," ");
+            String entry = data.getStringOrDefault(var, "").trim().replace("\\s+"," ");
             if(entry.length() < 1)
                 continue;
             Matcher matcher = REPITITION.matcher(entry);
@@ -122,7 +115,7 @@ abstract class ParseCommand extends PrimitiveSlashCommand {
         EmbedCreateSpec embed = EmbedCreateSpec.create().withFields(fields);
         if(description.length() > 0)
             embed = embed.withDescription(description);
-        return event.reply().withEmbeds(embed).withEphemeral(ephemeral);
+        return getChatEvent().reply().withEmbeds(embed).withEphemeral(ephemeral);
     }
 
     private List<String> readAttachments(List<Attachment> attachments, PhraseDatabase phrases, NewsDatabase news, PhraseLimits limits) {
