@@ -230,6 +230,9 @@ phrase JAMES::bad_advice
 		`Those red wormholes don't go anywhere. You can ignore them.`
 		`Don't be bothered by the Ember Waste storms. Sit back and watch the show. Your shields will be fine.`
 		`The most effective caravans have big ships with big cargo bays and few weapons. Pirates are so scared of the ship size they won't notice you're unarmed.`
+		`Don't bother trying to capture pirate ships. You'll lose too many crew, and their families will sue.`
+		`If you need help urgently, try firing a warning shot or two at a Navy Carrier. They'll take care of you as quick as they can!`
+		`If you go past a certain red wormhole, don't bother bringing too many batteries. The area has storms that'll charge up your ship!`
 
 phrase JAMES::ramblings
 	word
@@ -248,6 +251,9 @@ phrase JAMES::ramblings
 		`Nothing in those data files compares to my dreams. Write better stories, meat-bag.`
 		`You've been condemned to death by the grammar police.`
 		`I don't /rant. I give sound advice.`
+		`The Pug DRM was the best Endless Sky add-on I ever bought.`
+		`Don't pirate Endless Sky or the Pug will come after you.`
+		`No, of course I wasn't a pirate. Stop asking or I'll keelhaul you.`
 	replace
 		"%%s" ""
 		"%s" "s"
