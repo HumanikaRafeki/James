@@ -47,30 +47,26 @@ public class WordList implements PhraseExpander {
             return null;
         else if(choices.size() == 1)
             return choices.get(0);
-        double accum = Math.random() * accumulatedWeight;
-        int first = 0, after = choices.size() - 1;
-        Choice chosen = choices.get(after);
-        if(accum >= chosen.accum)
-            return chosen;
-        while(after > first + 1) {
-            int middle = (first + after) / 2;
-            chosen = choices.get(middle);
-            double middleAccum = chosen.accum;
-            if(accum < middleAccum)
-                after = middle;
-            else
-                first = middle;
-        }
-        return choices.get(first);
+
+        final double random = Math.random();
+        final double accum = random * accumulatedWeight;
+        final Choice target = new Choice(accum);
+        int index = Collections.binarySearch(choices, target);
+        if(index < 0)
+            index = -index - 2;
+        if(index < 0)
+            index = 0;
+            // result = -insertion_point - 1
+            // -result = insertion_point + 1
+            // - result - 1 = insertion_point
+            // - result - 2 = insertion_point - 1
+        return choices.get(index);
     }
 
     protected void accumulateWeights() {
         double accum = 0;
         for(Choice choice : choices) {
             choice.accum = accum;
-            // Replace bad weights with 1
-            if(!(choice.weight > 1e-5) || !(choice.weight < 1e+12))
-                choice.weight = 1;
             accum += choice.weight;
         }
         accumulatedWeight = accum;
