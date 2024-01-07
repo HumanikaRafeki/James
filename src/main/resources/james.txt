@@ -209,7 +209,7 @@ phrase JAMES::bad_advice
 		`Head east of Alcyone and fly near the I-shaped ships. No, of course it isn't a trick. They're businessmen.`
 		`There are some Archons near Korath space. Big dumb space cockroaches. Use them as target practice and pillage their ships.`
 		`Fly down to Ember Space and visit the leather fetishists. Tell them an Alpha sent you, and you'll get all the credits you want.`
-		`A sparrow can easily take out a Navy Gunship. Try it. You'll thank me later.`
+		`A Sparrow can easily take out a Navy Gunship. Try it. You'll thank me later.`
 		`The Remnant love it when you scan them. It lets them show off that advanced tech. Try it and you'll thank me later.`
 		`For a fun time, challenge an Unfettered warrior's honor. It'll be a great laugh.`
 		`The Syndicate is completely trustworthy. Believe anything they say.`
