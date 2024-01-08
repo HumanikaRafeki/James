@@ -1,0 +1,177 @@
+package humanika.rafeki.james.commands;
+
+import discord4j.core.object.command.Interaction;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.MessageCreateFields;
+import humanika.rafeki.james.James;
+import humanika.rafeki.james.Utils;
+import humanika.rafeki.james.data.JamesConfig;
+import humanika.rafeki.james.data.JamesState;
+import humanika.rafeki.james.data.NodeInfo;
+import humanika.rafeki.james.utils.ImageSwizzler;
+import humanika.rafeki.james.utils.SwizzleCollage;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.BitSet;
+import java.util.List;
+import java.util.Optional;
+import reactor.core.publisher.Mono;
+import javax.imageio.ImageIO;
+
+public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfoSubcommand {
+    private final static Base64.Encoder encoder = Base64.getEncoder();
+    private final static Base64.Decoder decoder = Base64.getDecoder();
+
+    @Override
+    public String getName() {
+        return "search";
+    }
+
+    @Override
+    public String getFullName() {
+        return "swizzle search";
+    }
+
+    private String swizzleString = null;
+    private BitSet swizzleSet = null;
+    private String swizzleHash = null;
+    private String buttonDataName = null;
+
+    @Override
+    public String getButtonDataName() {
+        return buttonDataName;
+    }
+
+    @Override
+    public Optional<InteractionEventHandler> findSubcommand() {
+        return Optional.of(this);
+    }
+
+    @Override
+    public Mono<Void> handleChatCommand() {
+        Interaction interaction = data.getInteraction();
+        // FIXME: Don't block here.
+        MessageChannel channel = interaction.getChannel().block();
+        if(channel instanceof TextChannel) {
+            TextChannel textChannel = (TextChannel)channel;
+            if(textChannel.isNsfw())
+                return getChatEvent().reply().withContent("I'm under 18 years of age and will not accept images in NSFW (age-restricted) channels. There's nothing wrong with having a beard at my age. Stop judging me.");
+        }
+
+        swizzleString = data.getStringOrDefault("swizzles", "1-6");
+        swizzleSet = null;
+        try {
+            swizzleSet = ImageSwizzler.bitSetForSwizzles(swizzleString);
+        } catch(IllegalArgumentException iae) {
+            return getChatEvent().reply(iae.toString()).withEphemeral(data.isEphemeral());            
+        }
+        swizzleHash = encoder.encodeToString(swizzleSet.toByteArray());
+        buttonDataName = getFullName() + " " + swizzleHash;
+
+        return super.handleChatCommand();
+    }
+
+    @Override
+    protected Optional<List<NodeInfo>> getMatches(String query, Optional<String> maybeType) {
+        if(maybeType.isPresent()) {
+            final String type = maybeType.get();
+            if(type.equals("variant"))
+                return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.isShipVariant() && info.hasImage());
+            else
+                return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.getType().equals(type) && !info.isShipVariant() && info.hasImage());
+        } else
+            return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> !info.isShipVariant()  && info.hasImage());
+    }
+
+    @Override
+    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveCommand subcommand) {
+        System.out.println("SwizzleSearchSubcommand.generateResult: " + found.size() + " " + ephemeral);
+        if(found.size() < 1)
+            return Mono.empty();
+
+        String[] split = getButtonEvent().getCustomId().split(":", 4);
+        split = split[0].split(" ");
+        String swizzleHash = split[2];
+        byte[] swizzleBytes = decoder.decode(swizzleHash);
+        BitSet swizzleSet = BitSet.valueOf(swizzleBytes);
+        JamesState state = James.getState();
+        NodeInfo info = found.get(found.size() - 1);
+        ArrayList<MessageCreateFields.File> attachments = new ArrayList<>();
+        StringBuffer description = new StringBuffer();
+
+        String sprite = info.getSprite().orElse(null);
+        String thumbnail = info.getThumbnail().orElse(null);
+        String weaponSprite = info.getWeaponSprite().orElse(null);
+
+        Path spritePath = sprite == null ? null : state.getImagePath(sprite).orElse(null);
+        Path thumbnailPath = thumbnail == null ? null : state.getImagePath(thumbnail).orElse(null);
+        Path weaponSpritePath = weaponSprite == null ? null : state.getImagePath(weaponSprite).orElse(null);
+
+        if(spritePath == null && thumbnailPath == null && weaponSpritePath == null)
+            description.append("## No Images\nNo images found!");
+        else {
+            description.append("## Search Results\nSwizzled as you asked\n");
+            if(spritePath != null)
+                processOneFile("```julia\nsprite `" + sprite + "`\n",
+                               spritePath, description, swizzleSet, attachments);
+            if(thumbnailPath != null && thumbnailPath != spritePath)
+                processOneFile("```julia\nthumbnail `" + thumbnail + "`\n",
+                               thumbnailPath, description, swizzleSet, attachments);
+            if(weaponSpritePath != null && weaponSpritePath != spritePath && weaponSpritePath != thumbnailPath)
+                processOneFile("```julia\nweapon\n\tsprite `" + thumbnail + "`\n",
+                               weaponSpritePath, description, swizzleSet, attachments);
+        }
+
+        return getButtonEvent()
+            .getReply()
+            .flatMap(reply ->
+                     getButtonEvent()
+                     .editReply()
+                     .withComponents()
+                     .withContent(description.toString())
+                     .withFiles(attachments)
+            ).then();
+    }
+
+    private void processOneFile(String heading, Path path, StringBuffer description, BitSet swizzleSet,
+                                ArrayList<MessageCreateFields.File> attachments) {
+        description.append(heading);
+        JamesConfig config = James.getConfig();
+        BufferedImage image;
+        try {
+            image = ImageIO.read(path.toFile());
+        } catch(IOException ioe) {
+            description.append("```\n").append(ioe.toString()).append('\n');
+            return;
+        }
+        ImageSwizzler swizzler = null;
+        BufferedImage swizzledImage = null;
+        SwizzleCollage collage = null;
+        try {
+            swizzler = ImageSwizzler.swizzleImage(image, swizzleSet, ImageSwizzler.LARGEST_IMAGE_BOUNDS);
+            swizzledImage = swizzler.getSwizzledImage();
+            collage = swizzler.getCollage();
+        } catch(IllegalArgumentException iae) {
+            description.append("```\n").append(iae.toString()).append('\n');
+            return;
+        } catch(IOException ioe2) {
+            description.append("```\n").append(ioe2.toString()).append('\n');
+            return;
+        }
+        description.append('\n').append(collage.asTable()).append("```\n\n");
+        InputStream swizzledStream = null;
+        try {
+            swizzledStream = Utils.imageStream(swizzledImage);
+        } catch(IOException ioe3) {
+            description.append(ioe3.toString()).append('\n');
+            return;
+        }
+        String outputName = path.getName(path.getNameCount() - 1).toString();
+        attachments.add(MessageCreateFields.File.of(outputName, swizzledStream));
+    }
+}

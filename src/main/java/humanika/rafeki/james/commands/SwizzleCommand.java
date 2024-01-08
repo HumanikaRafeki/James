@@ -59,6 +59,11 @@ public class SwizzleCommand extends PrimitiveCommand {
     }
 
     @Override
+    public Optional<String> getJson() {
+        return Optional.of("swizzle-command.json");
+    }
+
+    @Override
     public Mono<Void> handleChatCommand() {
         Optional<Long> swizzleArg = data.getLong("swizzle");
 

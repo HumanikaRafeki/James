@@ -3,7 +3,10 @@ package humanika.rafeki.james;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.utils.KorathCipher;
 import humanika.rafeki.james.utils.Translator;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,6 +18,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.MemoryCacheImageOutputStream;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -55,6 +63,29 @@ public class Utils {
             e.printStackTrace();
             return 0;
         }
+    }
+
+    /** Creates an InputStream for reading the given image
+     * @param img the image to stream
+     * @returns an InputStream that reads the image
+     * @throws IOException if an error occurs during reading.
+     * Blame {@link ImageIO#read(InputStream)} or {@link ImageWriter#write(IIOMetadata, IIOImage, ImageWriteParam)}.
+     */
+    public static InputStream imageStream(BufferedImage img) throws IOException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ImageWriter writer = ImageIO.getImageWritersByFormatName("png").next();
+        writer.setOutput(new MemoryCacheImageOutputStream(os));
+
+        ImageWriteParam param = writer.getDefaultWriteParam();
+        if(param.canWriteCompressed()) {
+            param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            param.setCompressionQuality(0.5f);
+        }
+
+        writer.write(null, new IIOImage(img, null, null), param);
+        writer.dispose();
+
+        return new ByteArrayInputStream(os.toByteArray());
     }
 
     public static ResponseBody download(URL url) throws IOException {

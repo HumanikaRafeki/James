@@ -51,8 +51,7 @@ class Commands {
             new RantCommand(),
             new SayCommand(),
             new ShowCommand(),
-            new SwizzleCommand(),
-            new SwizzleImageCommand(),
+            new SwizzleMultiCommand(),
             new TemplateCommand()
         };
         commands = Arrays.asList(commandArray);

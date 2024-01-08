@@ -25,13 +25,18 @@ import java.util.OptionalInt;
 import javax.imageio.ImageIO;
 import reactor.core.publisher.Mono;
 
-public class SwizzleImageCommand extends PrimitiveCommand {
+public class SwizzleImageSubcommand extends PrimitiveCommand {
     private static final String[] VAR_ARRAY = {"image1", "image2", "image3", "image4"};
     private static final List<String> VAR_LIST = Arrays.asList(VAR_ARRAY);
 
     @Override
     public String getName() {
-        return "swizzleimage";
+        return "image";
+    }
+
+    @Override
+    public String getFullName() {
+        return "swizzle image";
     }
 
     @Override
@@ -126,23 +131,11 @@ public class SwizzleImageCommand extends PrimitiveCommand {
             description.append(iae.toString()).append('\n');
             return;
         }
-        description.append("```julia\n").append(collage.asTable()).append("```\n\n");
+        description.append("```julia\n").append(collage.asTable()).append("```\n");
         InputStream swizzledStream = Utils.imageStream(swizzledImage);
         if(data.isSpoiler())
             result.add(MessageCreateFields.FileSpoiler.of(outputName, swizzledStream));
         else
             result.add(MessageCreateFields.File.of(outputName, swizzledStream));
-    }
-
-
-    private BitSet makeSwizzleSet(boolean swizzleAll, OptionalInt swizzleInt) throws IllegalArgumentException {
-        String description;
-        if(swizzleAll)
-            description = "0-28"; // ImageSwizzler.TWENTY_NINE_SWIZZLES;
-        else if(swizzleInt.isPresent())
-            description = String.valueOf(swizzleInt.getAsInt());
-        else
-            description = "1-6"; // ImageSwizzler.ALL_OLD_SWIZZLES;
-        return ImageSwizzler.bitSetForSwizzles(description);
     }
 }

@@ -6,7 +6,7 @@
         {
             "name": "image",
             "description": "Recolor images to one or more swizzles",
-            "type": 1
+            "type": 1,
             "options":  [
                 {
                     "name": "image1",
@@ -15,16 +15,16 @@
                     "required": true
                 },
                 {
-                    "name": "swizzle",
+                    "name": "swizzles",
                     "description": "List of swizzles; ie. 1,3,9,15 or 1-6 or 1-6,12-17 or 4",
                     "type": 3,
-                    "required": false,
+                    "required": false
                 },
                 {
                     "name": "image2",
                     "description": "another image to swizzle",
                     "type": 11,
-            "required": false
+                    "required": false
                 },
                 {
                     "name": "image3",
@@ -33,7 +33,7 @@
                     "required": false
                 },
                 {
-            "name": "image4",
+                    "name": "image4",
                     "description": "another image to swizzle",
                     "type": 11,
                     "required": false
@@ -57,21 +57,21 @@
             ]
         },
         {
-            "name": "data",
+            "name": "search",
             "description": "Swizzles images in game data files",
-            "type": 1
+            "type": 1,
             "options":  [
                 {
                     "name": "query",
                     "description": "query for searching game data files",
-                    "type": 11,
+                    "type": 3,
                     "required": true
                 },
                 {
-                    "name": "swizzle",
+                    "name": "swizzles",
                     "description": "List of swizzles; ie. 1,3,9,15 or 1-6 or 1-6,12-17 or 4",
                     "type": 3,
-                    "required": false,
+                    "required": false
                 },
                 {
                     "name": "hidden",

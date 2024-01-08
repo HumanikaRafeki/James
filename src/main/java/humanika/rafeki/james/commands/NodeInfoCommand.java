@@ -76,7 +76,7 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
 
         List<String> listItem = new ArrayList<>();
         List<String> buttonId = new ArrayList<>();
-        getResponse(matches, listItem, buttonId, ephemeral);
+        getResponse(matches, listItem, buttonId, ephemeral, subcommand);
         if(listItem.size() < 1) {
             builder.append("\n*No matches.*");
             return getChatEvent().reply().withContent(builder.toString()).withEphemeral(ephemeral);
@@ -117,6 +117,7 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
                  .withEphemeral(ephemeral).withComponents(rows);
     }
 
+    @Override
     public Mono<Void> handleButtonInteraction() {
         String[] split = getButtonEvent().getCustomId().split(":", 4);
         if(split.length < 4) {
@@ -126,8 +127,19 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
 
         String type = split[0];
         String[] names = split[0].split(" ");
-for(String n : names)
-System.out.println("NAME \"" + n + "\" IN NODE INFO COMMAND");
+        String[] expect = getFullName().split(" ");
+        boolean wrongCommand = names.length < expect.length;
+        if(!wrongCommand) {
+            for(int i = 0; i < expect.length; i++)
+                if(!expect[i].equals(names[i])) {
+                    wrongCommand = true;
+                    break;
+                }
+        }
+
+        for(String n : names)
+            System.out.println("NAME \"" + n + "\" IN NODE INFO COMMAND");
+        System.out.println("GET NAME = " + getName());
         String flags = split[1];
         String hash = split[2];
         String query = split[3];
@@ -136,14 +148,16 @@ System.out.println("NAME \"" + n + "\" IN NODE INFO COMMAND");
             getButtonEvent().deleteReply().subscribe();
         else if(hash.equals("done"))
             getButtonEvent().editReply().withComponents().subscribe();
-        else if(names[0].equals(getName())) {
+        else if(!wrongCommand) {
             Optional<InteractionEventHandler> subcommand = subcommandFor(names);
             Optional<List<NodeInfo>> found = James.getState().nodesWithHash(hash);
 if(!subcommand.isPresent())
 System.out.println("NO SUBCOMMAND IN NODEINFOCOMMAND!!");
-            if(found.isPresent() && found.get().size() > 0)
+            if(found.isPresent() && found.get().size() > 0) {
+System.out.println("SUBCOMMAND PRESENT DOIT");
                 return generateResult(found.get(), ephemeral, (PrimitiveCommand)subcommand.orElse(null));
-            else {
+            } else {
+System.out.println("BAD SEARCH");
                 return getButtonEvent().editReply()
                     .withEmbeds(EmbedCreateSpec.create().withTitle("No Match")
                         .withDescription("Query beginning with \"" + query
@@ -218,8 +232,15 @@ System.out.println("NO SUBCOMMAND IN NODEINFOCOMMAND!!");
         return result;
     }
 
-    protected void getResponse(List<NodeInfo> matches, List<String> listItem, List<String> buttonId, boolean ephemeral) {
+    protected void getResponse(List<NodeInfo> matches, List<String> listItem, List<String> buttonId, boolean ephemeral, Optional<InteractionEventHandler> subcommand) {
         StringBuilder builder = new StringBuilder(100);
+        String buttonDataName = null;
+
+        if(subcommand.isPresent() && subcommand.get() instanceof NodeInfoSubcommand)
+            buttonDataName = ((NodeInfoSubcommand)subcommand.get()).getButtonDataName();
+        else
+            buttonDataName = getFullName();
+
         int i = 0;
         for(NodeInfo node : matches) {
             i++;
@@ -231,7 +252,7 @@ System.out.println("NO SUBCOMMAND IN NODEINFOCOMMAND!!");
             listItem.add(built);
 
             builder.delete(0, builder.length());
-            builder.append(ephemeral ? getFullName() + ":E:" : getFullName() + ":-:");
+            builder.append(ephemeral ? buttonDataName + ":E:" : buttonDataName + ":-:");
             builder.append(node.getHashString()).append(":").append(built);
             if(builder.length() > 95)
                 builder.delete(95, builder.length());

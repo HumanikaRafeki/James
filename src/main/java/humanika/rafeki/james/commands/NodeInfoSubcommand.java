@@ -1,4 +1,5 @@
 package humanika.rafeki.james.commands;
 
-interface NodeInfoSubcommand {
+public interface NodeInfoSubcommand {
+    public String getButtonDataName();
 }

@@ -46,6 +46,11 @@ class ShowSubcommand extends PrimitiveCommand implements NodeInfoSubcommand {
             return "show image";
     }
 
+    @Override
+    public String getButtonDataName() {
+        return getFullName();
+    }
+
     ShowSubcommand showing(boolean data, boolean images) {
         try {
             ShowSubcommand cloned = (ShowSubcommand)clone();
