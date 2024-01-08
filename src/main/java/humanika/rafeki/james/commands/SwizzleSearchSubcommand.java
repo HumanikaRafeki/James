@@ -90,7 +90,6 @@ public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfo
 
     @Override
     protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveCommand subcommand) {
-        System.out.println("SwizzleSearchSubcommand.generateResult: " + found.size() + " " + ephemeral);
         if(found.size() < 1)
             return Mono.empty();
 

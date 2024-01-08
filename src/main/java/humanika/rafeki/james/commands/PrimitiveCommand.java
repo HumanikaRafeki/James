@@ -59,7 +59,6 @@ public abstract class PrimitiveCommand implements Cloneable, InteractionEventHan
             result.chatEvent = chatEvent;
             return result;
         } catch(CloneNotSupportedException cnse) {
-            System.out.println("Clone not supported!");
             // Should never happen.
             return null;
         }
@@ -74,7 +73,6 @@ public abstract class PrimitiveCommand implements Cloneable, InteractionEventHan
             result.chatEvent = chatEvent;
             return result;
         } catch(CloneNotSupportedException cnse) {
-            System.out.println("Clone not supported!");
             // Should never happen.
             return null;
         }

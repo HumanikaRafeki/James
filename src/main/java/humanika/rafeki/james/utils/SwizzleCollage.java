@@ -114,31 +114,24 @@ public class SwizzleCollage {
         Point bestSize = null;
         for(int countX = 1; countX <= imageCount; countX++) {
             final int countY = (int)Math.ceil(imageCount / (double)countX);
-            System.out.println("SWIZZLE: Try " + countX + " by " + countY);
             if(image.x*countX > 4096 || image.y*countY > 4096) {
-                System.out.println("SWIZZLE: Too wide or too tall for 4096x4096 patch");
                 continue; // too wide or too tall
             }
             final int allowedX = makeAllowedBounds(countX);
             final int allowedY = makeAllowedBounds(countY);
             if(allowedX < image.x || allowedY < image.y) {
-                System.out.println("SWIZZLE: image doesn't fit in allowed space");
                 continue; // image doesn't fit in allowed space
             }
             final int unused = countX * countY - imageCount;
             if(unused < 0 || unused >= countY) {
-                System.out.println("SWIZZLE: doesn't fit in available spots: " + (countX * countY) + " - " + imageCount + " not within 0.." + countY + " inclusive");
                 continue; // doesn't fit in available spots 
             }
             final double badness = badnessOf(countX, countY);
             if(badness < bestBadness) {
-                System.out.println("SWIZZLE: best with badness" + badness + " is " + countX + " by " + countY);
                 bestSize = new Point(countX, countY);
                 bestBadness = badness;
-            } else
-                System.out.println("SWIZZLE: reject badness" + badness);
+            }
         }
-        System.out.println("SWIZZLE: Final size " + bestSize.x + " by " + bestSize.y);
         return bestSize;
     }
 
@@ -165,7 +158,6 @@ public class SwizzleCollage {
                 width = tiles.x - 1;
             int[] row = new int[width];
             for(int x = 0; x < width; x++, i++) {
-                System.out.println("set(" + x + "," + y + ") = swizzleNumbers[" + i + ']');
                 int ix = swizzleNumbers[i];
                 row[x] = ix;
             }

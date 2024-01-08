@@ -137,9 +137,6 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
                 }
         }
 
-        for(String n : names)
-            System.out.println("NAME \"" + n + "\" IN NODE INFO COMMAND");
-        System.out.println("GET NAME = " + getName());
         String flags = split[1];
         String hash = split[2];
         String query = split[3];
@@ -151,13 +148,9 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
         else if(!wrongCommand) {
             Optional<InteractionEventHandler> subcommand = subcommandFor(names);
             Optional<List<NodeInfo>> found = James.getState().nodesWithHash(hash);
-if(!subcommand.isPresent())
-System.out.println("NO SUBCOMMAND IN NODEINFOCOMMAND!!");
             if(found.isPresent() && found.get().size() > 0) {
-System.out.println("SUBCOMMAND PRESENT DOIT");
                 return generateResult(found.get(), ephemeral, (PrimitiveCommand)subcommand.orElse(null));
             } else {
-System.out.println("BAD SEARCH");
                 return getButtonEvent().editReply()
                     .withEmbeds(EmbedCreateSpec.create().withTitle("No Match")
                         .withDescription("Query beginning with \"" + query

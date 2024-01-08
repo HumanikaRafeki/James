@@ -67,7 +67,6 @@ public class ImageSwizzler {
         ImageSwizzler swizzler = new ImageSwizzler();
         final int width = img.getWidth();
         final int height = img.getHeight();
-        System.out.println("SWIZZLE: Swizzle image " + width + " by " + height + " with swizzles " + swizzles);
         final SwizzleCollage collage = new SwizzleCollage(swizzles, new Point(width, height), allowedBounds);
         final int[] imgData = new int[width * height];
         final int[] work = new int[width * height];
@@ -102,7 +101,6 @@ public class ImageSwizzler {
         BitSet swizzles = new BitSet();
         String[] ranges = input.replaceAll("\\s+","").split(",");
         for(String range : ranges) {
-            System.out.println("SWIZZLE: range " + range);
             String[] values = range.split("-");
             int first = Integer.parseInt(values[0], 10);
             int last = first;
@@ -114,12 +112,10 @@ public class ImageSwizzler {
             if(last < ImageSwizzler.FIRST_SWIZZLE || last > ImageSwizzler.LAST_SWIZZLE)
                 throw new IllegalArgumentException("Invalid swizzle " + last + ". Swizzles must be in the range of "
                                                    + ImageSwizzler.FIRST_SWIZZLE + "-" + ImageSwizzler.LAST_SWIZZLE);
-            System.out.println("Set " + first + " through " + last + " to true");
             swizzles.set(first, last + 1, true);
         }
         if(swizzles.isEmpty())
             throw new IllegalArgumentException("Invalid swizzle string \"" + input + "\": no swizzles are selected.");
-        System.out.println("SWIZZLE: Swizzle string \"" + input + "\" = " +swizzles);
         return swizzles;
     }
 
@@ -136,7 +132,6 @@ public class ImageSwizzler {
             for(int x = 0; x < nrow; x++) {
                 int swizzle = collage.get(x, y);
                 int swizzleIndex = swizzle - 1;
-                System.out.println("SWIZZLE: x="+x+" y="+y+" width="+image.x+" height="+image.y+" slide="+slide);
                 if(swizzleIndex >= 0)
                     createSwizzledImage(image.x, image.y, imgData, work, output, SWIZZLE_PALLETE[swizzleIndex],
                                         image.x * x + slide, image.y * y);
