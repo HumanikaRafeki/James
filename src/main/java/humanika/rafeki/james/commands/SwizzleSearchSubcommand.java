@@ -3,6 +3,8 @@ package humanika.rafeki.james.commands;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.EmbedCreateFields;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateFields;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.Utils;
@@ -20,8 +22,9 @@ import java.util.Base64;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
-import reactor.core.publisher.Mono;
+import java.util.OptionalInt;
 import javax.imageio.ImageIO;
+import reactor.core.publisher.Mono;
 
 public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfoSubcommand {
     private final static Base64.Encoder encoder = Base64.getEncoder();
@@ -41,6 +44,7 @@ public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfo
     private BitSet swizzleSet = null;
     private String swizzleHash = null;
     private String buttonDataName = null;
+    private OptionalInt showTable = OptionalInt.empty();
 
     @Override
     public String getButtonDataName() {
@@ -53,6 +57,24 @@ public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfo
     }
 
     @Override
+    public void describeSearch(StringBuilder builder, Optional<String> maybeType, String query) {
+        super.describeSearch(builder, maybeType, query);
+        builder.append("\nSwizzle List: `").append(ImageSwizzler.describeSwizzleSet(swizzleSet)).append('`');
+        if(!showTable.isPresent())
+            builder.append("\nUse \"table: show\" to see which swizzle is where in each image.");
+    }
+
+    @Override
+    public void getButtonFlags(StringBuilder builder) {
+        super.getButtonFlags(builder);
+        if(showTable.isPresent() && showTable.getAsInt() != 0) {
+            System.out.println("TABLE PRESENT AND TRUE append T");
+            builder.append('T');
+        } else
+            System.out.println("NO T NO TABLE " + showTable.isPresent());
+    }
+
+    @Override
     public Mono<Void> handleChatCommand() {
         Interaction interaction = data.getInteraction();
         // FIXME: Don't block here.
@@ -62,7 +84,9 @@ public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfo
             if(textChannel.isNsfw())
                 return getChatEvent().reply().withContent("I'm under 18 years of age and will not accept images in NSFW (age-restricted) channels. There's nothing wrong with having a beard at my age. Stop judging me.");
         }
-
+        Optional<String> maybeShowTable = data.getString("table");
+        if(maybeShowTable.isPresent())
+            showTable = OptionalInt.of(maybeShowTable.get().equals("show") ? 1 : 0);
         swizzleString = data.getStringOrDefault("swizzles", "1-6");
         swizzleSet = null;
         try {
@@ -94,6 +118,7 @@ public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfo
             return Mono.empty();
 
         String[] split = getButtonEvent().getCustomId().split(":", 4);
+        boolean doTable = split[1].contains("T");
         split = split[0].split(" ");
         String swizzleHash = split[2];
         byte[] swizzleBytes = decoder.decode(swizzleHash);
@@ -111,34 +136,59 @@ public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfo
         Path thumbnailPath = thumbnail == null ? null : state.getImagePath(thumbnail).orElse(null);
         Path weaponSpritePath = weaponSprite == null ? null : state.getImagePath(weaponSprite).orElse(null);
 
+        EmbedCreateSpec embed = EmbedCreateSpec.create();
+
         if(spritePath == null && thumbnailPath == null && weaponSpritePath == null)
-            description.append("## No Images\nNo images found!");
+            embed = embed.withTitle("No Images").withDescription("No images found!");
         else {
-            description.append("## Search Results\nSwizzled as you asked\n");
+            embed = embed.withTitle("Search Results").withDescription("Swizzled as you asked")
+                .withFooter(EmbedCreateFields.Footer.of(getCommentary(), null));
+            ArrayList<EmbedCreateFields.Field> fields = new ArrayList<>();
+
             if(spritePath != null)
                 processOneFile("```julia\nsprite `" + sprite + "`\n",
-                               spritePath, description, swizzleSet, attachments);
+                               spritePath, fields, swizzleSet, attachments);
             if(thumbnailPath != null && thumbnailPath != spritePath)
                 processOneFile("```julia\nthumbnail `" + thumbnail + "`\n",
-                               thumbnailPath, description, swizzleSet, attachments);
+                               thumbnailPath, fields, swizzleSet, attachments);
             if(weaponSpritePath != null && weaponSpritePath != spritePath && weaponSpritePath != thumbnailPath)
                 processOneFile("```julia\nweapon\n\tsprite `" + thumbnail + "`\n",
-                               weaponSpritePath, description, swizzleSet, attachments);
+                               weaponSpritePath, fields, swizzleSet, attachments);
+
+            embed = embed.withFields(fields);
         }
 
-        return getButtonEvent()
-            .getReply()
-            .flatMap(reply ->
-                     getButtonEvent()
-                     .editReply()
-                     .withComponents()
-                     .withContent(description.toString())
-                     .withFiles(attachments)
-            ).then();
+        final EmbedCreateSpec finalEmbed = embed;
+
+        if(doTable)
+            return getButtonEvent()
+                .getReply()
+                .flatMap(reply ->
+                         getButtonEvent()
+                         .editReply()
+                         .withComponents()
+                         .withEmbeds(finalEmbed)
+                         .withFiles(attachments)
+                         ).then();
+        else
+            return getButtonEvent()
+                .getReply()
+                .flatMap(reply ->
+                         getButtonEvent()
+                         .editReply()
+                         .withComponents()
+                         .withFiles(attachments)
+                         ).then();
     }
 
-    private void processOneFile(String heading, Path path, StringBuffer description, BitSet swizzleSet,
-                                ArrayList<MessageCreateFields.File> attachments) {
+    private String getCommentary() {
+        String babble = James.getState().jamesPhrase("JAMES::ping");
+        return babble!=null ? babble : "*no commentary*";
+    }
+
+    private void processOneFile(String heading, Path path, ArrayList<EmbedCreateFields.Field> fields,
+                                BitSet swizzleSet, ArrayList<MessageCreateFields.File> attachments) {
+        StringBuffer description = new StringBuffer(100);
         description.append(heading);
         JamesConfig config = James.getConfig();
         BufferedImage image;
@@ -172,5 +222,6 @@ public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfo
         }
         String outputName = path.getName(path.getNameCount() - 1).toString();
         attachments.add(MessageCreateFields.File.of(outputName, swizzledStream));
+        fields.add(EmbedCreateFields.Field.of(outputName, description.toString(), true));
     }
 }

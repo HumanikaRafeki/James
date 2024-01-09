@@ -4,7 +4,8 @@ import java.util.BitSet;
 import java.awt.Point;
 
 public class SwizzleCollage {
-    private static final double GOLDEN_RATIO = (1 + Math.sqrt(5)) / 2;
+    //private static final double GOLDEN_RATIO = (1 + Math.sqrt(5)) / 2;
+    private static final double TARGET_RATIO = 16 / 9.0;
 
     private final BitSet swizzles;
     private final int[] swizzleNumbers;
@@ -65,40 +66,14 @@ public class SwizzleCollage {
 
     public String asTable() {
         StringBuffer buffer = new StringBuffer(20 * tiles.x * tiles.y);
-        int unused = tiles.x * tiles.y - imageCount;
-        int priorWidth = 0;
-        boolean shift = false;
-        int iswizzle = 0;
         for(int y = 0; y < tiles.y; y++) {
             int[] row = collage[y];
-
-            int width = Math.max(priorWidth, row.length);
-            shift = width < tiles.x;
-            if(shift)
+            if(row.length < tiles.x)
                 buffer.append("  ");
-            for(int x = 0; x < width; x++)
-                buffer.append("-----");
-            buffer.append("-\n");
-
-            width = row.length;
-            shift = width < tiles.x;
-            if(shift)
-                buffer.append("  ");
-            for(int x = 0; x < width; x++) {
-                buffer.append(String.format("| %2d ", swizzleNumbers[iswizzle]));
-                iswizzle++;
-            }
-            buffer.append("|\n");
-            priorWidth = row.length;
+            for(int x = 0; x < row.length; x++)
+                buffer.append(String.format(" %2d", row[x]));
+            buffer.append("\n");
         }
-
-        shift = priorWidth < tiles.x;
-        if(shift)
-            buffer.append("  ");
-        for(int x = 0; x < priorWidth; x++)
-            buffer.append("-----");
-        buffer.append("-\n");
-
         return buffer.toString();
     }
 
@@ -137,7 +112,7 @@ public class SwizzleCollage {
 
     private double badnessOf(int countX, int countY) {
         int unused = countX*countY - imageCount;
-        double howNonGolden = Math.abs((image.x * countX) / (double)(image.y * countY) - GOLDEN_RATIO);
+        double howNonGolden = Math.abs((image.x * countX) / (double)(image.y * countY) - TARGET_RATIO);
         double totalPixels = countX * image.y * countY * image.y;
         double unusedPixels = image.y * unused * image.y;
         double howBlank = unusedPixels / (double)totalPixels;

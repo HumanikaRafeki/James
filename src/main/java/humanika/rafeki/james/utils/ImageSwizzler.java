@@ -93,6 +93,35 @@ public class ImageSwizzler {
         return collage;
     }
 
+    private final static void appendSwizzleRange(StringBuilder builder, int firstInSeries, int lastInSeries) {
+        if(builder.length() > 0)
+            builder.append(',');
+        builder.append(firstInSeries);
+        if(lastInSeries > firstInSeries)
+            builder.append('-').append(lastInSeries);
+    }
+
+    public static String describeSwizzleSet(BitSet swizzles) {
+        int firstInSeries = FIRST_SWIZZLE - 2;
+        int lastInSeries = FIRST_SWIZZLE - 2;
+        StringBuilder builder = new StringBuilder();
+        for(int i = FIRST_SWIZZLE; i <= LAST_SWIZZLE; i++) {
+            if(!swizzles.get(i))
+                continue;
+            boolean haveSeries = lastInSeries >= FIRST_SWIZZLE;
+            boolean inSeries = i == lastInSeries + 1;
+            if(!haveSeries)
+                firstInSeries = i;
+            else if(!inSeries) {
+                appendSwizzleRange(builder, firstInSeries, lastInSeries);
+                firstInSeries = i;
+            }
+            lastInSeries = i;
+        }
+        appendSwizzleRange(builder, firstInSeries, lastInSeries);
+        return builder.toString();
+    }
+
     public static BitSet bitSetForSwizzles(String input) throws IllegalArgumentException {
         String cleaned = input.replaceAll("\\s+", "");
         if(!VALID_SWIZZLE_STRING.matcher(cleaned).matches())

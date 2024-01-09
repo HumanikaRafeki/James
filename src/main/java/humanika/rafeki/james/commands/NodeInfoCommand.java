@@ -36,6 +36,18 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
         return "show";
     }
 
+    public void describeSearch(StringBuilder builder, Optional<String> maybeType, String query) {
+        builder.append("## Search Results\nFor `");
+        builder.append(query.replaceAll("`", "'")).append('`');
+        if(maybeType.isPresent())
+            builder.append(" of type `").append(maybeType.get().replaceAll("`", "'")).append('`');
+    }
+
+    public void getButtonFlags(StringBuilder builder) {
+        if(data.isEphemeral())
+            builder.append('E');
+    }
+
     @Override
     public Mono<Void> handleChatCommand() {
         Optional<InteractionEventHandler> subcommand = findSubcommand();
@@ -56,11 +68,7 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
             return getChatEvent().reply().withContent("Provide a query for the search!").withEphemeral(true);
 
         StringBuilder builder = new StringBuilder();
-
-        builder.append("## Search Results\nFor `");
-        builder.append(query.replaceAll("`", "'")).append('`');
-        if(maybeType.isPresent())
-            builder.append(" of type `").append(maybeType.get().replaceAll("`", "'")).append('`');
+        describeSearch(builder, maybeType, query);
 
         Optional<List<NodeInfo>> maybeMatches = getMatches(query, maybeType);
         if(!maybeMatches.isPresent()) {
@@ -245,7 +253,9 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
             listItem.add(built);
 
             builder.delete(0, builder.length());
-            builder.append(ephemeral ? buttonDataName + ":E:" : buttonDataName + ":-:");
+            builder.append(buttonDataName).append(':');
+            getButtonFlags(builder);
+            builder.append(":");
             builder.append(node.getHashString()).append(":").append(built);
             if(builder.length() > 95)
                 builder.delete(95, builder.length());
