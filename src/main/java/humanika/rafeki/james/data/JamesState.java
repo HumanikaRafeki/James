@@ -68,6 +68,10 @@ public class JamesState implements AutoCloseable {
         return endlessSky.governmentsWithSwizzle(swizzle);
     }
 
+    public List<SearchResult> fuzzyMatchNodesAndImages(String query, int maxSearch, Predicate<NodeInfo> nodeCondition, Predicate<String> imageCondition) {
+        return endlessSky.fuzzyMatchNodesAndImages(query, maxSearch, nodeCondition, imageCondition);
+    }
+
     public Optional<SearchResult> dummyResultWithHash(String hash) {
         return endlessSky.dummyResultWithHash(hash);
     }

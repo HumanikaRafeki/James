@@ -94,12 +94,14 @@ public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfo
     protected List<SearchResult> getMatches(String query, Optional<String> maybeType) {
         if(maybeType.isPresent()) {
             final String type = maybeType.get();
-            if(type.equals("variant"))
+            if(type.equals("image"))
+                return James.getState().fuzzyMatchImagePaths(query, QUERY_COUNT, name -> true);
+            else if(type.equals("variant"))
                 return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.isShipVariant() && info.hasImage());
             else
                 return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.getType().equals(type) && info.hasImage());
         } else
-            return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.hasImage());
+            return James.getState().fuzzyMatchNodesAndImages(query, QUERY_COUNT, info -> info.hasImage(), name -> true);
     }
 
     @Override

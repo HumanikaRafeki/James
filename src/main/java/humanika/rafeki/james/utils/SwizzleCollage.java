@@ -32,7 +32,6 @@ public class SwizzleCollage {
         int iswizzle = 0;
         for(int i = 0; i < this.swizzles.size(); i++)
             if(this.swizzles.get(i)) {
-                System.out.println("swizzleNumbers[" + iswizzle + "] = " + i);
                 swizzleNumbers[iswizzle] = i;
                 iswizzle++;
             }

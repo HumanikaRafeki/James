@@ -27,6 +27,7 @@ public class ShowCommand extends NodeInfoCommand {
 
     private ShowSubcommand subcommand = null;
     private boolean findImages = true;
+    private boolean findData = true;
 
     protected Optional<String> getType() {
         return subcommand.getData().getString("type");
@@ -53,13 +54,22 @@ public class ShowCommand extends NodeInfoCommand {
     protected List<SearchResult> getMatches(String query, Optional<String> maybeType) {
         if(maybeType.isPresent()) {
             final String type = maybeType.get();
-            if(type.equals("variant"))
+            if(type.equals("image")) {
+                if(!findImages)
+                    return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,
+                        info -> info.isShipVariant() && info.hasImage());
+                else
+                    return James.getState().fuzzyMatchImagePaths(query, QUERY_COUNT, name -> true);
+            } else if(type.equals("variant"))
                 return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,
                     info -> info.isShipVariant() && (!findImages || info.hasImage()));
             else
                 return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,
                     info -> info.getType().equals(type) && (!findImages || info.hasImage()));
-        } else
+        } else if(findImages)
+            return James.getState().fuzzyMatchNodesAndImages(query, QUERY_COUNT,
+                info -> !findImages || info.hasImage(), name -> true);
+        else
             return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,
                 info -> !findImages || info.hasImage());
     }
@@ -70,15 +80,18 @@ public class ShowCommand extends NodeInfoCommand {
         }
         if(names[1].equals("data")) {
             findImages = false;
+            findData = true;
             subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, false).withButtonEvent(getButtonEvent()));
             return Optional.of(subcommand);
         }
         else if(names[1].equals("image")) {
             findImages = true;
+            findData = false;
             subcommand = (ShowSubcommand)(new ShowSubcommand().showing(false, true).withButtonEvent(getButtonEvent()));
             return Optional.of(subcommand);
         } else if(names[1].equals("both")) {
             findImages = true;
+            findData = true;
             subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, true).withButtonEvent(getButtonEvent()));
             return Optional.of(subcommand);
         }

@@ -71,6 +71,42 @@ public class EndlessSky implements AutoCloseable {
         return Optional.empty();
     }
 
+    public List<SearchResult> fuzzyMatchNodesAndImages(String query, int maxSearch, Predicate<NodeInfo> nodeCondition, Predicate<String> imageCondition) {
+        List<SearchResult> nodes = fuzzyMatchNodeNames(query, maxSearch, nodeCondition);
+        List<SearchResult> images = fuzzyMatchImagePaths(query, maxSearch, imageCondition);
+
+        if(nodes.size() == 0)
+            return images;
+        else if(images.size() == 0)
+            return nodes;
+
+        // Add the two maxSearch from the two lists.
+        List<SearchResult> result = new ArrayList<>();
+        for(int i = 0, n = 0, side = 99; side != 0;) {
+            // side: -1 = add image; +1 = add node; 0 = nothing more to add
+            // i: index within images of first image not yet added
+            // n: index within nodes of first node not yet added
+            if(result.size() >= maxSearch)
+                break;
+            side = 0;
+            if(i < images.size()) {
+                if(n < nodes.size())
+                    side = images.get(i).getScore() < nodes.get(n).getScore() ? 1 : -1;
+                else
+                    side = -1;
+            } else if(n < nodes.size())
+                side = 1;
+            if(side == 1) {
+                result.add(nodes.get(n));
+                n++;
+            } else if(side == -1) {
+                result.add(images.get(i));
+                i++;
+            }
+        }
+        return result;
+    }
+
     public Optional<SearchResult> dummyResultWithHash(String hash) {
         Optional<SearchResult> result = lookups.dummyResultWithHash(hash);
         return result.isPresent() ? result : images.dummyResultWithHash(hash);
