@@ -1,16 +1,17 @@
 package humanika.rafeki.james.data;
 
-import me.mcofficer.esparser.DataNode;
-
-import java.util.List;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.HashSet;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Base64;
-import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import me.mcofficer.esparser.DataNode;
 import org.simmetrics.StringMetric;
 
 public class NodeInfo {
@@ -45,12 +46,13 @@ public class NodeInfo {
     private final Optional<String> thumbnail;
     private final Optional<List<DataNode>> description;
     private final Optional<List<DataNode>> spaceport;
+    private final List<String> images;
 
     /** For Ship variants, "base" is the name of the template ship and "dataName" is the variant name */
     private final Optional<String> base;
     private final Optional<String> displayName;
-    private final Optional<String> imageRefType;
-    private final Optional<String> imageRefDataName;
+    private final Optional<String> effectRefType;
+    private final Optional<String> effectRefDataName;
 
     /** True iff this is a ship variant (ship "base name" "variant name") */
     private final boolean shipVariantFlag;
@@ -64,6 +66,9 @@ public class NodeInfo {
     private final String name;
     private final String base64Hash;
     private final DataNode node;
+
+    private Optional<NodeInfo> baseNode;
+    private Optional<NodeInfo> effectNode;
 
     @Override
     public String toString() {
@@ -80,10 +85,6 @@ public class NodeInfo {
             builder.append("; displayName=`").append(displayName.get()).append('`');
         if(base.isPresent())
             builder.append("; base=`").append(base.get()).append('`');
-        if(imageRefType.isPresent())
-            builder.append("; imageRefType=`").append(imageRefType.get()).append('`');
-        if(imageRefDataName.isPresent())
-            builder.append("; imageRefDataName=`").append(imageRefDataName.get()).append('`');
         if(shipVariantFlag)
             builder.append("; shipVariant=true");
         if(sprite.isPresent())
@@ -116,14 +117,12 @@ public class NodeInfo {
 
         String sprite = null;
         String thumbnail = null;
-        String imageRefType = null;
-        String imageRefDataName = null;
+        String effectRefType = null;
+        String effectRefDataName = null;
         String weaponSprite = null;
 
         if(type.equals("ship") && node.size() > 2) {
             base = node.token(1);
-            imageRefType = "ship";
-            imageRefDataName = base;
             dataName = node.token(2);
             subtype = "variant";
         } else
@@ -163,8 +162,8 @@ public class NodeInfo {
                 } else if(child.size() >= 2) {
                     switch(child.token(0)) {
                     case "environmental effect":
-                        imageRefType = "effect";
-                        imageRefDataName = child.token(1);
+                        effectRefType = "effect";
+                        effectRefDataName = child.token(1);
                         break;
                     case "description":
                         if(description == null)
@@ -194,6 +193,17 @@ public class NodeInfo {
             }
         }
 
+        ArrayList<String> images = new ArrayList<>(3);
+        if(sprite != null)
+            images.add(sprite);
+        if(weaponSprite != null && sprite != weaponSprite)
+            images.add(weaponSprite);
+        if(thumbnail != null && thumbnail != sprite && thumbnail != weaponSprite)
+            images.add(thumbnail);
+        if(images.size() > 0)
+            this.images = Collections.unmodifiableList(images);
+        else
+            this.images = Collections.emptyList();
         this.sprite = Optional.ofNullable(sprite);
         this.weaponSprite = Optional.ofNullable(weaponSprite);
         this.thumbnail = Optional.ofNullable(thumbnail);
@@ -201,8 +211,8 @@ public class NodeInfo {
         this.spaceport = Optional.ofNullable(spaceport);
         this.base = Optional.ofNullable(base);
         this.displayName = Optional.ofNullable(displayName);
-        this.imageRefType = Optional.ofNullable(imageRefType);
-        this.imageRefDataName = Optional.ofNullable(imageRefDataName);
+        this.effectRefType = Optional.ofNullable(effectRefType);
+        this.effectRefDataName = Optional.ofNullable(effectRefDataName);
         this.type = type;
         this.dataName = dataName;
         this.name = name;
@@ -210,11 +220,36 @@ public class NodeInfo {
         this.shipVariantFlag = type.equals("ship") && base != null;
 
         StringBuilder builder = new StringBuilder();
-        this.searchString = dataName.toString().toLowerCase().replaceAll("[^0-9a-zA-Z-]+", " ").strip();
+        if(this.shipVariantFlag)
+            builder.append(base).append(' ').append(dataName);
+        else
+            builder.append(dataName);
+        this.searchString = builder.toString().toLowerCase().replaceAll("[^0-9a-zA-Z-]+", " ").strip();
 
         builder.delete(0, builder.length());
         builder.append("type=").append(type).append(";subtype=").append(subtype).append(";dataName=").append(dataName).append(";base=").append(base);
         this.base64Hash = generateBase64Hash(builder.toString());
+
+        baseNode = Optional.empty();
+        effectNode = Optional.empty();        
+    }
+
+    void postLoad(NodeDatabase nodes) {
+        if(effectRefType.isPresent() && effectRefDataName.isPresent()) {
+            String type = effectRefType.get();
+            Optional<NodeInfo> ref = nodes.getFirstMatch(effectRefDataName.get(), info -> info.getType().equals(type));
+            ref.ifPresent(node -> {
+                effectNode = Optional.of(node);
+                node.getImageIterator().forEachRemaining(image -> {
+                    if(!images.contains(image))
+                        images.add(image);
+                });
+            });
+        }
+
+        base.ifPresent(baseName -> {
+            Optional<NodeInfo> ref = nodes.getFirstMatch(baseName, info -> info.getType().equals("ship"));
+        });
     }
 
     private static /* synchronized */ String generateBase64Hash(String content) {
@@ -256,6 +291,8 @@ public class NodeInfo {
             return thumbnail;
         else if(weaponSprite.isPresent())
             return weaponSprite;
+        else if(images.size() > 0)
+            return Optional.of(images.get(0));
         return Optional.empty();
     }
 
@@ -267,14 +304,6 @@ public class NodeInfo {
         else if(weaponSprite.isPresent())
             return weaponSprite;
         return Optional.empty();
-    }
-
-    public Optional<String> getImageRefType() {
-        return imageRefType;
-    }
-
-    public Optional<String> getImageRefDataName() {
-        return imageRefDataName;
     }
 
     public String getBestType() {
@@ -301,7 +330,7 @@ public class NodeInfo {
     }
 
     public boolean hasDescription() {
-        return description.isPresent();
+        return description.isPresent() || baseNode.isPresent() && baseNode.get().description.isPresent();
     }
 
     public boolean hasSpaceport() {
@@ -309,14 +338,22 @@ public class NodeInfo {
     }
 
     public boolean hasImage() {
-        return thumbnail.isPresent() || sprite.isPresent() || weaponSprite.isPresent();
+        return images.size() > 0;
     }
 
     public Optional<List<DataNode>> getDescription() {
-        return description;
+        if(description.isPresent())
+            return description;
+        else if(baseNode.isPresent())
+            return baseNode.get().description;
+        return Optional.empty();
     }
 
     public Optional<List<DataNode>> getSpaceport() {
         return spaceport;
+    }
+
+    public Iterator<String> getImageIterator() {
+        return images.iterator();
     }
 }

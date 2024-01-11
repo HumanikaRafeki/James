@@ -1,8 +1,5 @@
 package humanika.rafeki.james.commands;
 
-import discord4j.core.object.command.Interaction;
-import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateFields;
@@ -11,6 +8,7 @@ import humanika.rafeki.james.Utils;
 import humanika.rafeki.james.data.JamesConfig;
 import humanika.rafeki.james.data.JamesState;
 import humanika.rafeki.james.data.NodeInfo;
+import humanika.rafeki.james.data.SearchResult;
 import humanika.rafeki.james.utils.ImageSwizzler;
 import humanika.rafeki.james.utils.SwizzleCollage;
 import java.awt.image.BufferedImage;
@@ -20,9 +18,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.BitSet;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
 import javax.imageio.ImageIO;
 import reactor.core.publisher.Mono;
 
@@ -61,29 +62,18 @@ public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfo
         super.describeSearch(builder, maybeType, query);
         builder.append("\nSwizzle List: `").append(ImageSwizzler.describeSwizzleSet(swizzleSet)).append('`');
         if(!showTable.isPresent())
-            builder.append("\nUse \"table: show\" to see which swizzle is where in each image.");
+            builder.append("\nUse \"table: hide\" to hide the search result table.");
     }
 
     @Override
     public void getButtonFlags(StringBuilder builder) {
         super.getButtonFlags(builder);
-        if(showTable.isPresent() && showTable.getAsInt() != 0) {
-            System.out.println("TABLE PRESENT AND TRUE append T");
+        if(!showTable.isPresent() || showTable.getAsInt() != 0)
             builder.append('T');
-        } else
-            System.out.println("NO T NO TABLE " + showTable.isPresent());
     }
 
     @Override
     public Mono<Void> handleChatCommand() {
-        Interaction interaction = data.getInteraction();
-        // FIXME: Don't block here.
-        MessageChannel channel = interaction.getChannel().block();
-        if(channel instanceof TextChannel) {
-            TextChannel textChannel = (TextChannel)channel;
-            if(textChannel.isNsfw())
-                return getChatEvent().reply().withContent("I'm under 18 years of age and will not accept images in NSFW (age-restricted) channels. There's nothing wrong with having a beard at my age. Stop judging me.");
-        }
         Optional<String> maybeShowTable = data.getString("table");
         if(maybeShowTable.isPresent())
             showTable = OptionalInt.of(maybeShowTable.get().equals("show") ? 1 : 0);
@@ -101,62 +91,51 @@ public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfo
     }
 
     @Override
-    protected Optional<List<NodeInfo>> getMatches(String query, Optional<String> maybeType) {
+    protected List<SearchResult> getMatches(String query, Optional<String> maybeType) {
         if(maybeType.isPresent()) {
             final String type = maybeType.get();
             if(type.equals("variant"))
                 return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.isShipVariant() && info.hasImage());
             else
-                return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.getType().equals(type) && !info.isShipVariant() && info.hasImage());
+                return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.getType().equals(type) && info.hasImage());
         } else
-            return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> !info.isShipVariant()  && info.hasImage());
+            return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.hasImage());
     }
 
     @Override
-    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveCommand subcommand) {
-        if(found.size() < 1)
-            return Mono.empty();
-
+    protected Mono<Void> generateResult(SearchResult found, boolean ephemeral, PrimitiveCommand subcommand) {
         String[] split = getButtonEvent().getCustomId().split(":", 4);
-        boolean doTable = split[1].contains("T");
+        final boolean doTable = split[1].contains("T");
         split = split[0].split(" ");
-        String swizzleHash = split[2];
-        byte[] swizzleBytes = decoder.decode(swizzleHash);
-        BitSet swizzleSet = BitSet.valueOf(swizzleBytes);
-        JamesState state = James.getState();
-        NodeInfo info = found.get(found.size() - 1);
-        ArrayList<MessageCreateFields.File> attachments = new ArrayList<>();
-        StringBuffer description = new StringBuffer();
+        final String swizzleHash = split[2];
+        final byte[] swizzleBytes = decoder.decode(swizzleHash);
+        final BitSet swizzleSet = BitSet.valueOf(swizzleBytes);
+        final JamesState state = James.getState();
+        final ArrayList<MessageCreateFields.File> attachments = new ArrayList<>();
+        final StringBuffer description = new StringBuffer();
+        final ArrayList<EmbedCreateFields.Field> fields = new ArrayList<>();
+        final Optional<NodeInfo> maybeInfo = found.getNodeInfo();
+        final Set<String> seen = new HashSet<>();
 
-        String sprite = info.getSprite().orElse(null);
-        String thumbnail = info.getThumbnail().orElse(null);
-        String weaponSprite = info.getWeaponSprite().orElse(null);
+        if(maybeInfo.isPresent())
+            generateNodeInfoResult(maybeInfo.get(), state, fields, swizzleSet, attachments, seen);
 
-        Path spritePath = sprite == null ? null : state.getImagePath(sprite).orElse(null);
-        Path thumbnailPath = thumbnail == null ? null : state.getImagePath(thumbnail).orElse(null);
-        Path weaponSpritePath = weaponSprite == null ? null : state.getImagePath(weaponSprite).orElse(null);
+        for(Iterator<String> iter = found.getImageIterator(); iter.hasNext();) {
+            final String image = iter.next();
+            if(seen.contains(image))
+                continue;
+            seen.add(image);
+            final Path path = state.getImagePath(image).orElse(null);
+            processOneFile("```julia\n\"" + image + "\"\n", path, fields, swizzleSet, attachments);
+        }
 
         EmbedCreateSpec embed = EmbedCreateSpec.create();
 
-        if(spritePath == null && thumbnailPath == null && weaponSpritePath == null)
+        if(seen.size() == 0)
             embed = embed.withTitle("No Images").withDescription("No images found!");
-        else {
+        else
             embed = embed.withTitle("Search Results").withDescription("Swizzled as you asked")
-                .withFooter(EmbedCreateFields.Footer.of(getCommentary(), null));
-            ArrayList<EmbedCreateFields.Field> fields = new ArrayList<>();
-
-            if(spritePath != null)
-                processOneFile("```julia\nsprite `" + sprite + "`\n",
-                               spritePath, fields, swizzleSet, attachments);
-            if(thumbnailPath != null && thumbnailPath != spritePath)
-                processOneFile("```julia\nthumbnail `" + thumbnail + "`\n",
-                               thumbnailPath, fields, swizzleSet, attachments);
-            if(weaponSpritePath != null && weaponSpritePath != spritePath && weaponSpritePath != thumbnailPath)
-                processOneFile("```julia\nweapon\n\tsprite `" + thumbnail + "`\n",
-                               weaponSpritePath, fields, swizzleSet, attachments);
-
-            embed = embed.withFields(fields);
-        }
+                .withFooter(EmbedCreateFields.Footer.of(getCommentary(), null)).withFields(fields);
 
         final EmbedCreateSpec finalEmbed = embed;
 
@@ -181,13 +160,39 @@ public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfo
                          ).then();
     }
 
+    private void generateNodeInfoResult(NodeInfo info, JamesState state, List<EmbedCreateFields.Field> fields, BitSet swizzleSet, List<MessageCreateFields.File> attachments, Set<String> seen) {
+        String sprite = info.getSprite().orElse(null);
+        String thumbnail = info.getThumbnail().orElse(null);
+        String weaponSprite = info.getWeaponSprite().orElse(null);
+
+        Path spritePath = sprite == null ? null : state.getImagePath(sprite).orElse(null);
+        Path thumbnailPath = thumbnail == null ? null : state.getImagePath(thumbnail).orElse(null);
+        Path weaponSpritePath = weaponSprite == null ? null : state.getImagePath(weaponSprite).orElse(null);
+
+        if(spritePath != null) {
+            seen.add(sprite);
+            processOneFile("```julia\nsprite `" + sprite + "`\n",
+                           spritePath, fields, swizzleSet, attachments);
+        }
+        if(thumbnailPath != null && thumbnailPath != spritePath) {
+            seen.add(thumbnail);
+            processOneFile("```julia\nthumbnail `" + thumbnail + "`\n",
+                           thumbnailPath, fields, swizzleSet, attachments);
+        }
+        if(weaponSpritePath != null && weaponSpritePath != spritePath && weaponSpritePath != thumbnailPath) {
+            seen.add(weaponSprite);
+            processOneFile("```julia\nweapon\n\tsprite `" + weaponSprite + "`\n",
+                           weaponSpritePath, fields, swizzleSet, attachments);
+        }
+    }
+
     private String getCommentary() {
         String babble = James.getState().jamesPhrase("JAMES::ping");
         return babble!=null ? babble : "*no commentary*";
     }
 
-    private void processOneFile(String heading, Path path, ArrayList<EmbedCreateFields.Field> fields,
-                                BitSet swizzleSet, ArrayList<MessageCreateFields.File> attachments) {
+    private void processOneFile(String heading, Path path, List<EmbedCreateFields.Field> fields,
+                                BitSet swizzleSet, List<MessageCreateFields.File> attachments) {
         StringBuffer description = new StringBuffer(100);
         description.append(heading);
         JamesConfig config = James.getConfig();

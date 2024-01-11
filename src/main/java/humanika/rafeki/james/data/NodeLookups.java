@@ -1,27 +1,23 @@
 package humanika.rafeki.james.data;
 
-import me.mcofficer.esparser.DataNode;
-import me.mcofficer.esparser.DataFile;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Optional;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
+import me.mcofficer.esparser.DataFile;
+import me.mcofficer.esparser.DataNode;
 import org.simmetrics.StringMetric;
 import org.simmetrics.metrics.StringMetrics;
 
-public class NodeLookups {
+public class NodeLookups implements NodeDatabase {
     private HashMap<String, DataFile> dataFiles = new HashMap<>();
     private HashMap<String, ArrayList<NodeInfo>> nameNode = new HashMap<>();
     private HashMap<String, ArrayList<NodeInfo>> hashNode = new HashMap<>();
     private HashMap<Integer, ArrayList<Government>> swizzleGovernment = new HashMap<>();
     private final static StringMetric metric = StringMetrics.needlemanWunch();
-
-    NodeLookups() {
-
-    }
 
     /* synchronized */ void addFile(String relativePath, DataFile file) {
         dataFiles.put(relativePath, file);
@@ -35,25 +31,6 @@ public class NodeLookups {
             addToHashNode(info.getHashString(), info);
             if(type.equals("government"))
                 addToSwizzleGovernment(node);
-        }
-    }
-
-    class FloatNode {
-        public final float score;
-        public final NodeInfo node;
-        FloatNode(float score, NodeInfo node) {
-            this.score = score;
-            this.node = node;
-        }
-        public static int compare(FloatNode lhs, FloatNode rhs) {
-            return lhs.score > rhs.score ? -1 : lhs.score < rhs.score ? 1 : 0;
-        }
-    }
-
-    private class ShrinkableList extends ArrayList<FloatNode> {
-        public void shrink(int len) {
-            if(len < size())
-                removeRange(len, size());
         }
     }
 
@@ -71,37 +48,38 @@ public class NodeLookups {
         return Optional.of(results);
     }
 
-    public Optional<List<NodeInfo>> fuzzyMatchNodeNames(String query, int maxSearch, Predicate<NodeInfo> condition) {
+    public Optional<NodeInfo> getFirstMatch(String dataName, Predicate<NodeInfo> condition) {
+        ArrayList<NodeInfo> infos = nameNode.get(dataName);
+        for(NodeInfo info : infos)
+            if(condition.test(info))
+                return Optional.of(info);
+        return Optional.empty();
+    }
+
+    public List<SearchResult> fuzzyMatchNodeNames(String query, int maxSearch, Predicate<NodeInfo> condition) {
         int threshold = maxSearch > 0 ? 3 * maxSearch : 0;
-        ShrinkableList work = new ShrinkableList();
+        ShrinkableArrayList<SearchResult> work = new ShrinkableArrayList<>();
         for(Map.Entry<String, ArrayList<NodeInfo>> entry : nameNode.entrySet()) {
             ArrayList<NodeInfo> list = entry.getValue();
-            if(list.size() < 1)
-                continue;
-            for(NodeInfo info : list) {
+            if(list.size() > 0) {
+                NodeInfo info = list.get(list.size() - 1);
                 if(condition.test(info)) {
                     float score = metric.compare(query, info.getSearchString());
-                    work.add(new FloatNode(score, info));
-                    if(threshold > 0 && work.size() > threshold) {
-                        work.sort(FloatNode::compare);
+                    work.add(SearchResult.of(score, info));
+                    if(threshold > 0 && work.size() >= threshold) {
+                        work.sort(SearchResult::lessThan);
                         work.shrink(maxSearch);
-                        break; // Only match one per name or hashes are duplicated and Discord breaks
                     }
                 }
             }
         }
-
         if(work.size() < 1)
-            return Optional.empty();
-
-        work.sort(FloatNode::compare);
-        ArrayList<NodeInfo> output = new ArrayList<>();
-        int stop = work.size();
-        if(maxSearch > 0 && maxSearch < stop)
-            stop = maxSearch;
-        for(int i = 0; i < stop; i++)
-            output.add(work.get(i).node);
-        return Optional.of(output);
+            return Collections.emptyList();
+        if(work.size() > 1)
+            work.sort(SearchResult::lessThan);
+        if(maxSearch > 0 && work.size() > maxSearch)
+            work.shrink(maxSearch);
+        return Collections.unmodifiableList(work);
     }
 
     public Optional<List<NodeInfo>> nodesWithHash(String hash) {
@@ -109,6 +87,13 @@ public class NodeLookups {
         if(got == null || got.size() < 1)
             return Optional.empty();
         return Optional.of(got);
+    }
+
+    public Optional<SearchResult> dummyResultWithHash(String hash) {
+        ArrayList<NodeInfo> got = hashNode.get(hash);
+        if(got == null || got.size() < 1)
+            return Optional.empty();
+        return Optional.of(SearchResult.of(0, got.get(got.size() - 1)));
     }
 
     public Optional<List<Government>> governmentsWithSwizzle(int swizzle) {

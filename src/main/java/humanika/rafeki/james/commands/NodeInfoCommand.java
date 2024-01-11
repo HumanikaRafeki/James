@@ -14,9 +14,11 @@ import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.data.NodeInfo;
+import humanika.rafeki.james.data.SearchResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -70,13 +72,7 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
         StringBuilder builder = new StringBuilder();
         describeSearch(builder, maybeType, query);
 
-        Optional<List<NodeInfo>> maybeMatches = getMatches(query, maybeType);
-        if(!maybeMatches.isPresent()) {
-            builder.append("\n*No matches.*");
-            return getChatEvent().reply().withContent(builder.toString()).withEphemeral(ephemeral);
-        }
-
-        List<NodeInfo> matches = maybeMatches.get();
+        List<SearchResult> matches = getMatches(query, maybeType);
         if(matches.size() < 1) {
             builder.append("\n*No matches.*");
             return getChatEvent().reply().withContent(builder.toString()).withEphemeral(ephemeral);
@@ -155,8 +151,8 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
             getButtonEvent().editReply().withComponents().subscribe();
         else if(!wrongCommand) {
             Optional<InteractionEventHandler> subcommand = subcommandFor(names);
-            Optional<List<NodeInfo>> found = James.getState().nodesWithHash(hash);
-            if(found.isPresent() && found.get().size() > 0) {
+            Optional<SearchResult> found = James.getState().dummyResultWithHash(hash);
+            if(found.isPresent()) {
                 return generateResult(found.get(), ephemeral, (PrimitiveCommand)subcommand.orElse(null));
             } else {
                 return getButtonEvent().editReply()
@@ -171,9 +167,9 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
         return Mono.empty();
     }
 
-    protected abstract Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveCommand subcommand);
+    protected abstract Mono<Void> generateResult(SearchResult found, boolean ephemeral, PrimitiveCommand subcommand);
 
-    protected abstract Optional<List<NodeInfo>> getMatches(String query, Optional<String> type);
+    protected abstract List<SearchResult> getMatches(String query, Optional<String> type);
 
     protected Optional<String> getType() {
         return data.getString("type");
@@ -209,19 +205,10 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
             thumbnail = null;
         }
 
-        if(canRecurse && image == null && thumbnail == null) {
-            String refType = info.getImageRefType().orElse(null);
-            String refDataName = info.getImageRefDataName().orElse(null);
-            if(refType != null && refDataName != null) {
-                Optional<List<NodeInfo>> matches = James.getState().selectNodesByName(refDataName, 10, subinfo -> subinfo.getType().equals(refType));
-                if(matches.isPresent()) {
-                    for(NodeInfo subinfo : matches.get()) {
-                        String[] subresult = getImageAndThumbnail(subinfo, false);
-                        if(subresult[0] != null && subresult[1] != null)
-                            return subresult;
-                    }
-                }
-            }
+        if(image == null && thumbnail == null) {
+            Iterator<String> iter = info.getImageIterator();
+            if(iter.hasNext())
+                image = iter.next();
         } else if(info.getType().equals("ship")) {
             // Ships look better with their shipyard image ("thumbnail" in data files) as the big one and top view as the thumbnail
             String swap = image;
@@ -233,7 +220,7 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
         return result;
     }
 
-    protected void getResponse(List<NodeInfo> matches, List<String> listItem, List<String> buttonId, boolean ephemeral, Optional<InteractionEventHandler> subcommand) {
+    protected void getResponse(List<SearchResult> matches, List<String> listItem, List<String> buttonId, boolean ephemeral, Optional<InteractionEventHandler> subcommand) {
         StringBuilder builder = new StringBuilder(100);
         String buttonDataName = null;
 
@@ -243,12 +230,12 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
             buttonDataName = getFullName();
 
         int i = 0;
-        for(NodeInfo node : matches) {
+        for(SearchResult result : matches) {
             i++;
             if(i > 1)
                 builder.delete(0, builder.length());
 
-            builder.append(node.getBestType()).append(' ').append(node.getName());
+            builder.append(result.getBestType()).append(' ').append(result.getName());
             String built = builder.toString();
             listItem.add(built);
 
@@ -256,7 +243,7 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
             builder.append(buttonDataName).append(':');
             getButtonFlags(builder);
             builder.append(":");
-            builder.append(node.getHashString()).append(":").append(built);
+            builder.append(result.getHashString()).append(":").append(built);
             if(builder.length() > 95)
                 builder.delete(95, builder.length());
             buttonId.add(builder.toString());

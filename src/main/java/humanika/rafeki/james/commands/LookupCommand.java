@@ -14,6 +14,7 @@ import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.data.NodeInfo;
+import humanika.rafeki.james.data.SearchResult;
 import humanika.rafeki.james.utils.AddParagraphFields;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,15 +31,24 @@ public class LookupCommand extends NodeInfoCommand {
     }
 
     @Override
-    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveCommand subcommand) {
-        NodeInfo chosen = found.get(found.size() - 1);
+    protected Mono<Void> generateResult(SearchResult found, boolean ephemeral, PrimitiveCommand subcommand) {
+        Optional<NodeInfo> maybe = found.getNodeInfo();
+        if(!maybe.isPresent())
+            return getButtonEvent().getReply().flatMap(reply ->
+                getButtonEvent()
+                    .editReply()
+                    .withComponents()
+                    .withEmbeds(EmbedCreateSpec.create()
+                        .withFields(EmbedCreateFields.Field.of(
+                            "Internal Error", "/lookup sent a hash for something that wasn't a DataNode.", false))))
+                .then();
+
+        NodeInfo info = maybe.get();
         List<EmbedCreateSpec> embeds = new ArrayList<>();
         StringBuilder builder = new StringBuilder(100);
         String before = James.getConfig().endlessSkyData;
         String after = James.getConfig().endlessSkyDataQuery;
         AddParagraphFields fieldAdder = new AddParagraphFields(4, false);
-
-        NodeInfo info = found.get(found.size() - 1);
 
         List<EmbedCreateFields.Field> fields = new ArrayList<>();
 
@@ -67,7 +77,7 @@ public class LookupCommand extends NodeInfoCommand {
         return getButtonEvent().getReply().flatMap(reply -> getButtonEvent().editReply().withEmbeds(embeds).withComponents()).then();
     }
 
-    protected Optional<List<NodeInfo>> getMatches(String query, Optional<String> maybeType) {
+    protected List<SearchResult> getMatches(String query, Optional<String> maybeType) {
         if(maybeType.isPresent()) {
             final String type = maybeType.get();
             if(type.equals("variant"))

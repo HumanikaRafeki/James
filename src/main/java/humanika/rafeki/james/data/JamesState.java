@@ -68,7 +68,11 @@ public class JamesState implements AutoCloseable {
         return endlessSky.governmentsWithSwizzle(swizzle);
     }
 
-    public Optional<List<NodeInfo>> fuzzyMatchNodeNames(String query, int maxSearch, Predicate<NodeInfo> condition) {
+    public Optional<SearchResult> dummyResultWithHash(String hash) {
+        return endlessSky.dummyResultWithHash(hash);
+    }
+
+    public List<SearchResult> fuzzyMatchNodeNames(String query, int maxSearch, Predicate<NodeInfo> condition) {
         return endlessSky.fuzzyMatchNodeNames(query, maxSearch, condition);
     }
 
@@ -78,6 +82,14 @@ public class JamesState implements AutoCloseable {
 
     public Optional<List<NodeInfo>> nodesWithHash(String hash) {
         return endlessSky.nodesWithHash(hash);
+    }
+
+    public List<SearchResult> fuzzyMatchImagePaths(String query, int maxSearch, Predicate<String> condition) {
+        return endlessSky.fuzzyMatchImagePaths(query, maxSearch, condition);
+    }
+
+    public Optional<String> imageWithHash(String hash) {
+        return endlessSky.imageWithHash(hash);
     }
 
     public Optional<String> getImageRawUrl(String name) {

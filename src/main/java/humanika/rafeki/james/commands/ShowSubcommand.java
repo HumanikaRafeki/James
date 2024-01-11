@@ -6,14 +6,18 @@ import discord4j.core.spec.MessageCreateFields;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.data.JamesState;
 import humanika.rafeki.james.data.NodeInfo;
+import humanika.rafeki.james.data.SearchResult;
 import humanika.rafeki.james.utils.AddParagraphFields;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import me.mcofficer.esparser.DataNode;
 import reactor.core.publisher.Mono;
 
@@ -63,16 +67,15 @@ class ShowSubcommand extends PrimitiveCommand implements NodeInfoSubcommand {
         }
     }
 
-    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral) {
-        if(found.size() < 1)
-            return Mono.empty();
+    protected Mono<Void> generateResult(SearchResult found, boolean ephemeral) {
         List<EmbedCreateSpec> embeds = new ArrayList<>();
-        NodeInfo info = found.get(found.size() - 1);
         ArrayList<MessageCreateFields.File> attachmentField = new ArrayList<>();
         InputStream attachmentStream = null;
 
         try {
-            if(showData) {
+            Optional<NodeInfo> maybeInfo = found.getNodeInfo();
+            if(showData && maybeInfo.isPresent()) {
+                NodeInfo info = maybeInfo.get();
                 DataNode node = info.getDataNode();
                 List<String> allLines = node.getLines();
                 List<String> someLines = allLines;
@@ -105,7 +108,7 @@ class ShowSubcommand extends PrimitiveCommand implements NodeInfoSubcommand {
             }
             
             if(showImages) {
-                if(!embedImages(info, embeds, true))
+                if(!embedImages(found, embeds, true))
                     embeds.add(EmbedCreateSpec.create().withDescription("No images found.").withTitle("No Images"));
             }
 
@@ -118,36 +121,45 @@ class ShowSubcommand extends PrimitiveCommand implements NodeInfoSubcommand {
         }
     }
 
-    private boolean embedImages(NodeInfo info, List<EmbedCreateSpec> embeds, boolean recurse) {
+    private boolean embedImages(SearchResult result, List<EmbedCreateSpec> embeds, boolean recurse) {
+        Set<String> seen = new HashSet<>();
+        Optional<NodeInfo> maybeInfo = result.getNodeInfo();
+        JamesState state = James.getState();
+        if(maybeInfo.isPresent())
+            embedNodeImages(state, maybeInfo.get(), embeds, recurse, seen);
+        for(Iterator<String> iter = result.getImageIterator(); iter.hasNext();) {
+            String image = iter.next();
+            if(seen.contains(image))
+                continue;
+            seen.add(image);
+            state.getImageRawUrl(image).ifPresent(path ->
+                embeds.add(EmbedCreateSpec.create().withImage(path).withTitle("Image")
+                          .withDescription("```julia\n\"" + image + "\"\n```")));
+        }
+        return seen.size() > 0;
+    }
+
+    private void embedNodeImages(JamesState state, NodeInfo info, List<EmbedCreateSpec> embeds, boolean recurse, Set seen) {
         String sprite = info.getSprite().orElse(null);
         String thumbnail = info.getThumbnail().orElse(null);
         String weaponSprite = info.getWeaponSprite().orElse(null);
-        JamesState state = James.getState();
-        if(sprite != null)
+        if(sprite != null) {
+            seen.add(sprite);
             state.getImageRawUrl(sprite).ifPresent(path ->
                 embeds.add(EmbedCreateSpec.create().withImage(path).withTitle("Sprite")
                            .withDescription("```julia\nsprite \"" + sprite + "\"\n```")));
-        if(thumbnail != null && thumbnail != sprite)
+        }
+        if(thumbnail != null && thumbnail != sprite) {
+            seen.add(thumbnail);
             state.getImageRawUrl(thumbnail).ifPresent(path ->
                 embeds.add(EmbedCreateSpec.create().withImage(path).withTitle("Thumbnail")
                            .withDescription("```julia\nthumbnail \"" + thumbnail + "\"\n```")));
-        if(weaponSprite != null && weaponSprite != thumbnail && weaponSprite != sprite)
+        }
+        if(weaponSprite != null && weaponSprite != thumbnail && weaponSprite != sprite) {
+            seen.add(weaponSprite);
             state.getImageRawUrl(weaponSprite).ifPresent(path ->
                 embeds.add(EmbedCreateSpec.create().withImage(path).withTitle("Weapon Sprite")
                            .withDescription("```julia\nweapon\n\tsprite \"" + weaponSprite + "\"\n```")));
-
-        if(sprite != null || thumbnail != null || weaponSprite != null)
-            return true;
-        String refType = info.getImageRefType().orElse(null);
-        String refDataName = info.getImageRefDataName().orElse(null);
-        if(refType == null || refDataName == null)
-            return false;
-        Optional<List<NodeInfo>> matches = James.getState().selectNodesByName(refDataName, 10, subinfo -> subinfo.getType().equals(refType));
-        if(!matches.isPresent())
-            return false;
-        for(NodeInfo subinfo : matches.get())
-            if(embedImages(subinfo, embeds, false))
-                return true;
-        return false;
+        }
     }
 }

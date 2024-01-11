@@ -14,6 +14,7 @@ import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import humanika.rafeki.james.James;
 import humanika.rafeki.james.data.NodeInfo;
+import humanika.rafeki.james.data.SearchResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +26,7 @@ import reactor.core.publisher.Mono;
 public class ShowCommand extends NodeInfoCommand {
 
     private ShowSubcommand subcommand = null;
+    private boolean findImages = true;
 
     protected Optional<String> getType() {
         return subcommand.getData().getString("type");
@@ -43,20 +45,23 @@ public class ShowCommand extends NodeInfoCommand {
     }
 
     @Override
-    protected Mono<Void> generateResult(List<NodeInfo> found, boolean ephemeral, PrimitiveCommand subcommand) {
+    protected Mono<Void> generateResult(SearchResult found, boolean ephemeral, PrimitiveCommand subcommand) {
         return( ((ShowSubcommand)subcommand).generateResult(found, ephemeral) );
     }
 
     @Override
-    protected Optional<List<NodeInfo>> getMatches(String query, Optional<String> maybeType) {
+    protected List<SearchResult> getMatches(String query, Optional<String> maybeType) {
         if(maybeType.isPresent()) {
             final String type = maybeType.get();
             if(type.equals("variant"))
-                return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.isShipVariant());
+                return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,
+                    info -> info.isShipVariant() && (!findImages || info.hasImage()));
             else
-                return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> info.getType().equals(type) && !info.isShipVariant());
+                return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,
+                    info -> info.getType().equals(type) && (!findImages || info.hasImage()));
         } else
-            return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT, info -> !info.isShipVariant());
+            return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,
+                info -> !findImages || info.hasImage());
     }
 
     protected Optional<InteractionEventHandler> subcommandFor(String[] names) {
@@ -64,13 +69,16 @@ public class ShowCommand extends NodeInfoCommand {
             return Optional.empty();
         }
         if(names[1].equals("data")) {
+            findImages = false;
             subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, false).withButtonEvent(getButtonEvent()));
             return Optional.of(subcommand);
         }
         else if(names[1].equals("image")) {
+            findImages = true;
             subcommand = (ShowSubcommand)(new ShowSubcommand().showing(false, true).withButtonEvent(getButtonEvent()));
             return Optional.of(subcommand);
         } else if(names[1].equals("both")) {
+            findImages = true;
             subcommand = (ShowSubcommand)(new ShowSubcommand().showing(true, true).withButtonEvent(getButtonEvent()));
             return Optional.of(subcommand);
         }

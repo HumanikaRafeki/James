@@ -71,7 +71,12 @@ public class EndlessSky implements AutoCloseable {
         return Optional.empty();
     }
 
-    public Optional<List<NodeInfo>> fuzzyMatchNodeNames(String query, int maxSearch, Predicate<NodeInfo> condition) {
+    public Optional<SearchResult> dummyResultWithHash(String hash) {
+        Optional<SearchResult> result = lookups.dummyResultWithHash(hash);
+        return result.isPresent() ? result : images.dummyResultWithHash(hash);
+    }
+
+    public List<SearchResult> fuzzyMatchNodeNames(String query, int maxSearch, Predicate<NodeInfo> condition) {
         return lookups.fuzzyMatchNodeNames(query, maxSearch, condition);
     }
 
@@ -81,6 +86,14 @@ public class EndlessSky implements AutoCloseable {
 
     public Optional<List<NodeInfo>> nodesWithHash(String hash) {
         return lookups.nodesWithHash(hash);
+    }
+
+    public List<SearchResult> fuzzyMatchImagePaths(String query, int maxSearch, Predicate<String> condition) {
+        return images.fuzzyMatchRelativePaths(query, maxSearch, condition);
+    }
+
+    public Optional<String> imageWithHash(String hash) {
+        return images.imageWithHash(hash);
     }
 
     public Optional<Path> getImagePath(String name) {
