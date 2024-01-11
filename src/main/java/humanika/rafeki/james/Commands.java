@@ -52,7 +52,8 @@ class Commands {
             new SayCommand(),
             new ShowCommand(),
             new SwizzleMultiCommand(),
-            new TemplateCommand()
+            new TemplateCommand(),
+            new UnkorathCommand()
         };
         commands = Arrays.asList(commandArray);
         nameCommand = new HashMap();

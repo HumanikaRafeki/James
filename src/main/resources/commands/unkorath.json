@@ -1,0 +1,45 @@
+{
+    "name": "unkorath",
+    "description": "Pass text through the Korath reverse cipher.",
+    "dm_permission": false,
+    "options": [
+        {
+            "name": "text",
+            "description": "Text to cipher (should be Indonesian)",
+            "type": 3,
+            "required": true
+        },
+        {
+            "name": "language",
+            "description": "Which language did it come from?",
+            "type": 3,
+            "required": true,
+            "choices": [
+                {
+                    "name": "Efreti",
+                    "value": "efreti"
+                },
+                {
+                    "name": "Exile",
+                    "value": "exile"
+                }
+            ]
+        },
+        {
+            "name": "hidden",
+            "description": "Hide response from other users.",
+            "type": 3,
+            "required": false,
+            "choices": [
+                {
+                    "name": "hide",
+                    "value": "hide"
+                },
+                {
+                    "name": "show",
+                    "value": "show"
+                }
+            ]
+        }
+    ]
+}

@@ -1,16 +1,25 @@
 package humanika.rafeki.james.utils;
 
-import okhttp3.OkHttpClient;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.Locale;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import javax.annotation.Nullable;
+import okhttp3.OkHttpClient;
 
 public class KorathCipher {
     private static final Map<Character, Character> toExile = createExileMap();
     private static final Map<Character, Character> toEfreti = createEfretiMap();
+    private static final Map<Character, Character> fromExile = reverseMap(toExile);
+    private static final Map<Character, Character> fromEfreti = reverseMap(toEfreti);
+    private static final Set<Character> indonesianLetters = stringToSet("abcdefghijklmnopqrstuvwxyz");
+    private static final Set<Character> indonesianPlus = stringToSet("abcdefghijklmnopqrstuvwxyz'");
+
     private static final Locale locale = new Locale("id");
 
     private String english;
@@ -18,11 +27,11 @@ public class KorathCipher {
     private String exile;
     private String efreti;
 
-    public KorathCipher(String english, String indonesian) {
+    public KorathCipher(@Nullable String english, @Nullable String indonesian, @Nullable String exile, @Nullable String efreti) {
         this.english = english;
         this.indonesian = indonesian;
-        exile = null;
-        efreti = null;
+        this.exile = exile;
+        this.efreti = efreti;
     }
 
     public String getEnglish() {
@@ -41,6 +50,24 @@ public class KorathCipher {
         return efreti;
     }
 
+    /** Applies the reverse cipher to efreti, producing indonesian field */
+    public KorathCipher unefreti() {
+        char[][] reversedChars = reverseStrings(efreti.toLowerCase(locale), indonesianLetters);
+        char[][] undone = new char[reversedChars.length][];
+        applyCipher(reversedChars, undone, fromEfreti);
+        indonesian = join(undone);
+        return this;
+    }
+
+    /** Applies the reverse cipher to exile, producing indonesian field */
+    public KorathCipher unexile() {
+        char[][] reversedChars = reverseStrings(exile.toLowerCase(locale), indonesianPlus);
+        char[][] undone = new char[reversedChars.length][];
+        applyCipher(reversedChars, undone, fromExile);
+        indonesian = join(undone);
+        return this;
+    }
+
     /** Applies cipher steps to indonesian, creating exile and efreti fields.
      * @returns this */
     public KorathCipher indokorath() {
@@ -56,7 +83,7 @@ public class KorathCipher {
     /** Applies cipher steps to indonesian, creating exile and efreti fields. Assumes that indonesian is non-null.
      * @returns this */
     private void cipherSteps() {
-        char[][] reversedChars = reverseStrings(indonesian.toLowerCase(locale));
+        char[][] reversedChars = reverseStrings(indonesian.toLowerCase(locale), indonesianLetters);
         char[][] korath = new char[reversedChars.length][];
         applyCipher(reversedChars, korath, toExile);
         exile = join(korath);
@@ -66,7 +93,7 @@ public class KorathCipher {
 
     /** Splits from into words and reverses the order of the letters in each word.
      * @returns An array of words. */
-    private char[][] reverseStrings(String from) {
+    private char[][] reverseStrings(String from, Set<Character> letters) {
         String delim = " \t\n\r\f";
         StringTokenizer tokenizer = new StringTokenizer(from, delim, true);
         int words = tokenizer.countTokens();
@@ -76,8 +103,8 @@ public class KorathCipher {
             if(chars.length > 0 && delim.indexOf(chars[0]) < 0) {
                 char swapper;
                 int left = 0, right = chars.length - 1;
-                for(; left < right && !toExile.containsKey(chars[right]); right--) {}
-                for(; left < right && !toExile.containsKey(chars[left]); left++) {}
+                for(; left < right && !letters.contains(chars[right]); right--) {}
+                for(; left < right && !letters.contains(chars[left]); left++) {}
                 for(; left < right; left++, right--) {
                     swapper = chars[left];
                     chars[left] = chars[right];
@@ -121,6 +148,13 @@ public class KorathCipher {
         return builder.toString();
     }
 
+    private static Map<Character, Character> reverseMap(Map<Character, Character> from) {
+        Map<Character, Character> to = new HashMap<>();
+        for(Map.Entry<Character, Character> entry : from.entrySet())
+            to.put(entry.getValue(), entry.getKey());
+        return to;
+    }
+
     /** Generates the Korath cipher map to cipher Indonesian into Exile
      * @returns a map from Indonesian character to Exile character. */
     private static Map<Character, Character> createExileMap() {
@@ -161,5 +195,12 @@ public class KorathCipher {
             put('p', 'c'); put('q', 't'); put('r', 'p'); put('s', 'm');
             put('t', 'k'); put('v', 'r'); put('w', 'g'); put('x', 's');
             put('y', 'd'); put('z', 'k'); }};
+    }
+
+    private static Set<Character> stringToSet(String s) {
+        Set<Character> result = new HashSet<>();
+        for(char c : s.toCharArray())
+            result.add(c);
+        return result;
     }
 }

@@ -99,19 +99,35 @@ public class Utils {
         return response.body();
     }
 
+    /** Applies the Korath reverse cipher to the Efreti text.
+     * @param efreti the efreti output of the Korath cipher
+     * @returns reverse-ciphered text which might be Indonesian */
+    public static KorathCipher reverseEfretiCipher(String efreti) {
+        return new KorathCipher(null, null, null, efreti).unefreti();
+    }
+
+    /** Applies the Korath reverse cipher to the Exile text.
+     * @param exile the exile output of the Korath cipher
+     * @returns reverse-ciphered text which might be Indonesian */
+    public static KorathCipher reverseExileCipher(String exile) {
+        return new KorathCipher(null, null, exile, null).unexile();
+    }
+
     /** Applies the Korath cipher to the Indonesian text.
      * @param indonesian a string containing text that should be in the Indonesian language
      * @returns a KorathCipher object where the indonesian, exile, and efreti fields are valid */
     public static KorathCipher applyKorathCipher(String indonesian) {
-        return new KorathCipher(null, indonesian).indokorath();
+        return new KorathCipher(null, indonesian, null, null).indokorath();
     }
 
     /** Translates English text to Indonesian and applies the Korath cipher to the Indonesian text.
+     * The English translation requires web access.
      * @param english a string containing text that should be in the English language
-     * @returns a KorathCipher object where the english, indonesian, exile, and efreti fields are valid */
+     * @returns a KorathCipher object where the english, indonesian, exile, and efreti fields are valid
+     * @throws IOException if something goes wrong while translating to Indonesian */
     public static KorathCipher translateToKorath(String english) throws IOException {
         String indonesian = Translator.translate("en", "id", english, James.getHttpClient());
-        return new KorathCipher(english, indonesian).indokorath();
+        return new KorathCipher(english, indonesian, null, null).indokorath();
     }
 
     /**
