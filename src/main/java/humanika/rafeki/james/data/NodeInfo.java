@@ -41,9 +41,9 @@ public class NodeInfo {
         }
     }
 
-    private final Optional<String> sprite;
-    private final Optional<String> weaponSprite;
-    private final Optional<String> thumbnail;
+    private Optional<String> sprite;
+    private Optional<String> weaponSprite;
+    private Optional<String> thumbnail;
     private final Optional<List<DataNode>> description;
     private final Optional<List<DataNode>> spaceport;
     private final List<String> images = new ArrayList<>();
@@ -244,6 +244,13 @@ public class NodeInfo {
 
         base.ifPresent(baseName -> {
             baseNode = nodes.getFirstMatch(baseName, info -> info.getType().equals("ship"));
+            if(baseNode.isPresent()) {
+                NodeInfo bn = baseNode.get();
+                if(!sprite.isPresent())
+                    sprite = bn.getSprite();
+                if(!thumbnail.isPresent())
+                    thumbnail = bn.getThumbnail();
+            }
         });
     }
 
