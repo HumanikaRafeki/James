@@ -103,7 +103,7 @@ public abstract class NodeInfoCommand extends PrimitiveCommand {
             String label = listItem.get(i);
             if(label.length() > MAX_BUTTON_LABEL_LENGTH)
                 label = label.substring(0, MAX_BUTTON_LABEL_LENGTH - 3) + "...";
-            if(seen.size() < PRIMARY_COUNT)
+            if(seen.size() <= PRIMARY_COUNT)
                 buttons.add(Button.primary(buttonId.get(i), label));
             else
                 buttons.add(Button.secondary(buttonId.get(i), label));
