@@ -46,7 +46,7 @@ public class NodeInfo {
     private final Optional<String> thumbnail;
     private final Optional<List<DataNode>> description;
     private final Optional<List<DataNode>> spaceport;
-    private final List<String> images;
+    private final List<String> images = new ArrayList<>();
 
     /** For Ship variants, "base" is the name of the template ship and "dataName" is the variant name */
     private final Optional<String> base;
@@ -193,17 +193,12 @@ public class NodeInfo {
             }
         }
 
-        ArrayList<String> images = new ArrayList<>(3);
         if(sprite != null)
             images.add(sprite);
         if(weaponSprite != null && sprite != weaponSprite)
             images.add(weaponSprite);
         if(thumbnail != null && thumbnail != sprite && thumbnail != weaponSprite)
             images.add(thumbnail);
-        if(images.size() > 0)
-            this.images = Collections.unmodifiableList(images);
-        else
-            this.images = Collections.emptyList();
         this.sprite = Optional.ofNullable(sprite);
         this.weaponSprite = Optional.ofNullable(weaponSprite);
         this.thumbnail = Optional.ofNullable(thumbnail);
@@ -241,14 +236,14 @@ public class NodeInfo {
             ref.ifPresent(node -> {
                 effectNode = Optional.of(node);
                 node.getImageIterator().forEachRemaining(image -> {
-                    if(!images.contains(image))
-                        images.add(image);
+                    if(image != null && !this.images.contains(image))
+                        this.images.add(image);
                 });
             });
         }
 
         base.ifPresent(baseName -> {
-            Optional<NodeInfo> ref = nodes.getFirstMatch(baseName, info -> info.getType().equals("ship"));
+            baseNode = nodes.getFirstMatch(baseName, info -> info.getType().equals("ship"));
         });
     }
 

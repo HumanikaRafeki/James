@@ -182,6 +182,7 @@ public class EndlessSky implements AutoCloseable {
             news.addNews(read.getNodes());
             lookups.addFile(relative, read);
         }
+        lookups.postLoad();
         this.phrases = phrases;
         this.news = news;
         this.lookups = lookups;

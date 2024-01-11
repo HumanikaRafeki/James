@@ -3,9 +3,11 @@ package humanika.rafeki.james.data;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import me.mcofficer.esparser.DataFile;
 import me.mcofficer.esparser.DataNode;
@@ -13,18 +15,24 @@ import org.simmetrics.StringMetric;
 import org.simmetrics.metrics.StringMetrics;
 
 public class NodeLookups implements NodeDatabase {
-    private HashMap<String, DataFile> dataFiles = new HashMap<>();
-    private HashMap<String, ArrayList<NodeInfo>> nameNode = new HashMap<>();
-    private HashMap<String, ArrayList<NodeInfo>> hashNode = new HashMap<>();
-    private HashMap<Integer, ArrayList<Government>> swizzleGovernment = new HashMap<>();
+    private Map<String, DataFile> dataFiles = new HashMap<>();
+    private Map<String, ArrayList<NodeInfo>> nameNode = new HashMap<>();
+    private Set<DataNode> allTopLevelNodes = new HashSet<>();
+    private Set<NodeInfo> allTopNodeInfo = new HashSet<>();
+    private Map<String, ArrayList<NodeInfo>> hashNode = new HashMap<>();
+    private Map<Integer, ArrayList<Government>> swizzleGovernment = new HashMap<>();
     private final static StringMetric metric = StringMetrics.needlemanWunch();
 
     /* synchronized */ void addFile(String relativePath, DataFile file) {
         dataFiles.put(relativePath, file);
         for(DataNode node : file.getNodes()) {
+            if(allTopLevelNodes.contains(node))
+                continue;
+            allTopLevelNodes.add(node);
             if(node.size() < 2)
                 continue;
             NodeInfo info = new NodeInfo(node);
+            allTopNodeInfo.add(info);
             String type = info.getType();
             String name = info.getDataName();
             addToNameNode(name, info);
@@ -32,6 +40,11 @@ public class NodeLookups implements NodeDatabase {
             if(type.equals("government"))
                 addToSwizzleGovernment(node);
         }
+    }
+
+    public void postLoad() {
+        for(NodeInfo node : allTopNodeInfo)
+            node.postLoad(this);
     }
 
     public Optional<List<NodeInfo>> selectNodesByName(String dataName, int maxSearch, Predicate<NodeInfo> condition) {

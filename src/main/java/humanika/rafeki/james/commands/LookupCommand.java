@@ -85,11 +85,10 @@ public class LookupCommand extends NodeInfoCommand {
                     info -> info.isShipVariant());
             else
                 return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,
-                    info -> info.getType().equals(type) && !info.isShipVariant()
+                    info -> info.getType().equals(type)
                         && (info.hasDescription() || info.hasSpaceport() || info.hasImage()) );
         } else
             return James.getState().fuzzyMatchNodeNames(query, QUERY_COUNT,
-                info -> !info.isShipVariant() && (info.hasDescription()
-                        || info.hasSpaceport() || info.hasImage()) );
+                info -> (info.hasDescription() || info.hasSpaceport() || info.hasImage()) );
     }
 }
