@@ -215,9 +215,6 @@ public class SwizzleSearchSubcommand extends NodeInfoCommand implements NodeInfo
         } catch(IllegalArgumentException iae) {
             description.append("```\n").append(iae.toString()).append('\n');
             return;
-        } catch(IOException ioe2) {
-            description.append("```\n").append(ioe2.toString()).append('\n');
-            return;
         }
         description.append('\n').append(collage.asTable()).append("```\n\n");
         InputStream swizzledStream = null;
