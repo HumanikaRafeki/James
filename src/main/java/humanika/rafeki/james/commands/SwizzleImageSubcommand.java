@@ -143,9 +143,12 @@ public class SwizzleImageSubcommand extends PrimitiveCommand {
         String urlString = data.getUrl();
         URL url = new URL(urlString);
         BufferedImage image = ImageIO.read(url);
-        // ImageIO.write(image, "png", new File("/tmp/swizzles/0.png"));
-        // for(int i = 0; i < 28; i++)
-        //     ImageIO.write(new ImageSwizzler().swizzleToImage(image, OptionalInt.of(i)), "png", new File("/tmp/swizzles/"+(i+1)+".png"));
+        for(int i = 0; i <= 28; i++) {
+            BitSet set = new BitSet();
+            set.set(i);
+            ImageIO.write(ImageSwizzler.swizzleImage(image, set, ImageSwizzler.NICE_IMAGE_BOUNDS).getSwizzledImage(),
+                          "png", new File("/tmp/swazzles/"+i+".png"));
+        }
         ImageSwizzler swizzler = null;
         BufferedImage swizzledImage = null;
         SwizzleCollage collage = null;

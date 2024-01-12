@@ -15,7 +15,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.imageio.IIOImage;
@@ -29,12 +31,21 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class Utils {
+    private final static Base64.Encoder encoder = Base64.getUrlEncoder();
+    private final static Random random = new Random();
+
     public static String downloadAsString(URL url) throws IOException {
         return download(url).string();
     }
 
     public static byte[] downloadAsBytes(URL url) throws IOException {
         return download(url).bytes();
+    }
+
+    public static String randomBase64(int randomBytes) {
+        byte[] bytes = new byte[randomBytes];
+        random.nextBytes(bytes);
+        return encoder.encodeToString(bytes);
     }
 
     /**

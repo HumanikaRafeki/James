@@ -4,6 +4,7 @@ import discord4j.core.object.entity.Attachment;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateFields;
 import humanika.rafeki.james.James;
+import humanika.rafeki.james.Utils;
 import humanika.rafeki.james.data.Government;
 import humanika.rafeki.james.utils.ImageSwizzler;
 import java.awt.image.BufferedImage;
@@ -73,7 +74,7 @@ public class ShowSwizzleSubcommand extends PrimitiveCommand {
 
         EmbedCreateSpec embed = EmbedCreateSpec.create()
             .withTitle("Swizzle " + swizzle + " Sample")
-            .withThumbnail(James.getConfig().swizzledThumbnailPath + swizzle + ".png");
+            .withThumbnail(James.getConfig().swizzledThumbnailPath + swizzle + ".png?i=" + Utils.randomBase64(18));
 
         StringBuilder description = new StringBuilder();
         description.append("**Swizzle Vector:**\n```").append(vectorStrings[swizzle]).append("```");
