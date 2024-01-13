@@ -21,8 +21,13 @@ class DoubleVertex {
     final DoubleVertex normalize() {
         double lensq = lengthSquared();
         double len = Math.sqrt(lensq);
-        x /= len;
-        y /= len;
+        if(len == 0) {
+           x = 0;
+           y = 0;
+        } else { 
+            x /= len;
+            y /= len;
+        }
         return this;
     }
     final DoubleVertex shift(double x, double y) {

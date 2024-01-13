@@ -19,6 +19,8 @@ import humanika.rafeki.james.phrases.PhraseLimits;
 import humanika.rafeki.james.utils.KorathCipher;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -136,7 +138,13 @@ abstract class ParseCommand extends PrimitiveCommand {
 
         for(Attachment a : attachments) {
             try {
-                DataFile file = readAttachment(a, logger);
+                DataFile file = null;
+                try {
+                    file = readAttachment(a, logger);
+                } catch(URISyntaxException urise) {
+                    errors.add(a.getFilename() + ": bad URL from discord");
+                    continue;
+                }
                 if(file == null) {
                     errors.add(a.getFilename() + ": could not read" );
                     continue;
@@ -211,8 +219,8 @@ abstract class ParseCommand extends PrimitiveCommand {
         return false;
     }
 
-    private DataFile readAttachment(Attachment a, DataNodeStringLogger logger) throws IOException {
-        String result = Utils.downloadAsString(new URL(a.getUrl()));
+    private DataFile readAttachment(Attachment a, DataNodeStringLogger logger) throws IOException, URISyntaxException {
+        String result = Utils.downloadAsString(new URI(a.getUrl()).toURL());
         String[] lines = result.split("(?<=\\R)");
         return new DataFile(Arrays.asList(lines), logger);
     }

@@ -18,13 +18,20 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 package humanika.rafeki.james.utils;
 
-import java.util.Collections;
+import java.awt.Graphics2D;
+import java.awt.Color;
+import java.awt.BasicStroke;
 import java.awt.image.BufferedImage;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import humanika.rafeki.james.utils.Mask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Mask {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Mask.class);
     /** Direction kernel for obtaining the 8 nearest neighbors, beginning with "N" and
      * moving clockwise (since the frame data starts in the top-left and moves L->R). */
     private final static int[][] STEP = {
@@ -33,23 +40,32 @@ public class Mask {
     };
     private final static double[] SCALE = { 1., 1. / Math.sqrt(2.) };
 
+    class Countdown {
+        private long remaining;
+        Countdown(long remaining) {
+            this.remaining = remaining;
+        }
+        long tick() throws MaskException {
+            remaining--;
+            if(remaining == 0)
+                throw new MaskException("Infinite loop detected. Giving up.");
+            return remaining;
+        }
+    }
+
     final List<List<DoubleVertex>> outlines;
     final double radius;
-
-    List<List<DoubleVertex>> getOutlines() {
-        return outlines;
-    }
 
     public double getRadius() {
         return radius;
     }
 
     // Construct a mask from the alpha channel of an RGBA-formatted image.
-    private Mask(BufferedImage image) {
+    public Mask(BufferedImage image) throws MaskException {
 	double radius = 0;
-
+        Countdown countdown = new Countdown(((long)image.getWidth()) * ((long)image.getHeight()) * 30l);
 	List<List<DoubleVertex>> raw = new ArrayList<>();
-        trace(image, raw);
+        trace(image, raw, countdown);
 	if(raw.size() == 0) {
             this.outlines = Collections.unmodifiableList(raw);
             this.radius = 0;
@@ -61,9 +77,9 @@ public class Mask {
 	outlines.ensureCapacity(raw.size());
 
 	for(List<DoubleVertex> edge : raw) {
-            smoothAndCenter(edge, size);
+            //smoothAndCenter(edge, size, countdown);
 
-            List<DoubleVertex> outline = simplify(edge);
+            List<DoubleVertex> outline = edge; // simplify(edge, countdown);
             // Skip any outlines that have no area.
             if(outline.size() <= 2)
                 continue;
@@ -75,53 +91,104 @@ public class Mask {
         this.radius = radius;
     }
 
+    public void drawMask(BufferedImage image) {
+        System.out.println("Mask:");
+        Graphics2D g2d = image.createGraphics();
+        try {
+            g2d.setStroke(new BasicStroke(2));
+            g2d.setColor(Color.MAGENTA);
+            int[] x = new int[100];
+            int[] y = new int[100];
+            System.out.println("    Polygon:");
+            for(List<DoubleVertex> polygon : outlines) {
+                if(polygon.size() < 3) {
+                    System.out.println("        Not a polygon! Has only " + polygon.size() + " sides!");
+                    continue;
+                }
+                if(x.length < polygon.size()) {
+                    x = new int[polygon.size() * 5 / 4];
+                    y = new int[x.length];
+                }
+                for(int i = 0; i < polygon.size(); i++) {
+                    DoubleVertex vertex = polygon.get(i);
+                    x[i] = (int)Math.round(vertex.x);
+                    y[i] = (int)Math.round(vertex.y);
+                    System.out.println("        Vertex: " + x[i] + " " + y[i]);
+                }
+                g2d.drawPolygon(x, y, polygon.size());
+            }
+        } finally {
+            g2d.dispose();
+        }
+        System.out.println("End mask.");
+    }
+
     // Find the radius of the object.
-    double computeRadius(List<DoubleVertex> outline) {
+    private double computeRadius(List<DoubleVertex> outline) {
         double radius = 0.;
         for(DoubleVertex p : outline)
             radius = Math.max(radius, p.lengthSquared());
         return Math.sqrt(radius);
     }
 
-    private void trace(BufferedImage img, List<List<DoubleVertex>> raw) {
+    private void trace(BufferedImage img, List<List<DoubleVertex>> raw, Countdown countdown) throws MaskException {
         final int width = img.getWidth();
         final int height = img.getHeight();
         final int numPixels = width * height;
-        final float[] alpha = alphaFraction(img);
+        final int[] alpha = alphaChannel(img);
         final boolean[] hasOutline = new boolean[numPixels];
         Arrays.fill(hasOutline, false);
 
         // Convert from a direction index to the desired pixel.
         final int off[] = {
             -width, -width + 1,  1,  width + 1,
-            width,  width - 1, -1, -width - 1,
+             width,  width - 1, -1, -width - 1,
         };
 
         // The image pixel being inspected, in XY coords.
-        IntVertex next = new IntVertex();
         IntVertex p = new IntVertex();
 
-        final ArrayList<Integer> directions = new ArrayList<>();
-        ArrayList<DoubleVertex> points = new ArrayList<>();
-        for(int start = 0; start < numPixels;) {
-            directions.clear();
-            points.clear();
+        for(int x = 0; x < width; x++) {
+            alpha[x] = 0;
+            alpha[numPixels - x - 1] = 0;
+            hasOutline[x] = true;
+            hasOutline[numPixels - x - 1] = true;
+        }
 
-            // Find a pixel with some renderable color data (i.e. a non-zero alpha component).
-            for(;start < numPixels; start++)
-                if(alpha[start] != 0) {
-                    // If this pixel is not part of an existing outline, trace it.
-                    if(!hasOutline[start])
+        for(int y = 1; y < height; y++) {
+            alpha[y * width] = 0;
+            alpha[y * width - 1] = 0;
+            hasOutline[y * width] = true;
+            hasOutline[y * width - 1] = true;
+        }
+
+        for(int y = 1; y < height - 1; y++)
+            for(int x = 1; x < width - 1; x++) {
+                int start = y * width + x;
+                boolean startOn = alpha[start] != 0;
+                boolean allSame = true;
+                for(int d = 0; d < off.length; d++) {
+                    boolean dOn = alpha[start + off[d]] != 0;
+                    if(startOn != dOn) {
+                        allSame = false;
                         break;
-                    // Otherwise, advance to the next transparent pixel.
-                    // (any non-transparent pixels will belong to the existing outline).
-                    for(start++; start < numPixels; start++)
-                        if(alpha[start] == 0)
-                            break;
+                    }
                 }
+                if(allSame)
+                    hasOutline[start] = true;
+            }
+
+        final ArrayList<Integer> directions = new ArrayList<>();
+        for(int start = 0; start < numPixels; start++) {
+            countdown.tick();
+            directions.clear();
+            while(start < numPixels && hasOutline[start] && alpha[start] == 0) {
+                countdown.tick();
+                start++;
+            }
+
             if(start >= numPixels)
-                // All pixels were transparent.
-                return;
+                continue;
 
             // Loop until we come back to the start, recording the directions
             // that outline each pixel (rather than the actual pixel itself).
@@ -129,37 +196,27 @@ public class Mask {
 
             // The current image pixel, in index coordinates.
             int pos = start;
-
-            // The current image pixel, in (X, Y) coordinates.
-            p.assign(pos % width, pos / width);
-
             do {
-                hasOutline[pos] = true;
-                int firstD = d;
+//                LOGGER.info("pos = " + pos + "," + pos + " start = " + start + "," + start);
+                countdown.tick();
                 // The image pixel being inspected, in XY coords.
-                next.assign(p);
                 boolean isAlone = false;
-                while(true) {
-                    next.shift(STEP[d][0], STEP[d][1]);
-                    // First, ensure an offset in this direction would access a valid pixel index.
-                    if(next.x >= 0 && next.x < width && next.y >= 0 && next.y < height)
-                        // If that pixel has color data, then add it to the outline.
-                        if(alpha[pos + off[d]] != 0)
-                            break;
-                    // Otherwise, advance to the next direction.
-                    d = (d + 1) & 7;
-                    // If this point is alone, bail out.
-                    if(d == firstD) {
-                        isAlone = true;
+                int next = pos;
+                int g = 0;
+                for(g = 0; g < 8; g++, d = (d + 1) & 7) {
+                    countdown.tick();
+                    next = pos + off[d];
+                    if(!hasOutline[next] && alpha[next] != 0)
                         break;
-                    }
                 }
-                if(isAlone)
+                if(g == 8) {
+                    // Lone point.
+                    System.out.println("LONE POINT " + (pos % width) + "," + (pos / width));
                     break;
+                }
 
                 // Advance the pixels and store the direction traveled.
-                p.assign(next);
-                pos += off[d];
+                pos = next;
                 directions.add(Integer.valueOf(d));
 
                 // Rotate the direction backward ninety degrees.
@@ -173,11 +230,13 @@ public class Mask {
                 continue;
 
             // Interpolate outline points from directions and alpha values, rather than just the pixel's XY.
-            points.ensureCapacity(directions.size());
+            ArrayList<DoubleVertex> points = new ArrayList<>(directions.size());
             pos = start;
             p.assign(pos % width, pos / width);
-            int prev = directions.get(directions.size() - 1);
+            int prev = directions.get(directions.size() - 1).intValue();
             for(Integer nextInteger : directions) {
+                countdown.tick();
+                hasOutline[pos] = true;
                 int inext = nextInteger.intValue();
                 // Face outside by rotating direction backward ninety degrees.
                 int out0 = (prev + 6) & 7;
@@ -185,10 +244,16 @@ public class Mask {
 
                 // Determine the subpixel shift, where higher alphas will shift the estimate outward.
                 // (MAYBE: use an actual alpha gradient for dir & magnitude, or remove altogether.)
-                double scale = alpha[pos] - 0.5;
-                points.add(new DoubleVertex(STEP[out0][0] * SCALE[out0 & 1] + STEP[out1][0] * SCALE[out1 & 1],
-                                            STEP[out0][1] * SCALE[out0 & 1] + STEP[out1][1] * SCALE[out1 & 1])
-                           .normalize().scale(scale).shift(p.x, p.y));
+                // shift *= ((begin[pos] & on) >> 24) * (1. / 255.) - .5;
+                double shiftScale = alpha[pos] * (1.0 / 255.0) - 0.5;
+                DoubleVertex dv = new DoubleVertex(STEP[out0][0] * SCALE[out0 & 1] + STEP[out1][0] * SCALE[out1 & 1],
+                                                   STEP[out0][1] * SCALE[out0 & 1] + STEP[out1][1] * SCALE[out1 & 1])
+                    .normalize().scale(shiftScale);
+//                System.out.println("DV before shift " + dv.x + "," + dv.y);
+                dv.shift(p.x, p.y);
+//                System.out.println("DV shift by     " + p.x + "," + p.y);
+//                System.out.println("DV after  shift " + dv.x + "," + dv.y);
+                points.add(dv);
                 //shift *= ((begin[pos] & on) >> 24) * (1. / 255.) - .5;
                 p.shift(STEP[inext][0], STEP[inext][1]);
                 pos += off[inext];
@@ -199,18 +264,22 @@ public class Mask {
         return;
     }
 
-    static private void smoothAndCenter(List<DoubleVertex> raw, DoubleVertex size) {
+    static private void smoothAndCenter(List<DoubleVertex> raw, DoubleVertex size, Countdown countdown) throws MaskException {
+        if(raw.size() < 3)
+            return;
         // Smooth out the outline by averaging neighboring points.
         DoubleVertex prev = raw.get(raw.size() - 1);
-        for(DoubleVertex p : raw)
+        for(DoubleVertex p : raw) {
+            countdown.tick();
             prev.shift(p).shiftBack(size).swap(p);
+        }
     }
 
     // Distance from a point to a line, squared.
     static private double distanceSquared(DoubleVertex p, DoubleVertex a, DoubleVertex b) {
         // Convert to a coordinate system where a is the origin.
         p.shiftBack(a);
-        b.shiftBack(b);
+        b.shiftBack(a);
         double length = b.lengthSquared();
         if(length > 0) {
             // Find out how far along the line the tangent to p intersects.
@@ -221,12 +290,13 @@ public class Mask {
         return p.lengthSquared();
     }
 
-    static private void simplify(List<DoubleVertex> p, int first, int last, List<DoubleVertex> result) {
+    static private void simplify(List<DoubleVertex> p, int first, int last, List<DoubleVertex> result, Countdown countdown) throws MaskException {
         // Find the most divergent point.
         double dmax = 0.;
         int imax = 0;
 
         for(int i = first + 1; true; ++i) {
+            countdown.tick();
             if(i == p.size())
                 i = 0;
             if(i == last)
@@ -246,23 +316,25 @@ public class Mask {
             return;
 
         // Recursively simplify the lines to both sides of that point.
-        simplify(p, first, imax, result);
+        simplify(p, first, imax, result, countdown);
         result.add(p.get(imax));
-        simplify(p, imax, last, result);
+        simplify(p, imax, last, result, countdown);
     }
 
-    private static List<DoubleVertex> simplify(List<DoubleVertex> raw) {
+    private static List<DoubleVertex> simplify(List<DoubleVertex> raw, Countdown countdown) throws MaskException {
         // Out of all the top-most and bottom-most pixels, find the ones that
         // are closest to the center of the image.
         int top = -1;
         int bottom = -1;
         for(int i = 0; i < raw.size(); ++i) {
+            countdown.tick();
             DoubleVertex rawi = raw.get(i);
             double ax = Math.abs(rawi.x);
             double y = rawi.y;
-            if(top == -1)
-                top = bottom = i;
-            else if(y > raw.get(bottom).y || (y == raw.get(bottom).y && ax < Math.abs(raw.get(bottom).x)))
+            if(top == -1) {
+                bottom = i;
+                top = bottom;
+            } else if(y > raw.get(bottom).y || (y == raw.get(bottom).y && ax < Math.abs(raw.get(bottom).x)))
                 bottom = i;
             else if(y < raw.get(top).y || (y == raw.get(top).y && ax < Math.abs(raw.get(top).x)))
                 top = i;
@@ -271,23 +343,22 @@ public class Mask {
         List<DoubleVertex> result = new ArrayList<>();
         if(top != bottom) {
             result.add(raw.get(top));
-            simplify(raw, top, bottom, result);
+            simplify(raw, top, bottom, result, countdown);
             result.add(raw.get(bottom));
-            simplify(raw, bottom, top, result);
+            simplify(raw, bottom, top, result, countdown);
         }
         return result;
     }
 
-    private static float[] alphaFraction(BufferedImage img) {
+    private static int[] alphaChannel(BufferedImage img) {
         final int width = img.getWidth();
         final int height = img.getHeight();
         final int numPixels = width * height;
-        final int [] input = new int[numPixels];
-        img.getRGB(0, 0, width, height, input, 0, width);
+        final int [] alpha = new int[numPixels];
+        img.getRGB(0, 0, width, height, alpha, 0, width);
 
-        final float[] hasPixels = new float[numPixels];
-        for(int i = 0; i < numPixels;)
-            hasPixels[i] = (input[i] >>> 24) / 256.0f;
-        return hasPixels;
+        for(int i = 0; i < numPixels; i++)
+            alpha[i] = (alpha[i] >>> 24) & 255;
+        return alpha;
     }
 }

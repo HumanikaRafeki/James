@@ -8,7 +8,8 @@ import java.util.Optional;
 import reactor.core.publisher.Mono;
 
 public interface InteractionEventHandler {
-    public abstract String getName();
+    public boolean shouldDefer();
+    public String getName();
     public String getFullName();
     public Optional<String> getJson();
     public Mono<Void> handleChatCommand();

@@ -1,58 +1,36 @@
 {
-    "name": "swizzle",
-    "description": "Applies swizzles to images.",
+    "name": "mask",
+    "description": "Generates collision masks for images.",
     "dm_permission": false,
     "options": [
         {
             "name": "image",
-            "description": "Recolor images to one or more swizzles",
+            "description": "Attach images to see their collision masks.",
             "type": 1,
             "options":  [
                 {
                     "name": "image1",
-                    "description": "an image to swizzle",
+                    "description": "an image to mask",
                     "type": 11,
                     "required": true
                 },
                 {
-                    "name": "swizzles",
-                    "description": "List of swizzles; ie. 1,3,9,15 or 1-6 or 1-6,12-17 or 4",
-                    "type": 3,
-                    "required": false
-                },
-                {
                     "name": "image2",
-                    "description": "another image to swizzle",
+                    "description": "another image to mask",
                     "type": 11,
                     "required": false
                 },
                 {
                     "name": "image3",
-                    "description": "another image to swizzle",
+                    "description": "another image to mask",
                     "type": 11,
                     "required": false
                 },
                 {
                     "name": "image4",
-                    "description": "another image to swizzle",
+                    "description": "another image to mask",
                     "type": 11,
                     "required": false
-                },
-                {
-                    "name": "table",
-                    "description": "Show a table of which swizzle is where in each image.",
-                    "type": 3,
-                    "required": false,
-                    "choices": [
-                        {
-                            "name": "show",
-                            "value": "show"
-                        },
-                        {
-                            "name": "hide",
-                            "value": "hide"
-                        }
-                    ]
                 },
                 {
                     "name": "hidden",
@@ -74,7 +52,7 @@
         },
         {
             "name": "search",
-            "description": "Swizzles images in game data files",
+            "description": "Makes collision masks for images in game data files",
             "type": 1,
             "options":  [
                 {
@@ -84,12 +62,6 @@
                     "required": true
                 },
                 {
-                    "name": "swizzles",
-                    "description": "List of swizzles; ie. 1,3,9,15 or 1-6 or 1-6,12-17 or 4",
-                    "type": 3,
-                    "required": false
-                },
-                {
                     "name": "type",
                     "description": "types of data nodes to find (use \"image\" for images)",
                     "type": 3,
@@ -97,7 +69,7 @@
                 },
                 {
                     "name": "table",
-                    "description": "Show a table of which swizzle is where in each image.",
+                    "description": "Show a table of search results.",
                     "type": 3,
                     "required": false,
                     "choices": [

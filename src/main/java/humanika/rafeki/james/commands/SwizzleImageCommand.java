@@ -16,6 +16,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -72,6 +74,9 @@ public class SwizzleImageCommand extends PrimitiveCommand {
             } catch(IOException ioe) {
                 errors.append(data.getFilename() + ": unable to read file");
                 description.append("Unable to read file!\n");
+            } catch(URISyntaxException urise) {
+                errors.append(data.getFilename() + ": bad URL from discord");
+                description.append("Bad URL from discord.\n");
             }
         }
 
@@ -98,7 +103,7 @@ public class SwizzleImageCommand extends PrimitiveCommand {
 
     private void processOneFile(String outputName, Attachment data, StringBuffer errors,
                                 ArrayList<MessageCreateFields.File> result, BitSet swizzleSet,
-                                StringBuffer description) throws IOException {
+                                StringBuffer description) throws IOException, URISyntaxException {
         JamesConfig config = James.getConfig();
         String filename = data.getFilename();
         OptionalInt width = data.getWidth();
@@ -109,7 +114,7 @@ public class SwizzleImageCommand extends PrimitiveCommand {
             return;
         }
         String urlString = data.getUrl();
-        URL url = new URL(urlString);
+        URL url = new URI(urlString).toURL();
         BufferedImage image = ImageIO.read(url);
         // ImageIO.write(image, "png", new File("/tmp/swizzles/0.png"));
         // for(int i = 0; i < 28; i++)

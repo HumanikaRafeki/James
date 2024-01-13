@@ -17,6 +17,12 @@ application {
     mainClass.set("humanika.rafeki.james.James")
 }
 
+afterEvaluate {
+        tasks.withType(JavaCompile::class) {
+            options.compilerArgs.add("-Xlint:unchecked")
+            options.compilerArgs.add("-Xlint:deprecation")
+        }
+    }
 sourceSets {
     main {
         java.srcDir("src/main/java")

@@ -17,6 +17,8 @@ import humanika.rafeki.james.utils.SwizzleCollage;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,6 +88,9 @@ public class SwizzleImageSubcommand extends PrimitiveCommand {
             } catch(IOException ioe) {
                 errors.append(data.getFilename() + ": unable to read file");
                 description.append("Unable to read file!\n");
+            } catch(URISyntaxException urise) {
+                errors.append(data.getFilename() + ": invalid uri: " + urise.getMessage());
+                description.append("Bad URL from Discord: " + urise.getMessage() + "\n");
             }
         }
 
@@ -131,7 +136,7 @@ public class SwizzleImageSubcommand extends PrimitiveCommand {
 
     private void processOneFile(String outputName, Attachment data, StringBuffer errors,
                                 ArrayList<MessageCreateFields.File> result, BitSet swizzleSet,
-                                ArrayList<EmbedCreateFields.Field> fields) throws IOException {
+                                ArrayList<EmbedCreateFields.Field> fields) throws IOException, URISyntaxException {
         JamesConfig config = James.getConfig();
         String filename = data.getFilename().replaceAll("`", "'");
         OptionalInt width = data.getWidth();
@@ -141,7 +146,7 @@ public class SwizzleImageSubcommand extends PrimitiveCommand {
             return;
         }
         String urlString = data.getUrl();
-        URL url = new URL(urlString);
+        URL url = new URI(urlString).toURL();
         BufferedImage image = ImageIO.read(url);
         // for(int i = 0; i <= 28; i++) {
         //     BitSet set = new BitSet();

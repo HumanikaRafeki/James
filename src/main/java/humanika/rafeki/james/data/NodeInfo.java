@@ -15,7 +15,7 @@ import me.mcofficer.esparser.DataNode;
 import org.simmetrics.StringMetric;
 
 public class NodeInfo {
-    private final static Set skipTypes;
+    private final static Set<String> skipTypes;
     private final static MessageDigest hasher;
     private final static Base64.Encoder encoder;
 

@@ -13,6 +13,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -59,14 +61,14 @@ public class Utils {
      */
     public static int getHttpStatus(String url) {
         try {
-            URL u = new URL(url);
+            URL u = new URI(url).toURL();
             HttpURLConnection connection = (HttpURLConnection) u.openConnection();
             connection.setRequestMethod("HEAD");
             connection.setRequestProperty("User-Agent", "MarioB(r)owser4.2");
             connection.connect();
             return connection.getResponseCode();
         }
-        catch (MalformedURLException e) {
+        catch (URISyntaxException e) {
             e.printStackTrace();
             return 1;
         }

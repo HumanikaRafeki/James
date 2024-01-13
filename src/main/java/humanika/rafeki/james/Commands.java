@@ -45,6 +45,7 @@ class Commands {
             new IndokorathCommand(),
             new KorathCommand(),
             new LookupCommand(),
+            new MaskImageCommand(),
             new NewsCommand(),
             new PhrasesCommand(),
             new PingCommand(),
@@ -56,8 +57,8 @@ class Commands {
             new UnkorathCommand()
         };
         commands = Arrays.asList(commandArray);
-        nameCommand = new HashMap();
-        commandJson = new ArrayList();
+        nameCommand = new HashMap<>();
+        commandJson = new ArrayList<>();
         for(InteractionEventHandler command : commandArray) {
             Optional<String> json = command.getJson();
             if(json.isPresent()) {
@@ -145,7 +146,11 @@ class Commands {
         message.append(" ACCEPT");
         LOGGER.info(message.toString());
 
-        return command.withChatEvent(event).handleChatCommand();
+        if(command.shouldDefer())
+            return event.deferReply().concatWith(Mono.defer(
+                command.withChatEvent(event)::handleChatCommand)).then();
+        else
+            return command.withChatEvent(event).handleChatCommand();
       } catch(Exception e) {
         LOGGER.error("Exception while handling chat command", e);
         throw e;

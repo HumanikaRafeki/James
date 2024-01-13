@@ -115,7 +115,7 @@ class ImageCatalog extends SimpleFileVisitor<Path> {
         else if(there instanceof Path)
             return Optional.of((Path)there);
         else if(there instanceof ArrayList) {
-            ArrayList<Path> list = (ArrayList<Path>)there;
+            @SuppressWarnings("unchecked") ArrayList<Path> list = (ArrayList<Path>)there;
             return Optional.of(list.get(list.size()/2));
         }
         return Optional.empty();
@@ -184,7 +184,7 @@ class ImageCatalog extends SimpleFileVisitor<Path> {
             list.add(path);
             files.put(name, list);
         } else if(got instanceof ArrayList) {
-            ArrayList<Path> list = (ArrayList<Path>)got;
+            @SuppressWarnings("unchecked") ArrayList<Path> list = (ArrayList<Path>)got;
             list.add(path);
         }
     }

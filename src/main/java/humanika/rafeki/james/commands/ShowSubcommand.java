@@ -139,7 +139,7 @@ class ShowSubcommand extends PrimitiveCommand implements NodeInfoSubcommand {
         return seen.size() > 0;
     }
 
-    private void embedNodeImages(JamesState state, NodeInfo info, List<EmbedCreateSpec> embeds, boolean recurse, Set seen) {
+    private void embedNodeImages(JamesState state, NodeInfo info, List<EmbedCreateSpec> embeds, boolean recurse, Set<String> seen) {
         String sprite = info.getSprite().orElse(null);
         String thumbnail = info.getThumbnail().orElse(null);
         String weaponSprite = info.getWeaponSprite().orElse(null);

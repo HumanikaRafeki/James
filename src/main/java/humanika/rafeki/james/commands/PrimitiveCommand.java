@@ -27,6 +27,11 @@ public abstract class PrimitiveCommand implements Cloneable, InteractionEventHan
     private ButtonInteractionEvent buttonEvent;
 
     @Override
+    public boolean shouldDefer() {
+        return false;
+    }
+
+    @Override
     public String getFullName() {
         return getName();
     }

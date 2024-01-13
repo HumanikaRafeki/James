@@ -20,6 +20,8 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
@@ -65,10 +67,10 @@ public class GameData {
      * @param targetDir
      * @throws IOException
      */
-    public static void downloadFile(String url, Path targetDir, @Nullable String filename) throws IOException {
+    public static void downloadFile(String url, Path targetDir, @Nullable String filename) throws IOException, URISyntaxException {
         if (filename == null)
             filename = url.substring(url.lastIndexOf('/'));
-        ReadableByteChannel channel = Channels.newChannel(new URL(url).openStream());
+        ReadableByteChannel channel = Channels.newChannel(new URI(url).toURL().openStream());
         FileOutputStream outputStream = new FileOutputStream(targetDir + "/" + filename);
         outputStream.getChannel().transferFrom(channel, 0, Long.MAX_VALUE);
     }
@@ -78,7 +80,7 @@ public class GameData {
      * @return
      * @throws IOException
      */
-    public static ArrayList<File> fetchGameData(String githubToken) throws IOException {
+    public static ArrayList<File> fetchGameData(String githubToken) throws IOException, URISyntaxException  {
         Path temp = Files.createTempDirectory("james");
         File data = new File(temp.toAbsolutePath() + "/data/");
         data.mkdir();
@@ -93,7 +95,7 @@ public class GameData {
         return sources;
     }
 
-    private static void fetchGameDataRecursive(String githubToken, File dataFolder, String repoPath) {
+    private static void fetchGameDataRecursive(String githubToken, File dataFolder, String repoPath) throws URISyntaxException {
         String url = String.format("https://api.github.com/repos/endless-sky/endless-sky/contents/%s?ref=master", repoPath);
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "token "+ githubToken);

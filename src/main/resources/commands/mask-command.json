@@ -1,0 +1,47 @@
+{
+    "name": "mask",
+    "description": "Attach images to see their collision masks.",
+    "dm_permission": false,
+    "options":  [
+        {
+            "name": "image1",
+            "description": "an image to mask",
+            "type": 11,
+            "required": true
+        },
+        {
+            "name": "image2",
+            "description": "another image to mask",
+            "type": 11,
+            "required": false
+        },
+        {
+            "name": "image3",
+            "description": "another image to mask",
+            "type": 11,
+            "required": false
+        },
+        {
+            "name": "image4",
+            "description": "another image to mask",
+            "type": 11,
+            "required": false
+        },
+        {
+            "name": "hidden",
+            "description": "Hide response from other users.",
+            "type": 3,
+            "required": false,
+            "choices": [
+                {
+                    "name": "hide",
+                    "value": "hide"
+                },
+                {
+                    "name": "show",
+                    "value": "show"
+                }
+            ]
+        }
+    ]
+}

@@ -20,7 +20,7 @@ public class KorathCipher {
     private static final Set<Character> indonesianLetters = stringToSet("abcdefghijklmnopqrstuvwxyz");
     private static final Set<Character> indonesianPlus = stringToSet("abcdefghijklmnopqrstuvwxyz'");
 
-    private static final Locale locale = new Locale("id");
+    private static final Locale locale = Locale.forLanguageTag("id");
 
     private String english;
     private String indonesian;
